@@ -1,4 +1,4 @@
-> [WARNING]
+> [!WARNING]
 > This is in early stages of development. You can and will run into problems.
 
 # Aemulus Cross-Platform Mod Manager
