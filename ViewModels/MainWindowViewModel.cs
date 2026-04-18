@@ -127,7 +127,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
     private static readonly string _appVersion = System.Diagnostics.FileVersionInfo
-        .GetVersionInfo(Assembly.GetEntryAssembly()?.Location ?? "").FileVersion ?? "6.6.0.0";
+        .GetVersionInfo(Assembly.GetEntryAssembly()?.Location ?? "").FileVersion ?? "1.0.0.0";
 
     public void SetDialogService(DialogService dialogService)
     {

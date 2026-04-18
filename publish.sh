@@ -90,13 +90,31 @@ build_appimage() {
     # Copy published output
     cp -r "$SCRIPT_DIR/publish/linux-x64-appimage/"* "$APPDIR/usr/bin/"
 
-    # Convert .ico to .png for AppImage icon
-    convert "$SCRIPT_DIR/Assets/Aemulus.ico[0]" -resize 256x256 "$APPDIR/AemulusPackageManager.png"
+    # Convert .ico to .png for AppImage icon (use largest frame)
+    convert "$SCRIPT_DIR/Assets/Aemulus.ico[7]" "$APPDIR/AemulusPackageManager.png"
     cp "$APPDIR/AemulusPackageManager.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/AemulusPackageManager.png"
 
-    # Copy desktop file and AppRun
-    cp "$SCRIPT_DIR/publish/AemulusPackageManager.desktop" "$APPDIR/AemulusPackageManager.desktop"
-    cp "$SCRIPT_DIR/publish/AppRun" "$APPDIR/AppRun"
+    # Generate desktop file
+    cat > "$APPDIR/AemulusPackageManager.desktop" <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Aemulus Package Manager
+Comment=Manage modding packages for Persona games
+Exec=AemulusPackageManager
+Icon=AemulusPackageManager
+Categories=Game;Utility;
+Terminal=false
+StartupWMClass=AemulusPackageManager
+EOF
+
+    # Generate AppRun
+    cat > "$APPDIR/AppRun" <<'EOF'
+#!/bin/bash
+HERE="$(dirname "$(readlink -f "${0}")")"
+export PATH="${HERE}/usr/bin:${PATH}"
+export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
+exec "${HERE}/usr/bin/AemulusPackageManager" "$@"
+EOF
     chmod +x "$APPDIR/AppRun"
     chmod +x "$APPDIR/usr/bin/AemulusPackageManager"
 
