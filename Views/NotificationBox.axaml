@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AemulusModManager.Avalonia.Views.NotificationBox"
+        Title="Aemulus Package Manager" Width="500"
+        CanResize="False" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        Background="#121212">
+    <Grid RowDefinitions="3*,Auto">
+        <TextBlock x:Name="Notification" Padding="20" Foreground="White"
+                   TextAlignment="Center" VerticalAlignment="Center"
+                   TextWrapping="WrapWithOverflow" FontSize="15" Grid.Row="0"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"
+                    Margin="0,14,22,14" Spacing="10">
+            <Button x:Name="OkButton" Content="OK" Background="White" Foreground="Black"
+                    Height="25" Width="80" IsVisible="False" Click="Button_Click"/>
+            <Button x:Name="YesButton" Content="Yes" Background="White" Foreground="Black"
+                    Height="25" Width="80" IsVisible="False" Click="Yes_Button_Click"/>
+            <Button x:Name="NoButton" Content="No" Background="White" Foreground="Black"
+                    Height="25" Width="80" IsVisible="False" Click="Button_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

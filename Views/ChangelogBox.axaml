@@ -1,0 +1,41 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AemulusModManager.Avalonia.Views.ChangelogBox"
+        Title="Changelog" Width="500"
+        CanResize="False" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        Background="#121212">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto">
+        <TextBlock Grid.Row="0" x:Name="Text" Padding="10" Foreground="White"
+                   TextAlignment="Center" VerticalAlignment="Center"
+                   TextWrapping="WrapWithOverflow" FontSize="15"/>
+        <TextBlock Grid.Row="1" x:Name="VersionLabel" Text="Version"
+                   HorizontalAlignment="Left" VerticalAlignment="Top"
+                   Margin="10,10,10,0" FontSize="17" Foreground="White"/>
+        <DataGrid Grid.Row="2" x:Name="ChangesGrid" HorizontalAlignment="Center"
+                  Margin="25,0,25,10" Background="#121212" Foreground="White"
+                  VerticalAlignment="Center" FontSize="13" AreRowGroupHeadersFrozen="True"
+                  AutoGenerateColumns="False" MaxHeight="500"
+                  GridLinesVisibility="None" HeadersVisibility="None"
+                  BorderBrush="Transparent" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="Auto"/>
+                <DataGridTextColumn Header="Text" Binding="{Binding Text}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Grid Grid.Row="3" ColumnDefinitions="*,*,*" Margin="0,0,0,15">
+            <Button x:Name="OkButton" Content="OK" IsVisible="False" Background="White" Foreground="Black"
+                    Height="25" Width="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Click="Button_Click" Grid.Column="1"/>
+            <Button x:Name="YesButton" Content="Yes" IsVisible="False" Background="White" Foreground="Black"
+                    Height="25" Width="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Click="Yes_Button_Click" Grid.Column="0"/>
+            <Button x:Name="NoButton" Content="No" IsVisible="False" Background="White" Foreground="Black"
+                    Height="25" Width="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Click="Button_Click" Grid.Column="1"/>
+            <Button x:Name="SkipButton" Content="Skip Update" IsVisible="False" Background="White" Foreground="Black"
+                    Height="25" Width="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Click="Skip_Button_Click" Grid.Column="2"/>
+        </Grid>
+    </Grid>
+</Window>

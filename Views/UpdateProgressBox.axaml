@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AemulusModManager.Avalonia.Views.UpdateProgressBox"
+        Title="Aemulus Package Manager" Height="175" Width="500"
+        CanResize="False" WindowStartupLocation="CenterOwner"
+        Background="#151515">
+    <Grid RowDefinitions="*,*,*">
+        <TextBlock Grid.Row="0" x:Name="ProgressTitle" HorizontalAlignment="Center"
+                   TextWrapping="Wrap" Foreground="White" Text="" VerticalAlignment="Center" FontSize="15"/>
+        <ProgressBar Grid.Row="1" Foreground="#9a0000" Background="#202020"
+                     x:Name="ProgressBar" HorizontalAlignment="Center"
+                     Height="24" VerticalAlignment="Center" Width="300"/>
+        <TextBlock Grid.Row="2" x:Name="ProgressText" HorizontalAlignment="Center"
+                   TextWrapping="Wrap" Foreground="White" Text="" VerticalAlignment="Center" FontSize="15"/>
+    </Grid>
+</Window>

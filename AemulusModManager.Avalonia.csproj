@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>AemulusPackageManager</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <Title>Aemulus Package Manager</Title>
+    <Description>Manage modding packages for Persona games</Description>
+    <Copyright>Copyright © 2020-2021</Copyright>
+    <FileVersion>6.6.0.0</FileVersion>
+    <Authors>Tekka</Authors>
+    <Version>6.6.0.0</Version>
+    <AssemblyVersion>6.6.0.0</AssemblyVersion>
+    <Product>Aemulus Package Manager</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Avalonia UI Framework -->
+    <PackageReference Include="AsyncImageLoader.Avalonia" Version="3.3.0" />
+    <PackageReference Include="Avalonia" Version="11.2.8" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.2.8" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.8" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.8" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.8" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.2.8" Condition="'$(Configuration)' == 'Debug'" />
+
+    <!-- MVVM -->
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+
+    <!-- Cross-platform packages from original project -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Octokit" Version="0.49.0" />
+    <PackageReference Include="NVorbis" Version="0.10.3" />
+    <PackageReference Include="CriFsV2Lib" Version="2.1.0" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" />
+    <PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="9.6.2" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.4" />
+    <PackageReference Include="System.Text.Json" Version="9.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Content/data files -->
+    <None Include="Libraries\**" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Dependencies\FilteredCpkCsv\**" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Dependencies\PAKPack\**" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Dependencies\AtlusScriptCompiler\**" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Dependencies\PM1MessageScriptEditor\**" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Charsets must be next to AtlusScriptCompiler.exe for the CLI to find them -->
+    <None Include="Charsets\**" Link="Dependencies\AtlusScriptCompiler\Charsets\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

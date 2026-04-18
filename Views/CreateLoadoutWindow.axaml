@@ -1,0 +1,27 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AemulusModManager.Avalonia.Views.CreateLoadoutWindow"
+        Title="Create New Loadout" Height="110" Width="420"
+        CanResize="False" WindowStartupLocation="CenterOwner"
+        Background="#121212">
+    <Grid ColumnDefinitions="75,*" RowDefinitions="33,33">
+        <TextBlock Foreground="LightGray" VerticalAlignment="Center" HorizontalAlignment="Center"
+                   FontSize="15" FontWeight="Bold" Grid.Row="0" Grid.Column="0">Name</TextBlock>
+        <TextBox x:Name="NameBox" Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2"
+                 Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                 Margin="5,0,5,0"/>
+        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" ColumnDefinitions="*,*,*">
+            <CheckBox x:Name="CopyLoadout" Foreground="White" Content="Copy Current Loadout"
+                      Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Button x:Name="DeleteButton" Content="Delete" Background="White" Foreground="Black"
+                    Height="25" Width="100" Grid.Column="0" VerticalAlignment="Center"
+                    HorizontalAlignment="Center" IsVisible="False" Click="DeleteButton_Click"/>
+            <Button x:Name="CreateButton" Content="Confirm" Background="White" Foreground="Black"
+                    IsEnabled="False" Height="25" Width="100" Grid.Column="1"
+                    VerticalAlignment="Center" HorizontalAlignment="Center" Click="CreateButton_Click"/>
+            <Button x:Name="CancelButton" Content="Cancel" Background="White" Foreground="Black"
+                    Height="25" Width="100" Grid.Column="2" VerticalAlignment="Center"
+                    HorizontalAlignment="Center" Click="CancelButton_Click"/>
+        </Grid>
+    </Grid>
+</Window>

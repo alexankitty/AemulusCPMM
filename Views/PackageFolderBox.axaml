@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AemulusModManager.Avalonia.Views.PackageFolderBox"
+        Title="Aemulus Package Manager"
+        CanResize="False" SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner"
+        Background="#121212">
+    <Grid RowDefinitions="Auto,*,Auto" MinWidth="300">
+        <TextBlock Padding="20" Foreground="White" VerticalAlignment="Top"
+                   TextWrapping="WrapWithOverflow" FontSize="15"
+                   Text="Multiple Package.xml's found. Please select the correct Aemulus package folder."
+                   Grid.Row="0"/>
+        <DataGrid x:Name="FileGrid" Grid.Row="1" HorizontalAlignment="Center"
+                  VerticalAlignment="Center" AutoGenerateColumns="False"
+                  Margin="25,5,25,10" Background="#121212" Foreground="White"
+                  IsReadOnly="True" GridLinesVisibility="None">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Folder Directory" Binding="{Binding}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+                    Margin="0,0,0,10" Spacing="20">
+            <Button x:Name="SelectButton" Content="Select" Width="75" Height="25"
+                    Background="White" Foreground="Black" Click="SelectButton_Click"/>
+            <Button x:Name="CancelButton" Content="Cancel" Width="75" Height="25"
+                    Background="White" Foreground="Black" Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

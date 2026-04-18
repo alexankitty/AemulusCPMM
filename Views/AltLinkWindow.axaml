@@ -1,0 +1,27 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AemulusModManager.Avalonia.Views.AltLinkWindow"
+        Title="Alternate File Sources" Width="400"
+        CanResize="False" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        Background="#121212">
+    <Grid RowDefinitions="Auto,Auto,Auto">
+        <TextBlock Grid.Row="0" Text="Select a link:" Foreground="White"
+                   FontSize="15" Padding="15,10" HorizontalAlignment="Center"/>
+        <ListBox Grid.Row="1" x:Name="LinkList" Background="#202020" Foreground="#f2f2f2"
+                 Margin="10" MaxHeight="300" SelectionMode="Single">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Name}" FontSize="14" Foreground="#f2f2f2" Cursor="Hand"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+                    Margin="0,5,0,15" Spacing="20">
+            <Button Content="Select" Background="White" Foreground="Black"
+                    Height="25" Width="80" Click="SelectButton_Click"/>
+            <Button Content="Cancel" Background="White" Foreground="Black"
+                    Height="25" Width="80" Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
