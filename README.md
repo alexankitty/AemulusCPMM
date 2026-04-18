@@ -12,6 +12,7 @@ Welcome partner, you're in for a wild ride of testing this software. I don't hav
 * One click install isn't implemented
 * Drag and drop doesn't function due to limitations of Avalonia under Wayland. Either run the application under xorg, or use the add package button.
 * Config browse buttons are sized wrong.
+* PCSX2 launch is busted.
 
 # Installation
 I don't want to deal with packaging, so if you want to run an AUR package or something let me know.
