@@ -15,6 +15,15 @@
     <Version>6.6.0.0</Version>
     <AssemblyVersion>6.6.0.0</AssemblyVersion>
     <Product>Aemulus Package Manager</Product>
+    <ApplicationIcon>Assets\Aemulus.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <!-- Publish settings (applied via dotnet publish) -->
+  <PropertyGroup Condition="'$(PublishSingleFile)' == 'true' Or '$(SelfContained)' == 'true'">
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
