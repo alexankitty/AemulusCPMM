@@ -22,18 +22,20 @@ public static class ScriptCompiler
     private static bool _monoChecked;
 
     private static string CompilerPath => Path.Combine(AppDir, "Dependencies", "AtlusScriptCompiler", "AtlusScriptCompiler.exe");
+    // Native self-contained linux-x64 binary (no .exe, no mono required)
+    private static string LinuxCompilerPath => Path.Combine(AppDir, "Dependencies", "AtlusScriptCompiler", "AtlusScriptCompiler");
     private static string PM1Path => Path.Combine(AppDir, "Dependencies", "PM1MessageScriptEditor", "PM1MessageScriptEditor.exe");
 
     private static readonly Dictionary<string, (string Library, string Encoding, string FlowFormat, string MsgFormat)> GameInfo = new()
     {
-        ["Persona 4 Golden"]        = ("P4G", "P4", "V1", "V1"),
-        ["Persona 4 Golden (Vita)"] = ("P4G", "P4", "V1", "V1"),
-        ["Persona 3 FES"]           = ("P3F", "P3", "V1", "V1"),
-        ["Persona 5"]               = ("P5",  "P5", "V3BE", "V1BE"),
-        ["Persona 3 Portable"]      = ("P3P", "P3", "V1", "V1"),
-        ["Persona 5 Royal (PS4)"]   = ("P5R", "P5", "V3BE", "V1BE"),
-        ["Persona 5 Royal (Switch)"]= ("P5R", "P5", "V3BE", "V1BE"),
-        ["Persona Q2"]              = ("PQ2", "SJ", "V2", "V1"),
+        ["Persona 4 Golden"]        = ("p4g", "P4", "V1", "V1"),
+        ["Persona 4 Golden (Vita)"] = ("p4g", "P4", "V1", "V1"),
+        ["Persona 3 FES"]           = ("p3f", "P3", "V1", "V1"),
+        ["Persona 5"]               = ("p5",  "P5", "V3BE", "V1BE"),
+        ["Persona 3 Portable"]      = ("p3p", "P3", "V1", "V1"),
+        ["Persona 5 Royal (PS4)"]   = ("p5r", "P5", "V3BE", "V1BE"),
+        ["Persona 5 Royal (Switch)"]= ("p5r", "P5", "V3BE", "V1BE"),
+        ["Persona Q2"]              = ("pq2", "SJ", "V2", "V1"),
     };
 
     private static string? FindMono()
@@ -62,6 +64,10 @@ public static class ScriptCompiler
 
     public static bool CompilerExists(bool pm1 = false)
     {
+        // On Linux, prefer the self-contained native binary for AtlusScriptCompiler
+        if (!OperatingSystem.IsWindows() && !pm1 && File.Exists(LinuxCompilerPath))
+            return true;
+
         var path = pm1 ? PM1Path : CompilerPath;
         if (!File.Exists(path))
         {
@@ -70,7 +76,8 @@ public static class ScriptCompiler
         }
         if (!OperatingSystem.IsWindows() && FindMono() == null)
         {
-            ParallelLogger.Log("[ERROR] mono is required to run AtlusScriptCompiler on Linux. Install mono-runtime.");
+            ParallelLogger.Log("[ERROR] Neither a native AtlusScriptCompiler binary nor mono was found. "
+                + "Install mono-runtime or use an AppImage build.");
             return false;
         }
         return true;
@@ -88,14 +95,24 @@ public static class ScriptCompiler
         string finalArgs;
         if (!OperatingSystem.IsWindows())
         {
-            var mono = FindMono();
-            if (mono == null)
+            // Prefer native self-contained binary (strip .exe → AtlusScriptCompiler)
+            var nativePath = Path.Combine(Path.GetDirectoryName(exePath)!, Path.GetFileNameWithoutExtension(exePath));
+            if (File.Exists(nativePath))
             {
-                ParallelLogger.Log("[ERROR] mono is required to run this tool on Linux.");
-                return;
+                fileName = nativePath;
+                finalArgs = args;
             }
-            fileName = mono;
-            finalArgs = $"\"{exePath}\" {args}";
+            else
+            {
+                var mono = FindMono();
+                if (mono == null)
+                {
+                    ParallelLogger.Log("[ERROR] Neither a native binary nor mono was found for this tool on Linux.");
+                    return;
+                }
+                fileName = mono;
+                finalArgs = $"\"{exePath}\" {args}";
+            }
         }
         else
         {

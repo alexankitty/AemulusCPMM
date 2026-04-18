@@ -2,13 +2,14 @@ using System.Collections.Generic;
 using AemulusModManager.Avalonia.Utilities;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using AemulusModManager.Utilities;
 
 namespace AemulusModManager.Avalonia.Utilities.FileMerging;
 
 /// <summary>
 /// Cross-platform port of FlowMerger. Compiles .flow files to .bf using AtlusScriptCompiler CLI.
+/// The compiled .bf is left in place inside the package directory so that BinMerger.Unpack
+/// can later copy it to the output folder (Restart wipes output between FlowMerger and Unpack).
 /// </summary>
 public static class FlowMerger
 {
@@ -22,9 +23,14 @@ public static class FlowMerger
 
         foreach (string dir in ModList)
         {
+            // Sort so .bf files are processed before .flow files — on Linux, enumeration
+            // order is not guaranteed, and a .flow that hooks into a same-named .bf needs
+            // the .bf to already be registered in compiledFiles as its base.
             var flowFiles = Directory.EnumerateFiles(dir, "*.*", SearchOption.AllDirectories)
                 .Where(s => (s.ToLower().EndsWith(".flow") || s.ToLower().EndsWith(".bf"))
-                    && !s.ToLower().EndsWith(".bf.flow"));
+                    && !s.ToLower().EndsWith(".bf.flow"))
+                .OrderBy(s => s.ToLower().EndsWith(".bf") ? 0 : 1)
+                .ThenBy(s => s);
 
             string[]? aemIgnore = File.Exists(Path.Combine(dir, "Ignore.aem"))
                 ? File.ReadAllLines(Path.Combine(dir, "Ignore.aem"))
@@ -40,15 +46,18 @@ public static class FlowMerger
                 {
                     if (File.Exists(Path.ChangeExtension(file, "flow")))
                         continue; // Skip bf if flow exists (flow will be compiled)
-                    // Standalone bf — add as base
+                    // Standalone bf — add as base, BinMerger.Unpack will copy it to output
                     compiledFiles.Add(new[] { filePath, dir, bf });
                     continue;
                 }
 
+                if (aemIgnore != null && aemIgnore.Any(file.Contains))
+                    continue;
+
                 string[]? previousFileArr = compiledFiles.FindLast(p => p[0] == filePath);
                 string? previousFile = previousFileArr?[2];
 
-                // Copy a previously compiled bf so it can be merged
+                // Copy a previously compiled bf so it can be merged with this flow
                 if (previousFile != null)
                 {
                     File.Copy(previousFile, bf, true);
@@ -59,13 +68,11 @@ public static class FlowMerger
                     string ogPath = Path.Combine(DataDir, "Original", game,
                         ScriptCompiler.GetRelativePath(bf, dir, game, false));
 
-                    if (aemIgnore != null && aemIgnore.Any(file.Contains))
-                        continue;
-                    else if (File.Exists(ogPath))
+                    if (File.Exists(ogPath))
                         File.Copy(ogPath, bf, true);
                     else
                     {
-                        ParallelLogger.Log($"[INFO] Cannot find {ogPath}. Make sure you have unpacked the game's files if merging is needed");
+                        ParallelLogger.Log($"[INFO] Cannot find {ogPath}. Make sure you have unpacked the game's files if merging is needed.");
                         continue;
                     }
                 }
@@ -74,6 +81,7 @@ public static class FlowMerger
                     continue;
 
                 compiledFiles.Add(new[] { filePath, dir, bf });
+                // The compiled .bf stays in the package dir; BinMerger.Unpack copies it to output
             }
         }
     }

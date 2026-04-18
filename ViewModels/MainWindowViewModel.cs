@@ -79,6 +79,7 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private bool _bottomUpPriority;
     [ObservableProperty] private string _priorityLabel = "higher priority ▲";
     [ObservableProperty] private string _consoleOutput = "";
+    public ObservableCollection<LogEntry> ConsoleEntries { get; } = new();
     [ObservableProperty] private string _description = "";
     [ObservableProperty] private Bitmap? _previewImage;
     [ObservableProperty] private string _searchText = "";
@@ -148,6 +149,7 @@ public partial class MainWindowViewModel : ObservableObject
         UpdateGameAccentColor();
         SetupFileSystemWatcher();
         AppendConsole("[INFO] Aemulus Package Manager started (Avalonia cross-platform build)");
+        PreviewImage = _placeholderImage.Value;
     }
 
     private void SetupFileSystemWatcher()
@@ -2456,53 +2458,49 @@ public partial class MainWindowViewModel : ObservableObject
         }
 
         var search = value.ToLowerInvariant();
-        var modDir = ModPath ?? "";
-
-        var filtered = new ObservableCollection<DisplayedMetadata>();
-        foreach (var p in _packageList)
-        {
-            var meta = new Metadata();
-            var metadataFile = Path.Combine(modDir, p.path ?? "", "Package.xml");
-
-            if (File.Exists(metadataFile))
-            {
-                try
-                {
-                    using var stream = File.OpenRead(metadataFile);
-                    meta = (Metadata)_xsp.Deserialize(stream);
-                }
-                catch { }
-            }
-
-            if ((p.path?.ToLowerInvariant().Contains(search) ?? false) ||
-                (meta.name?.ToLowerInvariant().Contains(search) ?? false) ||
-                (meta.author?.ToLowerInvariant().Contains(search) ?? false))
-            {
-                var displayed = InitDisplayedMetadata(meta);
-                displayed.enabled = p.enabled;
-                displayed.path = p.path;
-                filtered.Add(displayed);
-            }
-        }
+        // Filter the already built DisplayedMetadata list for consistent display names
+        var filtered = new ObservableCollection<DisplayedMetadata>(
+            _displayedPackages.Where(dm =>
+                (!string.IsNullOrEmpty(dm.name) && dm.name.ToLowerInvariant().Contains(search)) ||
+                (!string.IsNullOrEmpty(dm.author) && dm.author.ToLowerInvariant().Contains(search)) ||
+                (!string.IsNullOrEmpty(dm.path) && dm.path.ToLowerInvariant().Contains(search))
+            )
+        );
         DisplayedPackages = filtered;
     }
 
     #endregion
 
+    private static IBrush BrushForLine(string line)
+    {
+        if (line.Contains("[ERROR]"))   return SolidColorBrush.Parse("#FF6060");
+        if (line.Contains("[WARNING]")) return SolidColorBrush.Parse("#FFD060");
+        return SolidColorBrush.Parse("#90EE90");
+    }
+
     public void AppendConsole(string message)
     {
         ConsoleOutput += message + Environment.NewLine;
+        ConsoleEntries.Add(new LogEntry(message, BrushForLine(message)));
     }
 
     public void AppendConsoleRaw(string text)
     {
         ConsoleOutput += text;
+        // Raw text may contain multiple newline-terminated lines from ParallelLogger
+        foreach (var line in text.Split('\n'))
+        {
+            var trimmed = line.TrimEnd('\r');
+            if (trimmed.Length > 0)
+                ConsoleEntries.Add(new LogEntry(trimmed, BrushForLine(trimmed)));
+        }
     }
 
     [RelayCommand]
     private void ClearConsole()
     {
         ConsoleOutput = "";
+        ConsoleEntries.Clear();
     }
 
     private void UpdateGameAccentColor()
@@ -2547,3 +2545,5 @@ public partial class MainWindowViewModel : ObservableObject
         });
     }
 }
+
+public record LogEntry(string Text, IBrush Foreground);

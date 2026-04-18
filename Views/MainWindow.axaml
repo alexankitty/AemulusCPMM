@@ -6,12 +6,12 @@
         xmlns:conv="using:AemulusModManager.Avalonia.Converters"
         xmlns:asyncImageLoader="using:AsyncImageLoader"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
-        mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
+        mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="720"
         x:Class="AemulusModManager.Avalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="{Binding WindowTitle}"
-        Width="1280" Height="720"
-        MinWidth="1280" MinHeight="720"
+        Width="1080" Height="720"
+        MinWidth="1080" MinHeight="720"
         Background="{DynamicResource AppBg}"
         DragDrop.AllowDrop="True">
 
@@ -20,6 +20,8 @@
             <conv:GameIconConverter x:Key="GameIconConverter" />
             <conv:GameColorConverter x:Key="GameColorConverter" />
             <conv:UrlConverter x:Key="UrlConverter" />
+
+            <SolidColorBrush x:Key="GameAccentIndicator" Color="#F5E63D"/>
 
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Dark">
@@ -67,8 +69,8 @@
             <Setter Property="Background" Value="#700000" />
         </Style>
         <Style Selector="Button.iconBtn">
-            <Setter Property="Width" Value="40" />
-            <Setter Property="Height" Value="40" />
+            <Setter Property="Width" Value="48" />
+            <Setter Property="Height" Value="48" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
@@ -97,40 +99,28 @@
         <Style Selector="DataGridRow">
             <Setter Property="Foreground" Value="{DynamicResource AppFg}" />
         </Style>
+
+        <!-- Active tab indicator matches game accent color -->
+        <Style Selector="TabItem:selected /template/ Border#PART_SelectedPipe">
+            <Setter Property="Background" Value="{DynamicResource GameAccentIndicator}" />
+        </Style>
+
     </Window.Styles>
 
+    <Grid>
     <TabControl Background="{DynamicResource AppBg}" SelectionChanged="TabControl_SelectionChanged">
         <!-- Tab 1: Manage Packages -->
-        <TabItem Header="Manage Packages" Foreground="{DynamicResource AppFg}">
-            <DockPanel>
-            <!-- Bottom Status Bar -->
-            <Grid DockPanel.Dock="Bottom" Margin="10,0,10,5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Cursor="Hand" VerticalAlignment="Center">
-                    <StackPanel.Styles>
-                        <Style Selector="StackPanel:pointerover > TextBlock">
-                            <Setter Property="Opacity" Value="0.8"/>
-                        </Style>
-                    </StackPanel.Styles>
-                    <i:Icon Value="fa-solid fa-question" FontSize="13" Foreground="{DynamicResource AppMuted}" Margin="0,0,5,0"/>
-                    <TextBlock Text="Setup Guide" Foreground="{DynamicResource AppMuted}" FontSize="13"
-                               PointerPressed="SetupGuide_Click"/>
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Cursor="Hand" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <StackPanel.Styles>
-                        <Style Selector="StackPanel:pointerover > TextBlock">
-                            <Setter Property="Opacity" Value="0.8"/>
-                        </Style>
-                    </StackPanel.Styles>
-                    <i:Icon Value="fa-solid fa-mug-hot" FontSize="13" Foreground="{DynamicResource AppMuted}" Margin="0,0,5,0"/>
-                    <TextBlock Text="Support Me!" Foreground="{DynamicResource AppMuted}" FontSize="13"
-                               PointerPressed="SupportMe_Click"/>
-                </StackPanel>
-            </Grid>
-            <Grid Margin="10">
+        <TabItem Header="Manage Packages" Foreground="{DynamicResource AppFg}" BorderBrush="{Binding GameAccentColor}">
+            <Border Background="{DynamicResource AppSurface}"
+                    BorderBrush="{DynamicResource AppBorder}"
+                    BorderThickness="2"
+                    Margin="0,0,0,10">
+            <Grid Margin="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="150" />
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*" MinWidth="400" />
                     <ColumnDefinition Width="5" />
@@ -138,12 +128,12 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Left Panel: Package List -->
-                <Grid Grid.Column="0">
+                <Grid Grid.Row="0" Grid.Column="0"
+                      Margin="10,10,5,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
-                        <RowDefinition Height="5" />
-                        <RowDefinition Height="150" />
                     </Grid.RowDefinitions>
 
                     <!-- Top Toolbar -->
@@ -160,8 +150,6 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
                         <!-- Game Selector -->
@@ -170,13 +158,21 @@
                                   SelectedItem="{Binding SelectedGame}"
                                   IsEnabled="{Binding IsUiEnabled}"
                                   Margin="0,0,3,0"
-                                  MinWidth="230"
+                                  MinWidth="44"
                                   Background="{DynamicResource AppControl}"
                                   Foreground="{DynamicResource AppFg}">
+                            <!-- Closed state: icon only -->
+                            <ComboBox.SelectionBoxItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Image Width="32" Height="32" Margin="2,0,2,0"
+                                           Source="{Binding Converter={StaticResource GameIconConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.SelectionBoxItemTemplate>
+                            <!-- Dropdown: icon + name -->
                             <ComboBox.ItemTemplate>
                                 <DataTemplate x:DataType="x:String">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Image Width="24" Height="24" Margin="2,0,8,0"
+                                        <Image Width="32" Height="32" Margin="2,0,8,0"
                                                Source="{Binding Converter={StaticResource GameIconConverter}}" />
                                         <TextBlock Text="{Binding}" VerticalAlignment="Center" />
                                     </StackPanel>
@@ -191,6 +187,7 @@
                                   IsEnabled="{Binding IsUiEnabled}"
                                   Margin="0,0,3,0"
                                   MinWidth="120"
+                                  Height="44"
                                   Background="{DynamicResource AppControl}"
                                   Foreground="{DynamicResource AppFg}" />
 
@@ -200,7 +197,7 @@
                                 IsEnabled="{Binding IsUiEnabled}"
                                 ToolTip.Tip="Config"
                                 Margin="0,0,2,0">
-                            <i:Icon Value="fa-solid fa-gear" FontSize="18" Foreground="{Binding GameAccentColor}"/>
+                            <i:Icon Value="fa-solid fa-gear" FontSize="32" Foreground="{Binding GameAccentColor}"/>
                         </Button>
 
                         <!-- Refresh -->
@@ -209,7 +206,7 @@
                                 IsEnabled="{Binding IsUiEnabled}"
                                 ToolTip.Tip="Refresh"
                                 Margin="0,0,2,0">
-                            <i:Icon Value="fa-solid fa-arrows-rotate" FontSize="18" Foreground="{Binding GameAccentColor}"/>
+                            <i:Icon Value="fa-solid fa-arrows-rotate" FontSize="32" Foreground="{Binding GameAccentColor}"/>
                         </Button>
 
                         <!-- Build -->
@@ -218,7 +215,7 @@
                                 IsEnabled="{Binding IsBuildEnabled}"
                                 ToolTip.Tip="Build"
                                 Margin="0,0,2,0">
-                            <i:Icon Value="fa-solid fa-hammer" FontSize="16" Foreground="{Binding GameAccentColor}"/>
+                            <i:Icon Value="fa-solid fa-hammer" FontSize="32" Foreground="{Binding GameAccentColor}"/>
                         </Button>
 
                         <!-- Launch -->
@@ -227,7 +224,7 @@
                                 IsEnabled="{Binding IsUiEnabled}"
                                 ToolTip.Tip="Launch Game"
                                 Margin="0,0,2,0">
-                            <i:Icon Value="fa-solid fa-rocket" FontSize="16" Foreground="{Binding GameAccentColor}"/>
+                            <i:Icon Value="fa-solid fa-rocket" FontSize="32" Foreground="{Binding GameAccentColor}"/>
                         </Button>
 
                         <!-- Open Folder -->
@@ -235,7 +232,7 @@
                                 Command="{Binding OpenModDirCommand}"
                                 ToolTip.Tip="Open Mod Folder"
                                 Margin="0,0,2,0">
-                            <i:Icon Value="fa-solid fa-folder-open" FontSize="16" Foreground="{Binding GameAccentColor}"/>
+                            <i:Icon Value="fa-solid fa-folder-open" FontSize="32" Foreground="{Binding GameAccentColor}"/>
                         </Button>
 
                         <!-- Add Package -->
@@ -244,7 +241,7 @@
                                 IsEnabled="{Binding IsUiEnabled}"
                                 ToolTip.Tip="Add Package"
                                 Margin="0,0,2,0">
-                            <i:Icon Value="fa-solid fa-plus" FontSize="18" Foreground="{Binding GameAccentColor}"/>
+                            <i:Icon Value="fa-solid fa-plus" FontSize="32" Foreground="{Binding GameAccentColor}"/>
                         </Button>
 
                         <!-- Create New Package -->
@@ -253,7 +250,7 @@
                                 IsEnabled="{Binding IsUiEnabled}"
                                 ToolTip.Tip="Create New Package"
                                 Margin="0,0,2,0">
-                            <i:Icon Value="fa-solid fa-file-circle-plus" FontSize="18" Foreground="{Binding GameAccentColor}"/>
+                            <i:Icon Value="fa-solid fa-file-circle-plus" FontSize="32" Foreground="{Binding GameAccentColor}"/>
                         </Button>
 
                         <!-- Priority Swap -->
@@ -261,7 +258,7 @@
                                 Command="{Binding SwapPriorityCommand}"
                                 ToolTip.Tip="{Binding PriorityLabel}"
                                 Margin="0,0,2,0">
-                            <i:Icon Value="fa-solid fa-sort" FontSize="18" Foreground="{Binding GameAccentColor}"/>
+                            <i:Icon Value="fa-solid fa-sort" FontSize="32" Foreground="{Binding GameAccentColor}"/>
                         </Button>
 
                         <!-- Dark Mode Toggle -->
@@ -270,29 +267,21 @@
                                 ToolTip.Tip="Toggle Dark/Light Mode"
                                 HorizontalAlignment="Left"
                                 Margin="0,0,2,0">
-                            <i:Icon Value="fa-solid fa-circle-half-stroke" FontSize="18" Foreground="{Binding GameAccentColor}"/>
+                            <i:Icon Value="fa-solid fa-circle-half-stroke" FontSize="32" Foreground="{Binding GameAccentColor}"/>
                         </Button>
-
-                        <!-- Package Stats -->
-                        <TextBlock Grid.Column="11"
-                                   Text="{Binding PackageStats}"
-                                   Foreground="{DynamicResource AppMuted}"
-                                   FontSize="12"
-                                   VerticalAlignment="Center"
-                                   Margin="5,0,5,0"/>
-
-                        <!-- Search Box -->
-                        <TextBox Grid.Column="12"
-                                 Watermark="Search..."
-                                 Text="{Binding SearchText}"
-                                 MinWidth="150"
-                                 Background="{DynamicResource AppControl}"
-                                 Foreground="{DynamicResource AppFg}"
-                                 BorderBrush="{DynamicResource AppBorder}" />
                     </Grid>
 
+                    <!-- Search Box -->
+                    <TextBox Grid.Row="1"
+                             Watermark="Search..."
+                             Text="{Binding SearchText}"
+                             Background="{DynamicResource AppControl}"
+                             Foreground="{DynamicResource AppFg}"
+                             BorderBrush="{DynamicResource AppBorder}"
+                             Margin="0,0,0,5" />
+
                     <!-- Package DataGrid with Priority indicator -->
-                    <Grid Grid.Row="1">
+                    <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
@@ -401,7 +390,7 @@
 
                         <!-- Priority Indicator Bar -->
                         <Border Grid.Column="1" BorderBrush="{DynamicResource AppBorder}" BorderThickness="1"
-                                Margin="3,0,0,0" Background="{DynamicResource AppSurface}" Width="35">
+                                Margin="3,0,0,5" Background="{DynamicResource AppSurface}" Width="35">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -409,71 +398,83 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <i:Icon Grid.Row="0" Value="fa-solid fa-sort-up" FontSize="14"
+                                        IsVisible="{Binding !BottomUpPriority}"
                                         Foreground="{DynamicResource AppMuted}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
-                                <TextBlock Grid.Row="1" Text="PACKAGE PRIORITY"
-                                           Foreground="{DynamicResource AppMuted}" FontSize="14" FontWeight="SemiBold"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           TextAlignment="Center">
-                                    <TextBlock.RenderTransform>
+                                <LayoutTransformControl Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <LayoutTransformControl.LayoutTransform>
                                         <RotateTransform Angle="90"/>
-                                    </TextBlock.RenderTransform>
-                                </TextBlock>
+                                    </LayoutTransformControl.LayoutTransform>
+                                    <TextBlock Text="PACKAGE PRIORITY"
+                                               Foreground="{DynamicResource AppMuted}" FontSize="12" FontWeight="SemiBold"
+                                               TextAlignment="Center"/>
+                                </LayoutTransformControl>
                                 <i:Icon Grid.Row="2" Value="fa-solid fa-sort-down" FontSize="14"
+                                        IsVisible="{Binding BottomUpPriority}"
                                         Foreground="{DynamicResource AppMuted}" HorizontalAlignment="Center" Margin="0,0,0,6"/>
                             </Grid>
                         </Border>
                     </Grid>
 
-                    <GridSplitter Grid.Row="2" Background="{DynamicResource AppControl}" />
-
-                    <!-- Console Output -->
-                    <Grid Grid.Row="3">
-                        <TextBox Text="{Binding ConsoleOutput}"
-                                 IsReadOnly="True"
-                                 AcceptsReturn="True"
-                                 TextWrapping="Wrap"
-                                 Background="{DynamicResource AppConsoleBg}"
-                                 Foreground="#90EE90"
-                                 FontFamily="Cascadia Mono,Consolas,Menlo,monospace"
-                                 FontSize="12"
-                                 CaretIndex="{Binding ConsoleOutput.Length, Mode=OneWay}" />
-                        <Button Content="Clear Logs" Classes="darkBtn"
-                                Command="{Binding ClearConsoleCommand}"
-                                HorizontalAlignment="Right" VerticalAlignment="Top"
-                                Margin="0,4,4,0" Padding="6,2"
-                                FontSize="10" Opacity="0.8"/>
-                    </Grid>
                 </Grid>
 
-                <GridSplitter Grid.Column="1" Background="{DynamicResource AppControl}" />
+                <!-- Console/datagrid horizontal splitter -->
+                <GridSplitter Grid.Row="1" Grid.Column="0" Background="{DynamicResource AppControl}" />
+
+                <!-- Console Output -->
+                <Grid Grid.Row="2" Grid.Column="0" Background="{DynamicResource AppConsoleBg}">
+                    <ScrollViewer x:Name="ConsoleScroll"
+                                  Padding="0"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding ConsoleEntries}"
+                                      FontFamily="Cascadia Mono,Consolas,Menlo,monospace"
+                                      FontSize="12">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Text}"
+                                               Foreground="{Binding Foreground}"
+                                               TextWrapping="Wrap" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <Button Content="Clear Logs" Classes="darkBtn"
+                            Command="{Binding ClearConsoleCommand}"
+                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Margin="0,4,4,0" Padding="6,2"
+                            FontSize="10" Opacity="0.8"/>
+                </Grid>
+
+                <GridSplitter Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Background="{DynamicResource AppControl}" />
 
                 <!-- Right Panel: Details / Preview -->
-                <Grid Grid.Column="2">
+                <Grid Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" Margin="0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" MinHeight="0" />
                         <RowDefinition Height="5" />
-                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" MinHeight="0" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <!-- Preview Image -->
                     <Border Grid.Row="0"
-                            Background="{DynamicResource AppSurface}"
-                            CornerRadius="5"
-                            Margin="5">
+                            Background="Transparent"
+                            Margin="0,0,0,0"
+                            ClipToBounds="True"
+                            Padding="10">
                         <Image Source="{Binding PreviewImage}"
                                Stretch="Uniform"
                                VerticalAlignment="Center"
-                               HorizontalAlignment="Center"
-                               Margin="4,5,4,2" />
+                               HorizontalAlignment="Center" 
+                               />
                     </Border>
 
                     <GridSplitter Grid.Row="1" Background="{DynamicResource AppControl}" />
 
                     <!-- Description -->
                     <Border Grid.Row="2"
-                            Background="{DynamicResource AppSurface}"
-                            CornerRadius="5"
-                            Margin="5"
+                            Background="Transparent"
+                            Margin="5,5,0,5"
                             Padding="10">
                         <ScrollViewer>
                             <TextBlock Text="{Binding Description}"
@@ -482,13 +483,52 @@
                                        FontSize="14" />
                         </ScrollViewer>
                     </Border>
+
+                    <!-- Bottom Status Bar -->
+                    <Grid Grid.Row="3" Margin="5,2,2,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Cursor="Hand" VerticalAlignment="Center">
+                            <StackPanel.Styles>
+                                <Style Selector="StackPanel:pointerover > TextBlock">
+                                    <Setter Property="Opacity" Value="0.8"/>
+                                </Style>
+                            </StackPanel.Styles>
+                            <i:Icon Value="fa-solid fa-question" FontSize="13" Foreground="{DynamicResource AppMuted}" Margin="0,0,5,0"/>
+                            <TextBlock Text="Setup Guide" Foreground="{DynamicResource AppMuted}" FontSize="13"
+                                       PointerPressed="SetupGuide_Click"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Cursor="Hand" VerticalAlignment="Center" Margin="0,0,12,0">
+                            <StackPanel.Styles>
+                                <Style Selector="StackPanel:pointerover > TextBlock">
+                                    <Setter Property="Opacity" Value="0.8"/>
+                                </Style>
+                            </StackPanel.Styles>
+                            <i:Icon Value="fa-solid fa-mug-hot" FontSize="13" Foreground="{DynamicResource AppMuted}" Margin="0,0,5,0"/>
+                            <TextBlock Text="Support Tekka" Foreground="{DynamicResource AppMuted}" FontSize="13"
+                                       PointerPressed="SupportTekka_Click"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Cursor="Hand" VerticalAlignment="Center">
+                            <StackPanel.Styles>
+                                <Style Selector="StackPanel:pointerover > TextBlock">
+                                    <Setter Property="Opacity" Value="0.8"/>
+                                </Style>
+                            </StackPanel.Styles>
+                            <i:Icon Value="fa-solid fa-mug-hot" FontSize="13" Foreground="{DynamicResource AppMuted}" Margin="0,0,5,0"/>
+                            <TextBlock Text="Support Me!" Foreground="{DynamicResource AppMuted}" FontSize="13"
+                                       PointerPressed="SupportMe_Click"/>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Grid>
-            </DockPanel>
+            </Border>
         </TabItem>
 
         <!-- Tab 2: Download Packages -->
-        <TabItem Header="Download Packages" Foreground="{DynamicResource AppFg}">
+        <TabItem Header="Download Packages" Foreground="{DynamicResource AppFg}" BorderBrush="{Binding GameAccentColor}">
             <Grid RowDefinitions="Auto,*,Auto">
                 <!-- Top Filter Bar -->
                 <WrapPanel Grid.Row="0" Margin="5" HorizontalAlignment="Center">
@@ -540,15 +580,15 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="{DynamicResource AppFeedCard}" CornerRadius="5" Padding="8" Margin="2">
-                                    <Grid ColumnDefinitions="80,*,Auto">
+                                    <Grid ColumnDefinitions="150,*,Auto">
                                         <!-- Thumbnail -->
-                                        <Image Grid.Column="0" Width="70" Height="70" Stretch="UniformToFill"
+                                        <Image Grid.Column="0" Width="150" Height="150" Stretch="UniformToFill"
                                                asyncImageLoader:ImageLoader.Source="{Binding Image}" Margin="0,0,8,0"/>
                                         <!-- Info -->
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="14"
+                                            <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="18"
                                                        Foreground="{DynamicResource AppFg}" TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Foreground="#909090" FontSize="11">
+                                            <TextBlock Foreground="#909090" FontSize="14">
                                                 <TextBlock.Text>
                                                     <MultiBinding StringFormat="by {0} | {1}">
                                                         <Binding Path="Owner.Name"/>
@@ -557,11 +597,11 @@
                                                 </TextBlock.Text>
                                             </TextBlock>
                                             <StackPanel Orientation="Horizontal" Spacing="10">
-                                                <TextBlock Text="{Binding Downloads, StringFormat='{}{0} DLs'}" Foreground="#707070" FontSize="10"/>
-                                                <TextBlock Text="{Binding Likes, StringFormat='{}{0} Likes'}" Foreground="#707070" FontSize="10"/>
-                                                <TextBlock Text="{Binding Views, StringFormat='{}{0} Views'}" Foreground="#707070" FontSize="10"/>
+                                                <TextBlock Text="{Binding Downloads, StringFormat='{}{0} DLs'}" Foreground="#707070" FontSize="14"/>
+                                                <TextBlock Text="{Binding Likes, StringFormat='{}{0} Likes'}" Foreground="#707070" FontSize="14"/>
+                                                <TextBlock Text="{Binding Views, StringFormat='{}{0} Views'}" Foreground="#707070" FontSize="14"/>
                                             </StackPanel>
-                                            <TextBlock Text="{Binding Description}" Foreground="#606060" FontSize="10"
+                                            <TextBlock Text="{Binding Description}" Foreground="#606060" FontSize="14"
                                                        MaxLines="2" TextTrimming="CharacterEllipsis" TextWrapping="Wrap"/>
                                         </StackPanel>
                                         <!-- Actions -->
@@ -601,4 +641,13 @@
             </Grid>
         </TabItem>
     </TabControl>
+    <!-- Package Stats overlaid on the tab strip -->
+    <TextBlock Text="{Binding PackageStats}"
+               Foreground="{DynamicResource AppMuted}"
+               FontSize="16"
+               VerticalAlignment="Top"
+               HorizontalAlignment="Right"
+               Margin="0,13,12,0"
+               IsHitTestVisible="False" />
+    </Grid>
 </Window>

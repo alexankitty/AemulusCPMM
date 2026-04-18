@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Reflection;
 
 namespace AemulusModManager.Avalonia.Utilities;
 
@@ -19,9 +18,10 @@ public static class AppPaths
 
     /// <summary>
     /// Directory containing the executable and its bundled dependencies.
+    /// Uses AppContext.BaseDirectory which works for both 'dotnet run' and published single-file apps.
     /// </summary>
     public static string ExeDir =>
-        _exeDir ??= Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? ".";
+        _exeDir ??= Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory);
 
     /// <summary>
     /// Directory for user-mutable data: Packages, Original, Config, Logs.

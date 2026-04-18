@@ -40,6 +40,17 @@ public partial class MainWindow : Window
         DataContext = new MainWindowViewModel();
         SetupConsoleRedirect();
         SetupDragDrop();
+        ViewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(ViewModel.GameAccentColor))
+                Resources["GameAccentIndicator"] = ViewModel.GameAccentColor;
+        };
+        Resources["GameAccentIndicator"] = ViewModel.GameAccentColor;
+        ViewModel.ConsoleEntries.CollectionChanged += (_, _) =>
+        {
+            var scroll = this.FindControl<ScrollViewer>("ConsoleScroll");
+            scroll?.ScrollToEnd();
+        };
     }
 
     private void SetupDragDrop()
@@ -185,9 +196,14 @@ public partial class MainWindow : Window
         try { Process.Start(new ProcessStartInfo("https://gamebanana.com/tuts/13379") { UseShellExecute = true }); } catch { }
     }
 
-    private void SupportMe_Click(object? sender, PointerPressedEventArgs e)
+    private void SupportTekka_Click(object? sender, PointerPressedEventArgs e)
     {
         try { Process.Start(new ProcessStartInfo("https://ko-fi.com/tekka") { UseShellExecute = true }); } catch { }
+    }
+
+    private void SupportMe_Click(object? sender, PointerPressedEventArgs e)
+    {
+        try { Process.Start(new ProcessStartInfo("https://ko-fi.com/alexankitty") { UseShellExecute = true }); } catch { }
     }
 
     private async void ConfigButton_Click(object? sender, RoutedEventArgs e)

@@ -58,6 +58,19 @@ jobs:
           -p:SelfContained=true
           -o publish/linux-x64
 
+      - name: Build AtlusScriptCompiler native Linux binary
+        run: |
+          git clone --depth 1 https://github.com/tge-was-taken/Atlus-Script-Tools.git atlus-tools
+          dotnet publish atlus-tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj \
+            -r linux-x64 --self-contained \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -c Release \
+            -o atlus_native
+          cp atlus_native/AtlusScriptCompiler \
+             publish/linux-x64/Dependencies/AtlusScriptCompiler/AtlusScriptCompiler
+          chmod +x publish/linux-x64/Dependencies/AtlusScriptCompiler/AtlusScriptCompiler
+
       - name: Create Linux archive
         run: tar -czf AemulusPackageManager-linux-x64.tar.gz -C publish/linux-x64 .
 
@@ -90,6 +103,19 @@ jobs:
           -p:PublishSingleFile=false
           -p:SelfContained=true
           -o publish/linux-x64
+
+      - name: Build AtlusScriptCompiler native Linux binary
+        run: |
+          git clone --depth 1 https://github.com/tge-was-taken/Atlus-Script-Tools.git atlus-tools
+          dotnet publish atlus-tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj \
+            -r linux-x64 --self-contained \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -c Release \
+            -o atlus_native
+          cp atlus_native/AtlusScriptCompiler \
+             publish/linux-x64/Dependencies/AtlusScriptCompiler/AtlusScriptCompiler
+          chmod +x publish/linux-x64/Dependencies/AtlusScriptCompiler/AtlusScriptCompiler
 
       - name: Build AppImage
         run: |
