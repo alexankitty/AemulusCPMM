@@ -1,7 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using System.Collections.Specialized;
 using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
 using Avalonia.Threading;
@@ -57,10 +59,20 @@ public partial class MainWindow : Window
                 Resources["GameAccentIndicator"] = ViewModel.GameAccentColor;
         };
         Resources["GameAccentIndicator"] = ViewModel.GameAccentColor;
-        ViewModel.ConsoleEntries.CollectionChanged += (_, _) =>
+        ViewModel.ConsoleEntries.CollectionChanged += (_, e) =>
         {
-            var scroll = this.FindControl<ScrollViewer>("ConsoleScroll");
-            scroll?.ScrollToEnd();
+            var tb = this.FindControl<SelectableTextBlock>("ConsoleText");
+            if (tb == null) return;
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                tb.Inlines?.Clear();
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems != null)
+            {
+                foreach (LogEntry entry in e.NewItems)
+                    tb.Inlines?.Add(new Run(entry.Text + "\n") { Foreground = entry.Foreground });
+                this.FindControl<ScrollViewer>("ConsoleScroll")?.ScrollToEnd();
+            }
         };
     }
 

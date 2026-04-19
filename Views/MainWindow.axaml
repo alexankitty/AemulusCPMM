@@ -452,20 +452,16 @@
                         <!-- Console Output -->
                         <Grid Grid.Row="2" Grid.Column="0" Background="{DynamicResource AppConsoleBg}">
                             <ScrollViewer x:Name="ConsoleScroll"
-                                          Padding="0"
                                           HorizontalScrollBarVisibility="Disabled"
                                           VerticalScrollBarVisibility="Auto">
-                                <ItemsControl ItemsSource="{Binding ConsoleEntries}"
-                                              FontFamily="Cascadia Mono,Consolas,Menlo,monospace"
-                                              FontSize="12">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Text}"
-                                                       Foreground="{Binding Foreground}"
-                                                       TextWrapping="Wrap" />
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+                                <Grid>
+                                    <SelectableTextBlock x:Name="ConsoleText"
+                                                         TextWrapping="Wrap"
+                                                         FontFamily="Cascadia Mono,Consolas,Menlo,monospace"
+                                                         FontSize="12"
+                                                         Padding="4"
+                                                         Background="Transparent" />
+                                </Grid>
                             </ScrollViewer>
                             <Button Content="Clear Logs" Classes="darkBtn"
                                     Command="{Binding ClearConsoleCommand}"
