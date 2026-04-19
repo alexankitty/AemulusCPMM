@@ -3,7 +3,32 @@
         x:Class="AemulusModManager.Avalonia.Views.CreatePackageWindow"
         Title="Create New Package" Height="380" Width="500"
         CanResize="False" WindowStartupLocation="CenterOwner"
+        xmlns:vm="using:AemulusModManager.Avalonia.ViewModels" xmlns:conv="clr-namespace:AemulusModManager.Avalonia.Converters"
+        x:DataType="vm:DialogWindowViewModel"
         Background="#121212">
+    <Window.Resources>
+        <conv:GameColorConverter x:Key="GameColorConverter" />
+        <conv:AccentForegroundConverter x:Key="AccentForegroundConverter" />
+        <conv:AccentDarkenConverter x:Key="AccentDarkenConverter" />
+    </Window.Resources>
+    <Window.Styles>
+        <Style Selector="Button">
+            <Setter Property="Background" Value="#303030" />
+            <Setter Property="Foreground" Value="#f2f2f2" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="#202020" />
+            <Setter Property="BorderBrush" Value="#424242" />
+            <Setter Property="Foreground" Value="#f2f2f2" />
+        </Style>
+        <Style Selector="TextBox:focus /template/ Border">
+            <Setter Property="BorderBrush" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+        </Style>
+        <Style Selector="CheckBox:checked /template/ Border#NormalRectangle">
+            <Setter Property="Background" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+            <Setter Property="BorderBrush" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+        </Style>
+    </Window.Styles>
     <Grid ColumnDefinitions="100,*" RowDefinitions="33,33,33,33,33,5,Auto,5,33,33,33,5">
         <TextBlock Foreground="LightGray" VerticalAlignment="Center" HorizontalAlignment="Center"
                    FontSize="15" FontWeight="Bold" Grid.Row="0" Grid.Column="0">Name</TextBlock>
@@ -20,35 +45,31 @@
         <TextBlock Foreground="LightGray" VerticalAlignment="Center" HorizontalAlignment="Center"
                    FontSize="15" FontWeight="Bold" Grid.Row="8" Grid.Column="0">Preview</TextBlock>
 
-        <TextBox x:Name="NameBox" Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2"
+        <TextBox x:Name="NameBox"
                  Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="0,0,10,0"/>
-        <TextBox x:Name="AuthorBox" Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2"
+        <TextBox x:Name="AuthorBox"
                  Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="0,0,10,0"/>
-        <TextBox x:Name="IDBox" Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2"
+        <TextBox x:Name="IDBox"
                  Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="0,0,10,0"/>
-        <TextBox x:Name="VersionBox" Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2"
+        <TextBox x:Name="VersionBox"
                  Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="0,0,10,0"/>
-        <TextBox x:Name="LinkBox" Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2"
+        <TextBox x:Name="LinkBox"
                  Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="0,0,10,0"/>
         <TextBox x:Name="DescBox" AcceptsReturn="True" AcceptsTab="True"
-                 Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2"
                  Grid.Row="6" Grid.Column="1" TextWrapping="Wrap" Height="65"
                  VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,0,10,0"/>
         <Grid Grid.Row="8" Grid.Column="1" ColumnDefinitions="*,Auto" Margin="0,0,10,0">
-            <TextBox x:Name="PreviewBox" Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2"
-                     IsReadOnly="True" Grid.Column="0" VerticalAlignment="Center"/>
-            <Button x:Name="PreviewButton" Content="Browse" Background="#202020" Foreground="#f2f2f2"
-                    Grid.Column="1" VerticalAlignment="Center" Width="75" Click="PreviewButton_Click"/>
+            <TextBox x:Name="PreviewBox" IsReadOnly="True" Grid.Column="0" VerticalAlignment="Center"/>
+            <Button x:Name="PreviewButton" Content="Browse" Grid.Column="1" VerticalAlignment="Center" Width="75" Click="PreviewButton_Click"/>
         </Grid>
         <CheckBox x:Name="AllowUpdates" Foreground="White" Content="Allow Updates"
                   Grid.Row="9" Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0"/>
-        <Grid Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2" ColumnDefinitions="*,*">
-            <Button x:Name="CreateButton" Content="Confirm" Background="White" Foreground="Black"
-                    IsEnabled="False" Height="25" Width="100" Grid.Column="0"
-                    VerticalAlignment="Center" HorizontalAlignment="Center" Click="CreateButton_Click"/>
-            <Button x:Name="CancelButton" Content="Cancel" Background="White" Foreground="Black"
-                    Height="25" Width="100" Grid.Column="1"
-                    VerticalAlignment="Center" HorizontalAlignment="Center" Click="CancelButton_Click"/>
+        <Grid Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2" ColumnDefinitions="*,*" HorizontalAlignment="Center">
+            <Button x:Name="CreateButton" Content="Confirm" Classes="accent"
+                    IsEnabled="False" Grid.Column="0"
+                    VerticalAlignment="Center" HorizontalAlignment="Left" Click="CreateButton_Click" Margin="0,0,10,0"/>
+            <Button x:Name="CancelButton" Content="Cancel" Grid.Column="1"
+                    VerticalAlignment="Center" HorizontalAlignment="Left" Click="CancelButton_Click"/>
         </Grid>
     </Grid>
 </Window>

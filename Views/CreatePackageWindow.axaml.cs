@@ -3,6 +3,8 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using AemulusModManager.Utilities;
+using AemulusModManager.Avalonia.ViewModels;
+using Avalonia.Media;
 
 namespace AemulusModManager.Avalonia.Views;
 
@@ -20,8 +22,9 @@ public partial class CreatePackageWindow : Window
         SetupTextChangedHandlers();
     }
 
-    public CreatePackageWindow(Metadata? m)
+    public CreatePackageWindow(DialogWindowViewModel viewModel, Metadata? m)
     {
+        DataContext = viewModel;
         InitializeComponent();
         SetupTextChangedHandlers();
         if (m != null)
@@ -42,6 +45,32 @@ public partial class CreatePackageWindow : Window
             if (IDBox.Text == NameBox.Text?.Replace(" ", "").ToLower())
                 _edited = false;
         }
+
+        // Set AccentButtonBackground resource based on GameTitle
+        if (viewModel is not null)
+        {
+            SetAccentButtonBackground(viewModel.GameTitle);
+            viewModel.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(viewModel.GameTitle))
+                {
+                    SetAccentButtonBackground(viewModel.GameTitle);
+                }
+            };
+        }
+    }
+
+
+    private void SetAccentButtonBackground(string gameTitle)
+    {
+        var brush = AemulusModManager.Avalonia.Converters.GameColorConverter.GetBrush(gameTitle);
+        this.Resources["AccentButtonBackground"] = brush;
+
+        // Use AccentDarkenConverter logic for darkening
+        var color = ((SolidColorBrush)brush).Color;
+        this.Resources["AccentButtonBackgroundPressed"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.2));
+        this.Resources["AccentButtonBackgroundPointerOver"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.3));
+        this.Resources["AccentButtonBackgroundDisabled"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.7));
     }
 
     private void SetupTextChangedHandlers()

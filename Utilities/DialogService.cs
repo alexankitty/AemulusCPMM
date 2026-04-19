@@ -127,11 +127,11 @@ public class DialogService
         });
     }
 
-    public async Task<(string? name, bool copyLoadout)> ShowInputDialog(string prompt, bool showCopyCheckbox = true)
+    public async Task<(string? name, bool copyLoadout)> ShowInputDialog(string prompt)
     {
         return await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            var box = new InputBox(prompt, showCopyCheckbox);
+            var box = new InputBox(prompt);
             await box.ShowDialog(_owner);
             return (box.Result, box.CopyLoadout);
         });

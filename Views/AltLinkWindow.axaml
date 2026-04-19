@@ -5,6 +5,17 @@
         CanResize="False" SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         Background="#121212">
+    <Window.Styles>
+        <Style Selector="Button">
+            <Setter Property="Background" Value="#303030" />
+            <Setter Property="Foreground" Value="#f2f2f2" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="#202020" />
+            <Setter Property="BorderBrush" Value="#424242" />
+            <Setter Property="Foreground" Value="#f2f2f2" />
+        </Style>
+    </Window.Styles>
     <Grid RowDefinitions="Auto,Auto,Auto">
         <TextBlock Grid.Row="0" Text="Select a link:" Foreground="White"
                    FontSize="15" Padding="15,10" HorizontalAlignment="Center"/>
@@ -18,10 +29,8 @@
         </ListBox>
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
                     Margin="0,5,0,15" Spacing="20">
-            <Button Content="Select" Background="White" Foreground="Black"
-                    Height="25" Width="80" Click="SelectButton_Click"/>
-            <Button Content="Cancel" Background="White" Foreground="Black"
-                    Height="25" Width="80" Click="CancelButton_Click"/>
+            <Button Content="Select" Click="SelectButton_Click"/>
+            <Button Content="Cancel" Click="CancelButton_Click"/>
         </StackPanel>
     </Grid>
 </Window>

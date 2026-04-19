@@ -750,8 +750,10 @@ public partial class MainWindowViewModel : ObservableObject
         if (_loadoutChanging) return;
         if (value == "Add new loadout")
         {
+            AppendConsole("[INFO] Creating new loadout...");
             _loadoutChanging = true;
             _ = HandleNewLoadoutAsync();
+
             return;
         }
         if (!string.IsNullOrEmpty(value))
@@ -774,42 +776,29 @@ public partial class MainWindowViewModel : ObservableObject
                 SelectedLoadout = _lastLoadout;
                 return;
             }
-
-            var (name, copyLoadout) = await _dialogService.ShowInputDialog("Enter loadout name:");
-            if (string.IsNullOrWhiteSpace(name) || name == "Add new loadout")
+            DialogWindowViewModel dialogvm = CreateDialogViewModel();
+            var window = new Views.CreateEditLoadoutWindow(dialogvm, SelectedGame, _lastLoadout, false);
+            await window.ShowDialog(_dialogService?.OwnerWindow);
+            var name = window.LoadoutName?.Trim() ?? "";
+            if(string.IsNullOrEmpty(name))
             {
                 SelectedLoadout = _lastLoadout;
                 return;
             }
-
-            // Check for duplicate
             var loadoutFile = Path.Combine(_configPath, SelectedGame, $"{name}.xml");
-            if (File.Exists(loadoutFile))
-            {
-                await _dialogService.ShowNotification($"A loadout named \"{name}\" already exists.");
-                SelectedLoadout = _lastLoadout;
-                return;
-            }
-
-            // Copy current loadout if requested, otherwise create an empty file
-            if (copyLoadout)
-            {
-                var currentFile = Path.Combine(_configPath, SelectedGame, $"{_lastLoadout}.xml");
-                if (File.Exists(currentFile))
-                    File.Copy(currentFile, loadoutFile);
-            }
-            if (!File.Exists(loadoutFile))
+            // If we got a name but the file doesn't exist, create a clean loadout.
+            if(!File.Exists(loadoutFile))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(loadoutFile)!);
                 var empty = new Packages { packages = new ObservableCollection<Package>() };
                 using var stream = File.Create(loadoutFile);
                 _xp.Serialize(stream, empty);
             }
-
             // Set the backing field directly so LoadPackages picks up the right name
             // without triggering OnSelectedLoadoutChanged again.
             _selectedLoadout = name;
             _lastLoadout = name;
+            ApplyLastLoadoutConfig();
             UpdateConfig();
             _loadoutChanging = false;
             LoadPackages();
@@ -1578,6 +1567,16 @@ public partial class MainWindowViewModel : ObservableObject
         return vm;
     }
 
+    public DialogWindowViewModel CreateDialogViewModel()
+    {
+        var vm = new DialogWindowViewModel
+        {
+            GameTitle = SelectedGame,
+            LoadoutName = "",
+        };
+        return vm;
+    }
+
     public void ApplyLastLoadoutConfig(){
         switch (SelectedGame)
         {
@@ -1961,7 +1960,9 @@ public partial class MainWindowViewModel : ObservableObject
             skippedVersion = SelectedPackage.skippedVersion
         };
 
-        var window = new Views.CreatePackageWindow(m);
+
+        DialogWindowViewModel vmdialog = CreateDialogViewModel();
+        var window = new Views.CreatePackageWindow(vmdialog, m);
         await window.ShowDialog(_dialogService.OwnerWindow);
 
         if (window.ResultMetadata != null)
@@ -2416,8 +2417,9 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private async Task EditLoadout(){
         if (SelectedLoadout == null || _loadoutChanging) return;
+        DialogWindowViewModel dialogvm = CreateDialogViewModel();
 
-        var window = new Views.CreateEditLoadoutWindow(SelectedGame, SelectedLoadout, true);
+        var window = new Views.CreateEditLoadoutWindow(dialogvm, SelectedGame, SelectedLoadout, true);
         await window.ShowDialog(_dialogService?.OwnerWindow);
         LoadPackages();
     }

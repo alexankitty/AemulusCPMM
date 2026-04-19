@@ -5,6 +5,17 @@
         CanResize="False" SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         Background="#121212">
+    <Window.Styles>
+        <Style Selector="Button">
+            <Setter Property="Background" Value="#303030" />
+            <Setter Property="Foreground" Value="#f2f2f2" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="#202020" />
+            <Setter Property="BorderBrush" Value="#424242" />
+            <Setter Property="Foreground" Value="#f2f2f2" />
+        </Style>
+    </Window.Styles>
     <Grid RowDefinitions="Auto,Auto,Auto,Auto">
         <TextBlock Grid.Row="0" x:Name="Text" Padding="10" Foreground="White"
                    TextAlignment="Center" VerticalAlignment="Center"
@@ -24,17 +35,17 @@
             </DataGrid.Columns>
         </DataGrid>
         <Grid Grid.Row="3" ColumnDefinitions="*,*,*" Margin="0,0,0,15">
-            <Button x:Name="OkButton" Content="OK" IsVisible="False" Background="White" Foreground="Black"
-                    Height="25" Width="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+            <Button x:Name="OkButton" Content="OK" IsVisible="False"
+            VerticalAlignment="Center" HorizontalAlignment="Center"
                     Click="Button_Click" Grid.Column="1"/>
-            <Button x:Name="YesButton" Content="Yes" IsVisible="False" Background="White" Foreground="Black"
-                    Height="25" Width="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+            <Button x:Name="YesButton" Content="Yes" IsVisible="False"
+            VerticalAlignment="Center" HorizontalAlignment="Center"
                     Click="Yes_Button_Click" Grid.Column="0"/>
-            <Button x:Name="NoButton" Content="No" IsVisible="False" Background="White" Foreground="Black"
-                    Height="25" Width="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+            <Button x:Name="NoButton" Content="No" IsVisible="False" 
+                    VerticalAlignment="Center" HorizontalAlignment="Center"
                     Click="Button_Click" Grid.Column="1"/>
-            <Button x:Name="SkipButton" Content="Skip Update" IsVisible="False" Background="White" Foreground="Black"
-                    Height="25" Width="80" VerticalAlignment="Center" HorizontalAlignment="Center"
+            <Button x:Name="SkipButton" Content="Skip Update" IsVisible="False"
+            VerticalAlignment="Center" HorizontalAlignment="Center"
                     Click="Skip_Button_Click" Grid.Column="2"/>
         </Grid>
     </Grid>

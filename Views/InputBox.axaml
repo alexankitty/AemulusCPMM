@@ -1,18 +1,16 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="AemulusModManager.Avalonia.Views.InputBox"
-        Title="New Loadout"
+        Title="New Input"
         Width="350" Height="180"
         WindowStartupLocation="CenterOwner"
         CanResize="False"
         Background="#202020"
         SizeToContent="Height">
     <StackPanel Margin="20">
-        <TextBlock x:Name="PromptText" Text="Enter loadout name:" Foreground="#f2f2f2" Margin="0,0,0,10"/>
+        <TextBlock x:Name="PromptText" Text="Input Text" Foreground="#f2f2f2" Margin="0,0,0,10"/>
         <TextBox x:Name="InputTextBox" Background="#303030" Foreground="#f2f2f2"
-                 BorderBrush="#404040" Watermark="Loadout name..." Margin="0,0,0,5"/>
-        <CheckBox x:Name="CopyCheckBox" Content="Copy current loadout" Foreground="#f2f2f2"
-                  IsChecked="False" Margin="0,0,0,10"/>
+                 BorderBrush="#404040" Watermark="Type here..." Margin="0,0,0,5"/>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
             <Button x:Name="ConfirmButton" Content="Confirm" Click="Confirm_Click"
                     Background="#303030" Foreground="#f2f2f2" Width="80"/>

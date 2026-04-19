@@ -13,10 +13,9 @@ public partial class InputBox : Window
         InitializeComponent();
     }
 
-    public InputBox(string prompt, bool showCopyCheckbox = true) : this()
+    public InputBox(string prompt) : this()
     {
         PromptText.Text = prompt;
-        CopyCheckBox.IsVisible = showCopyCheckbox;
     }
 
     private void Confirm_Click(object? sender, RoutedEventArgs e)
@@ -25,7 +24,6 @@ public partial class InputBox : Window
         if (string.IsNullOrEmpty(name))
             return;
         Result = name;
-        CopyLoadout = CopyCheckBox.IsChecked == true;
         Close();
     }
 

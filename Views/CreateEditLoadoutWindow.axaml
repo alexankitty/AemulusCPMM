@@ -1,27 +1,65 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="AemulusModManager.Avalonia.Views.CreateEditLoadoutWindow"
-        Title="Create New Loadout" Height="110" Width="420"
+        Title="Create New Loadout"
         CanResize="False" WindowStartupLocation="CenterOwner"
-        Background="#121212">
-    <Grid ColumnDefinitions="75,*" RowDefinitions="33,33">
-        <TextBlock Foreground="LightGray" VerticalAlignment="Center" HorizontalAlignment="Center"
-                   FontSize="15" FontWeight="Bold" Grid.Row="0" Grid.Column="0">Name</TextBlock>
-        <TextBox x:Name="NameBox" Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2"
-                 Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"
-                 Margin="5,0,5,0"/>
-        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" ColumnDefinitions="*,*,*">
-            <CheckBox x:Name="CopyLoadout" Foreground="White" Content="Copy Current Loadout"
-                      Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            <Button x:Name="DeleteButton" Content="Delete" Background="White" Foreground="Black"
-                    Height="25" Width="100" Grid.Column="0" VerticalAlignment="Center"
-                    HorizontalAlignment="Center" IsVisible="False" Click="DeleteButton_Click"/>
-            <Button x:Name="CreateButton" Content="Create" Background="White" Foreground="Black"
-                    IsEnabled="False" Height="25" Width="100" Grid.Column="1"
-                    VerticalAlignment="Center" HorizontalAlignment="Center" Click="CreateButton_Click"/>
-            <Button x:Name="CancelButton" Content="Cancel" Background="White" Foreground="Black"
-                    Height="25" Width="100" Grid.Column="2" VerticalAlignment="Center"
-                    HorizontalAlignment="Center" Click="CancelButton_Click"/>
-        </Grid>
-    </Grid>
+        Background="#121212"
+        Width="300"
+        Height="100"
+        xmlns:vm="using:AemulusModManager.Avalonia.ViewModels" xmlns:conv="clr-namespace:AemulusModManager.Avalonia.Converters"
+        x:DataType="vm:DialogWindowViewModel"
+        >
+        <Window.Resources>
+                <conv:GameColorConverter x:Key="GameColorConverter" />
+                <conv:AccentForegroundConverter x:Key="AccentForegroundConverter" />
+                <conv:AccentDarkenConverter x:Key="AccentDarkenConverter" />
+        </Window.Resources>
+        <Window.Styles>
+                <Style Selector="Button">
+                        <Setter Property="Background" Value="#303030" />
+                        <Setter Property="Foreground" Value="#f2f2f2" />
+                </Style>
+                <Style Selector="TextBox">
+                        <Setter Property="Background" Value="#202020" />
+                        <Setter Property="BorderBrush" Value="#424242" />
+                        <Setter Property="Foreground" Value="#f2f2f2" />
+                </Style>
+                <Style Selector="TextBox:focus /template/ Border">
+                        <Setter Property="BorderBrush" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+                </Style>
+                <Style Selector="CheckBox:checked /template/ Border#NormalRectangle">
+                        <Setter Property="Background" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+                        <Setter Property="BorderBrush" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+                </Style>
+                <Style Selector="CheckBox:pointerover /template/ Border#NormalRectangle">
+                        <Setter Property="Opacity" Value="0.7" />
+                </Style>
+                <Style Selector="CheckBox:pressed /template/ Border#NormalRectangle">
+                        <Setter Property="Opacity" Value="0.8" />
+                </Style>
+        </Window.Styles>
+        <Grid ColumnDefinitions="50, *" RowDefinitions="Auto,Auto,Auto">
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                           FontSize="15" FontWeight="Bold" Grid.Row="0" Grid.Column="0">Name</TextBlock>
+                <TextBox x:Name="NameBox"
+                         Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Width="200"
+                         Margin="5,0,5,0"/>
+                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" ColumnDefinitions="Auto,Auto,Auto" Margin="5,5,5,0">
+
+                        <Button x:Name="CreateButton" Content="Create" Classes="accent"
+                                IsEnabled="False" Grid.Column="0"
+                                VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,5,0" Click="CreateButton_Click"/>
+                        <Button x:Name="CancelButton" Content="Cancel"
+                                Grid.Column="1" VerticalAlignment="Center"
+                                HorizontalAlignment="Left" Margin="0,0,5,0" Click="CancelButton_Click"/>
+                        <Button x:Name="DeleteButton" Content="Delete"
+                                Grid.Column="2" VerticalAlignment="Center"
+                                HorizontalAlignment="Left" Margin="0,0,5,0" IsVisible="False" Click="DeleteButton_Click"/>
+
+                </Grid>
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="1" ColumnDefinitions="Auto" Margin="5,0,5,0">
+                        <CheckBox x:Name="CopyLoadout" Foreground="White" Content="Copy Current Loadout"
+                                  Grid.Column="0" HorizontalAlignment="Left" Margin="0,0,5,0" VerticalAlignment="Top"/>
+                </Grid>
+</Grid>
 </Window>

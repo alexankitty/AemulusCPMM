@@ -43,21 +43,9 @@ public partial class ConfigWindow : Window
 
         // Use AccentDarkenConverter logic for darkening
         var color = ((SolidColorBrush)brush).Color;
-        this.Resources["AccentButtonBackgroundPressed"] = new SolidColorBrush(Darken(color, 0.2));
-        this.Resources["AccentButtonBackgroundPointerOver"] = new SolidColorBrush(Darken(color, 0.3));
-        this.Resources["AccentButtonBackgroundDisabled"] = new SolidColorBrush(Darken(color, 0.7));
-    }
-
-    // Copied from AccentDarkenConverter
-    private static Color Darken(Color color, double amount)
-    {
-        amount = Math.Clamp(amount, 0, 1);
-        return Color.FromArgb(
-            color.A,
-            (byte)(color.R * (1 - amount)),
-            (byte)(color.G * (1 - amount)),
-            (byte)(color.B * (1 - amount))
-        );
+        this.Resources["AccentButtonBackgroundPressed"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.2));
+        this.Resources["AccentButtonBackgroundPointerOver"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.3));
+        this.Resources["AccentButtonBackgroundDisabled"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.7));
     }
 
     private async void BrowseOutputClick(object? sender, RoutedEventArgs e)

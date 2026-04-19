@@ -11,7 +11,7 @@ namespace AemulusModManager.Avalonia.Converters
         {
             if (value is Color color && parameter is string paramStr && double.TryParse(paramStr, NumberStyles.Float, CultureInfo.InvariantCulture, out double amount))
             {
-                return new SolidColorBrush(Darken(color, amount));
+                return new SolidColorBrush(Utilities.Colors.Darken(color, amount));
             }
             return value;
         }
@@ -19,17 +19,6 @@ namespace AemulusModManager.Avalonia.Converters
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
-        }
-
-        private Color Darken(Color color, double amount)
-        {
-            amount = Math.Clamp(amount, 0, 1);
-            return Color.FromArgb(
-                color.A,
-                (byte)(color.R * (1 - amount)),
-                (byte)(color.G * (1 - amount)),
-                (byte)(color.B * (1 - amount))
-            );
         }
     }
 }
