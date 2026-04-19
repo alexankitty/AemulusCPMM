@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AemulusModManager.Avalonia.ViewModels;
 using AemulusModManager.Avalonia.Views;
 using AemulusModManager.Utilities.PackageUpdating;
 using Avalonia.Controls;
@@ -127,11 +128,11 @@ public class DialogService
         });
     }
 
-    public async Task<(string? name, bool copyLoadout)> ShowInputDialog(string prompt)
+    public async Task<(string? name, bool copyLoadout)> ShowInputDialog(DialogWindowViewModel viewModel, string prompt)
     {
         return await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            var box = new InputBox(prompt);
+            var box = new InputBox(viewModel, prompt);
             await box.ShowDialog(_owner);
             return (box.Result, box.CopyLoadout);
         });

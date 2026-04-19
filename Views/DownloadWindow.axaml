@@ -4,19 +4,54 @@
         Title="Download" Width="375"
         CanResize="False" SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
-        Background="#151515">
-    <Grid RowDefinitions="Auto,Auto,30,40" ColumnDefinitions="*,*">
-        <TextBlock x:Name="DownloadText" TextAlignment="Center" Grid.Row="0" Grid.ColumnSpan="2"
-                   VerticalAlignment="Center" FontWeight="Bold" HorizontalAlignment="Center"
-                   FontSize="16" Foreground="#f2f2f2" TextWrapping="Wrap" Margin="10"/>
-        <Image x:Name="Preview" Width="350" Stretch="Uniform" VerticalAlignment="Center"
-               HorizontalAlignment="Center" Grid.Row="1" Grid.ColumnSpan="2"/>
-        <TextBlock Grid.ColumnSpan="2" Grid.Row="2" VerticalAlignment="Center"
-                   Text="Would you like to install?" Foreground="#f2f2f2"
-                   FontSize="16" FontWeight="Bold" TextAlignment="Center"/>
-        <Button Grid.Row="3" Grid.Column="0" Content="Yes" FontSize="16" FontWeight="Bold"
-                Foreground="#f2f2f2" Background="#494949" Margin="20,5,20,5" Click="Yes_Click"/>
-        <Button Grid.Row="3" Grid.Column="1" Content="No" FontSize="16" FontWeight="Bold"
-                Foreground="#f2f2f2" Background="#494949" Margin="20,5,20,5" Click="No_Click"/>
-    </Grid>
+        Background="#151515"
+        xmlns:vm="using:AemulusModManager.Avalonia.ViewModels" xmlns:conv="clr-namespace:AemulusModManager.Avalonia.Converters"
+        x:DataType="vm:DialogWindowViewModel"
+        >
+        <Window.Resources>
+                <conv:GameColorConverter x:Key="GameColorConverter" />
+                <conv:AccentForegroundConverter x:Key="AccentForegroundConverter" />
+                <conv:AccentDarkenConverter x:Key="AccentDarkenConverter" />
+        </Window.Resources>
+        <Window.Styles>
+                <Style Selector="Button">
+                        <Setter Property="Background" Value="#303030" />
+                        <Setter Property="Foreground" Value="#f2f2f2" />
+                </Style>
+                <Style Selector="TextBox">
+                        <Setter Property="Background" Value="#202020" />
+                        <Setter Property="BorderBrush" Value="#424242" />
+                        <Setter Property="Foreground" Value="#f2f2f2" />
+                </Style>
+                <Style Selector="TextBox:focus /template/ Border">
+                        <Setter Property="BorderBrush" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+                </Style>
+                <Style Selector="CheckBox:checked /template/ Border#NormalRectangle">
+                        <Setter Property="Background" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+                        <Setter Property="BorderBrush" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+                </Style>
+                <Style Selector="CheckBox:pointerover /template/ Border#NormalRectangle">
+                        <Setter Property="Opacity" Value="0.7" />
+                </Style>
+                <Style Selector="CheckBox:pressed /template/ Border#NormalRectangle">
+                        <Setter Property="Opacity" Value="0.8" />
+                </Style>
+        </Window.Styles>
+        <Grid RowDefinitions="Auto,Auto,30,40" ColumnDefinitions="*,*">
+                <TextBlock x:Name="DownloadText" TextAlignment="Center" Grid.Row="0" Grid.ColumnSpan="2"
+                           VerticalAlignment="Center" FontWeight="Bold" HorizontalAlignment="Center"
+                           FontSize="16" Foreground="#f2f2f2" TextWrapping="Wrap" Margin="10"/>
+                <Image x:Name="Preview" Width="350" Stretch="Uniform" VerticalAlignment="Center"
+                       HorizontalAlignment="Center" Grid.Row="1" Grid.ColumnSpan="2"/>
+                <TextBlock Grid.ColumnSpan="2" Grid.Row="2" VerticalAlignment="Center"
+                           Text="Would you like to install?" Foreground="#f2f2f2"
+                           FontSize="16" FontWeight="Bold" TextAlignment="Center"/>
+                <Grid Grid.Row="3" ColumnDefinitions="*,*" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center">
+                        <Button Classes="accent" Grid.Row="0" Grid.Column="0" Content="Yes" FontSize="16" FontWeight="Bold"
+                                Margin="20,5,20,5" Click="Yes_Click"/>
+                        <Button Grid.Row="0" Grid.Column="1" Content="No" FontSize="16" FontWeight="Bold"
+                                Margin="20,5,20,5" Click="No_Click"/>
+                </Grid>
+
+        </Grid>
 </Window>

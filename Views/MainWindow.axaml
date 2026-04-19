@@ -152,7 +152,7 @@
                             <RowDefinition Height="150" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*" MinWidth="400" />
+                            <ColumnDefinition Width="2*" MinWidth="770" />
                             <ColumnDefinition Width="5" />
                             <ColumnDefinition Width="*" MinWidth="300" />
                         </Grid.ColumnDefinitions>
@@ -240,9 +240,6 @@
                                         Margin="0,0,2,0">
                                     <i:Icon Value="{Binding ShowHiddenPackages, Converter={StaticResource HiddenIconConverter}}" FontSize="32" Foreground="{Binding GameAccentColor}"/>
                                 </Button>
-
-                                <Separator
-                                ></Separator>
 
                                 <!-- Config -->
                                 <Button Grid.Column="4" Classes="darkBtn iconBtn"

@@ -4,19 +4,47 @@
         Title="Aemulus Package Manager" Width="500"
         CanResize="False" SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
-        Background="#121212">
+        Background="#121212" xmlns:vm="using:AemulusModManager.Avalonia.ViewModels" xmlns:conv="clr-namespace:AemulusModManager.Avalonia.Converters"
+        x:DataType="vm:DialogWindowViewModel"
+        >
+        <Window.Resources>
+                <conv:GameColorConverter x:Key="GameColorConverter" />
+                <conv:AccentForegroundConverter x:Key="AccentForegroundConverter" />
+                <conv:AccentDarkenConverter x:Key="AccentDarkenConverter" />
+        </Window.Resources>
+        <Window.Styles>
+                <Style Selector="Button">
+                        <Setter Property="Background" Value="#303030" />
+                        <Setter Property="Foreground" Value="#f2f2f2" />
+                </Style>
+                <Style Selector="TextBox">
+                        <Setter Property="Background" Value="#202020" />
+                        <Setter Property="BorderBrush" Value="#424242" />
+                        <Setter Property="Foreground" Value="#f2f2f2" />
+                </Style>
+                <Style Selector="TextBox:focus /template/ Border">
+                        <Setter Property="BorderBrush" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+                </Style>
+                <Style Selector="CheckBox:checked /template/ Border#NormalRectangle">
+                        <Setter Property="Background" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+                        <Setter Property="BorderBrush" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+                </Style>
+                <Style Selector="CheckBox:pointerover /template/ Border#NormalRectangle">
+                        <Setter Property="Opacity" Value="0.7" />
+                </Style>
+                <Style Selector="CheckBox:pressed /template/ Border#NormalRectangle">
+                        <Setter Property="Opacity" Value="0.8" />
+                </Style>
+        </Window.Styles>
     <Grid RowDefinitions="3*,Auto">
         <TextBlock x:Name="Notification" Padding="20" Foreground="White"
                    TextAlignment="Center" VerticalAlignment="Center"
                    TextWrapping="WrapWithOverflow" FontSize="15" Grid.Row="0"/>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="0,14,22,14" Spacing="10">
-            <Button x:Name="OkButton" Content="OK" Background="White" Foreground="Black"
-                    Height="25" Width="80" IsVisible="False" Click="Button_Click"/>
-            <Button x:Name="YesButton" Content="Yes" Background="White" Foreground="Black"
-                    Height="25" Width="80" IsVisible="False" Click="Yes_Button_Click"/>
-            <Button x:Name="NoButton" Content="No" Background="White" Foreground="Black"
-                    Height="25" Width="80" IsVisible="False" Click="Button_Click"/>
+            <Button x:Name="OkButton" Classes="accent" Content="OK" IsVisible="False" Click="Button_Click"/>
+            <Button x:Name="YesButton" Classes="accent" Content="Yes" IsVisible="False" Click="Yes_Button_Click"/>
+            <Button x:Name="NoButton" Content="No" IsVisible="False" Click="Button_Click"/>
         </StackPanel>
     </Grid>
 </Window>

@@ -2395,7 +2395,8 @@ public partial class MainWindowViewModel : ObservableObject
                 if (_dialogService != null)
                 {
                     await _dialogService.ShowNotification($"A loadout named \"{loadoutName}\" already exists.");
-                    var (newName, _) = await _dialogService.ShowInputDialog("Enter a new name for the loadout:");
+                    var dialogvm = CreateDialogViewModel();
+                    var (newName, _) = await _dialogService.ShowInputDialog(dialogvm, "Enter a new name for the loadout:");
                     if (string.IsNullOrWhiteSpace(newName)) return null;
                     loadoutName = newName;
                     loadoutFile = Path.Combine(_configPath, game, $"{loadoutName}.xml");
