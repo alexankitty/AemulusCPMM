@@ -149,7 +149,7 @@ public partial class MainWindowViewModel : ObservableObject
         UpdateGameAccentColor();
         SetupFileSystemWatcher();
         AppendConsole("[INFO] Aemulus Package Manager started (Avalonia cross-platform build)");
-        PreviewImage = _placeholderImage.Value;
+        PreviewImage = DarkMode ? _placeholderImage_dark.Value : _placeholderImage_light.Value;
     }
 
     private void SetupFileSystemWatcher()
@@ -668,7 +668,11 @@ public partial class MainWindowViewModel : ObservableObject
             oldIndex >= DisplayedPackages.Count || newIndex >= DisplayedPackages.Count)
             return;
 
-        DisplayedPackages.Move(oldIndex, newIndex);
+        // Avalonia DataGrid does not handle ObservableCollection.Move correctly —
+        // use Remove + Insert so it gets separate Remove/Add CollectionChanged events.
+        var item = DisplayedPackages[oldIndex];
+        DisplayedPackages.RemoveAt(oldIndex);
+        DisplayedPackages.Insert(newIndex, item);
 
         // Rebuild package list order
         var newOrder = new ObservableCollection<Package>();
@@ -1952,7 +1956,7 @@ public partial class MainWindowViewModel : ObservableObject
         SavePackages();
         SelectedPackage = null;
         Description = "";
-        PreviewImage = _placeholderImage.Value;
+        PreviewImage = DarkMode ? _placeholderImage_dark.Value : _placeholderImage_light.Value;
     }
 
     [RelayCommand]
@@ -2377,6 +2381,7 @@ public partial class MainWindowViewModel : ObservableObject
     {
         DarkMode = !DarkMode;
         Config.darkMode = DarkMode;
+        LoadPreviewImage(SelectedPackage);
         UpdateConfig();
 
         // Switch Avalonia theme variant — DynamicResource ThemeDictionaries handle the rest
@@ -2403,11 +2408,22 @@ public partial class MainWindowViewModel : ObservableObject
         LoadPreviewImage(value);
     }
 
-    private static readonly Lazy<Bitmap?> _placeholderImage = new(() =>
+    private static readonly Lazy<Bitmap?> _placeholderImage_dark = new(() =>
     {
         try
         {
-            var uri = new Uri("avares://AemulusPackageManager/Assets/Preview.png");
+            var uri = new Uri("avares://AemulusPackageManager/Assets/Preview-dark.png");
+            using var stream = global::Avalonia.Platform.AssetLoader.Open(uri);
+            return new Bitmap(stream);
+        }
+        catch { return null; }
+    });
+
+    private static readonly Lazy<Bitmap?> _placeholderImage_light = new(() =>
+    {
+        try
+        {
+            var uri = new Uri("avares://AemulusPackageManager/Assets/Preview-light.png");
             using var stream = global::Avalonia.Platform.AssetLoader.Open(uri);
             return new Bitmap(stream);
         }
@@ -2416,9 +2432,10 @@ public partial class MainWindowViewModel : ObservableObject
 
     private void LoadPreviewImage(DisplayedMetadata? package)
     {
+
         if (package == null || string.IsNullOrEmpty(package.path))
         {
-            PreviewImage = _placeholderImage.Value;
+            PreviewImage = DarkMode ? _placeholderImage_dark.Value : _placeholderImage_light.Value;
             return;
         }
 
@@ -2426,7 +2443,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         if (!Directory.Exists(packageDir))
         {
-            PreviewImage = _placeholderImage.Value;
+            PreviewImage = DarkMode ? _placeholderImage_dark.Value : _placeholderImage_light.Value;
             return;
         }
 
@@ -2446,7 +2463,7 @@ public partial class MainWindowViewModel : ObservableObject
             Console.WriteLine($"[ERROR] Failed to load preview image: {ex.Message}");
         }
 
-        PreviewImage = _placeholderImage.Value;
+        PreviewImage = DarkMode ? _placeholderImage_dark.Value : _placeholderImage_light.Value;
     }
 
     partial void OnSearchTextChanged(string value)

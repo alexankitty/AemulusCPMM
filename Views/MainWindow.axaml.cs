@@ -1,7 +1,9 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.VisualTree;
 using Avalonia.Threading;
 using AemulusModManager.Avalonia.ViewModels;
 using AemulusModManager.Avalonia.Utilities;
@@ -34,12 +36,21 @@ public partial class MainWindow : Window
     private bool _filterChanging;
     private Dictionary<GameFilter, Dictionary<TypeFilter, List<GameBananaCategory>>>? _cats;
 
+    // Row reorder drag state (mirrors ContextDragBehavior internals)
+    private int _dragRowIndex = -1;
+    private int _dropFromIndex = -1;   // held across DoDragDrop await
+    private Point _dragStartPoint;
+    private PointerEventArgs? _triggerEvent;
+    private bool _dragLock;
+    private bool _dragCaptured;
+
     public MainWindow()
     {
         InitializeComponent();
         DataContext = new MainWindowViewModel();
         SetupConsoleRedirect();
         SetupDragDrop();
+        SetupPackageGridDragDrop();
         ViewModel.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(ViewModel.GameAccentColor))
@@ -53,20 +64,206 @@ public partial class MainWindow : Window
         };
     }
 
-    private void SetupDragDrop()
+    private void SetupPackageGridDragDrop()
     {
-        AddHandler(DragDrop.DragEnterEvent, OnDragOver, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-        AddHandler(DragDrop.DragOverEvent, OnDragOver, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-        AddHandler(DragDrop.DragLeaveEvent, OnDragLeave, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
-        AddHandler(DragDrop.DropEvent, OnDrop, RoutingStrategies.Tunnel | RoutingStrategies.Bubble);
+        // Attach per-row pointer handlers the same way ContextDragBehavior does:
+        // use LoadingRow so each DataGridRow gets the handlers directly.
+        PackageGrid.LoadingRow += OnPackageGridRowLoading;
+        PackageGrid.UnloadingRow += OnPackageGridRowUnloading;
+        PackageGrid.AddHandler(DragDrop.DragOverEvent, OnPackageGridDragOver, AllRoutes, handledEventsToo: true);
+        PackageGrid.AddHandler(DragDrop.DropEvent, OnPackageGridDrop, AllRoutes, handledEventsToo: true);
     }
 
+    private static readonly RoutingStrategies AllRoutes =
+        RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble;
+
+    private void OnPackageGridRowLoading(object? sender, DataGridRowEventArgs e)
+    {
+        e.Row.AddHandler(PointerPressedEvent,     OnRowPointerPressed,     AllRoutes, handledEventsToo: true);
+        e.Row.AddHandler(PointerMovedEvent,       OnRowPointerMoved,       AllRoutes, handledEventsToo: true);
+        e.Row.AddHandler(PointerReleasedEvent,    OnRowPointerReleased,    AllRoutes, handledEventsToo: true);
+        e.Row.AddHandler(PointerCaptureLostEvent, OnRowPointerCaptureLost, AllRoutes, handledEventsToo: true);
+        e.Row.AddHandler(DragDrop.DragEnterEvent, OnRowDragOver,           AllRoutes, handledEventsToo: true);
+        e.Row.AddHandler(DragDrop.DragOverEvent,  OnRowDragOver,           AllRoutes, handledEventsToo: true);
+        e.Row.AddHandler(DragDrop.DragLeaveEvent, OnRowDragLeave,          AllRoutes, handledEventsToo: true);
+        e.Row.AddHandler(DragDrop.DropEvent,      OnRowDrop,               AllRoutes, handledEventsToo: true);
+    }
+
+    private void OnPackageGridRowUnloading(object? sender, DataGridRowEventArgs e)
+    {
+        e.Row.RemoveHandler(PointerPressedEvent,     OnRowPointerPressed);
+        e.Row.RemoveHandler(PointerMovedEvent,       OnRowPointerMoved);
+        e.Row.RemoveHandler(PointerReleasedEvent,    OnRowPointerReleased);
+        e.Row.RemoveHandler(PointerCaptureLostEvent, OnRowPointerCaptureLost);
+        e.Row.RemoveHandler(DragDrop.DragEnterEvent, OnRowDragOver);
+        e.Row.RemoveHandler(DragDrop.DragOverEvent,  OnRowDragOver);
+        e.Row.RemoveHandler(DragDrop.DragLeaveEvent, OnRowDragLeave);
+        e.Row.RemoveHandler(DragDrop.DropEvent,      OnRowDrop);
+    }
+
+    private void OnRowPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is not DataGridRow row) return;
+        if (!e.GetCurrentPoint(row).Properties.IsLeftButtonPressed) return;
+
+        var list = ViewModel.DisplayedPackages;
+        _dragRowIndex = -1;
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (ReferenceEquals(list[i], row.DataContext))
+            {
+                _dragRowIndex = i;
+                break;
+            }
+        }
+        if (_dragRowIndex < 0) return;
+
+        // Use root-relative coords (same as ContextDragBehavior: GetPosition(null))
+        _dragStartPoint = e.GetPosition(null);
+        _triggerEvent   = e;
+        _dragLock       = true;
+        _dragCaptured   = true;
+    }
+
+    private async void OnRowPointerMoved(object? sender, PointerEventArgs e)
+    {
+        if (!_dragCaptured || _triggerEvent == null) return;
+        if (!e.GetCurrentPoint(null).Properties.IsLeftButtonPressed) return;
+
+        var diff = _dragStartPoint - e.GetPosition(null);
+        if (Math.Abs(diff.X) <= 3 && Math.Abs(diff.Y) <= 3) return;
+
+        if (_dragLock)
+            _dragLock = false;
+        else
+            return;
+
+        var triggerEvent = _triggerEvent;
+        _triggerEvent    = null;
+        _dropFromIndex   = _dragRowIndex;
+
+        var data = new DataObject();
+        data.Set("aemulus/row", "1");
+        await DragDrop.DoDragDrop(triggerEvent, data, DragDropEffects.Move);
+
+        _dropFromIndex = -1;
+    }
+
+    private void OnRowPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (!_dragCaptured) return;
+        _triggerEvent  = null;
+        _dragLock      = false;
+        _dragRowIndex  = -1;
+        _dragCaptured  = false;
+    }
+
+    private void OnRowPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
+    {
+        _triggerEvent  = null;
+        _dragLock      = false;
+        _dragCaptured  = false;
+        _dragRowIndex  = -1;
+    }
+
+    private void OnRowDragOver(object? sender, DragEventArgs e)
+    {
+        if (_dropFromIndex >= 0)
+        {
+            e.DragEffects = DragDropEffects.Move;
+            e.Handled = true;
+        }
+        else if (HasFiles(e.Data))
+        {
+            e.DragEffects = DragDropEffects.Copy;
+            DropOverlay.IsVisible = true;
+            e.Handled = true;
+        }
+    }
+
+    private void OnRowDragLeave(object? sender, RoutedEventArgs e)
+    {
+        // Only hide the overlay when the cursor leaves a row during a file drag
+        // (not during a row reorder). The window-level OnDragLeave handles the
+        // case of leaving the window entirely.
+        if (_dropFromIndex < 0)
+            DropOverlay.IsVisible = false;
+    }
+
+    private void OnRowDrop(object? sender, DragEventArgs e)
+    {
+        var fromIndex  = _dropFromIndex;
+        _dropFromIndex = -1;
+        if (fromIndex < 0) return;
+        e.Handled = true;
+
+        var row = sender as DataGridRow;
+        if (row?.DataContext is not DisplayedMetadata destItem) return;
+        var list    = ViewModel.DisplayedPackages;
+        var toIndex = -1;
+        for (int i = 0; i < list.Count; i++)
+            if (ReferenceEquals(list[i], destItem)) { toIndex = i; break; }
+        if (toIndex >= 0 && fromIndex != toIndex)
+            ViewModel.MovePackage(fromIndex, toIndex);
+    }
+
+    private void OnPackageGridDragOver(object? sender, DragEventArgs e)
+    {
+        if (_dropFromIndex < 0) return;
+        e.DragEffects = DragDropEffects.Move;
+        e.Handled = true;
+    }
+
+    private void OnPackageGridDrop(object? sender, DragEventArgs e)
+    {
+        // Fallback: catches drops on the DataGrid background (not on a row).
+        var fromIndex  = _dropFromIndex;
+        _dropFromIndex = -1;
+        if (fromIndex < 0) return;
+        e.Handled = true;
+
+        var pos     = e.GetPosition(PackageGrid);
+        var toIndex = GetRowIndexAtY(pos.Y);
+        if (toIndex >= 0 && fromIndex != toIndex)
+            ViewModel.MovePackage(fromIndex, toIndex);
+    }
+
+    private int GetRowIndexAtY(double yInGrid)
+    {
+        var list = ViewModel.DisplayedPackages;
+        foreach (var row in PackageGrid.GetVisualDescendants().OfType<DataGridRow>())
+        {
+            var origin = row.TranslatePoint(new Point(0, 0), PackageGrid);
+            if (origin == null) continue;
+            double top    = origin.Value.Y;
+            double bottom = top + row.Bounds.Height;
+            if (yInGrid >= top && yInGrid < bottom)
+            {
+                for (int i = 0; i < list.Count; i++)
+                    if (ReferenceEquals(list[i], row.DataContext))
+                        return i;
+            }
+        }
+        return -1;
+    }
+
+    private void SetupDragDrop()
+    {
+        AddHandler(DragDrop.DragEnterEvent, OnDragOver, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
+        AddHandler(DragDrop.DragOverEvent, OnDragOver, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
+        AddHandler(DragDrop.DragLeaveEvent, OnDragLeave, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
+        AddHandler(DragDrop.DropEvent, OnDrop, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
+    }
+
+    // Both Avalonia's mapped format AND the raw MIME type Linux file managers send.
     private static bool HasFiles(IDataObject data)
-        => data.Contains(DataFormats.Files) || data.Contains(DataFormats.Text);
+        => data.Contains(DataFormats.Files)
+        || data.Contains(DataFormats.Text)
+        || data.Contains("text/uri-list");
 
     private static string[] GetDroppedPaths(IDataObject data)
     {
-        // Primary: Avalonia storage items
+        // Primary: Avalonia storage items (works on X11 and sometimes Wayland)
         if (data.Contains(DataFormats.Files))
         {
             var files = data.GetFiles();
@@ -80,24 +277,26 @@ public partial class MainWindow : Window
             }
         }
 
-        // Fallback: text/uri-list (common on Linux DEs)
-        if (data.Contains(DataFormats.Text))
+        // Fallback: raw text/uri-list MIME type or plain text.
+        // On Linux some DEs send "text/uri-list" without Avalonia mapping it to Files.
+        // Split on both \r and \n, skip comment lines, handle file:// and file:///.
+        foreach (var fmt in new[] { "text/uri-list", DataFormats.Text })
         {
-            var text = data.GetText();
-            if (text != null)
-            {
-                var paths = text.Split('\n', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(line => line.Trim())
-                    .Where(line => line.StartsWith("file://"))
-                    .Select(line =>
-                    {
-                        try { return new Uri(line).LocalPath; }
-                        catch { return null; }
-                    })
-                    .Where(p => !string.IsNullOrEmpty(p))
-                    .ToArray();
-                if (paths.Length > 0) return paths!;
-            }
+            if (!data.Contains(fmt)) continue;
+            var text = data.Get(fmt) as string ?? data.GetText();
+            if (string.IsNullOrEmpty(text)) continue;
+            var paths = text
+                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(l => l.Trim())
+                .Where(l => l.StartsWith("file://") && !l.StartsWith("#"))
+                .Select(l =>
+                {
+                    try { return new Uri(l).LocalPath; }
+                    catch { return null; }
+                })
+                .Where(p => !string.IsNullOrEmpty(p))
+                .ToArray();
+            if (paths.Length > 0) return paths!;
         }
 
         return Array.Empty<string>();
@@ -105,6 +304,9 @@ public partial class MainWindow : Window
 
     private void OnDragOver(object? sender, DragEventArgs e)
     {
+        if (_dropFromIndex >= 0) return;
+        Console.WriteLine($"[DnD] OnDragOver route={e.Route} handled={e.Handled} inEffects={e.DragEffects}");
+        Console.WriteLine($"[DnD]   Files={e.Data.Contains(DataFormats.Files)} Text={e.Data.Contains(DataFormats.Text)} uri-list={e.Data.Contains("text/uri-list")} text/plain={e.Data.Contains("text/plain")}");
         if (HasFiles(e.Data))
         {
             e.DragEffects = DragDropEffects.Copy;
@@ -115,15 +317,19 @@ public partial class MainWindow : Window
 
     private void OnDragLeave(object? sender, DragEventArgs e)
     {
-        DropOverlay.IsVisible = false;
+        if (_dropFromIndex < 0)
+            DropOverlay.IsVisible = false;
     }
 
     private async void OnDrop(object? sender, DragEventArgs e)
     {
+        if (_dropFromIndex >= 0) return;
         DropOverlay.IsVisible = false;
         e.Handled = true;
+        Console.WriteLine($"[DnD] OnDrop fired");
 
         var paths = GetDroppedPaths(e.Data);
+        Console.WriteLine($"[DnD] paths extracted: {paths.Length}");
         if (paths.Length == 0) return;
 
         ViewModel.IsUiEnabled = false;

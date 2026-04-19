@@ -1,165 +1,114 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:AemulusModManager.Avalonia.ViewModels"
-        x:Class="AemulusModManager.Avalonia.Views.ConfigWindow"
-        x:DataType="vm:ConfigWindowViewModel"
-        Title="{Binding GameTitle, StringFormat='{}{0} Config'}"
-        Width="820" SizeToContent="Height"
-        CanResize="False" WindowStartupLocation="CenterOwner"
-        Background="#121212">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="600">
-        <StackPanel Margin="10" Spacing="6">
-            <!-- Path fields grid -->
-            <Grid ColumnDefinitions="120,*,75" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
-                <!-- Output Folder (always shown) -->
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Output Folder" Foreground="LightGray"
-                           FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding OutputFolder}" IsReadOnly="True"
-                         Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2" Height="25"
-                         VerticalAlignment="Center" Margin="5,2"/>
-                <Button Grid.Row="0" Grid.Column="2" Content="Browse" Background="White" Foreground="Black"
-                        Height="20" Width="60" HorizontalAlignment="Center" Click="BrowseOutputClick"/>
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:AemulusModManager.Avalonia.ViewModels" xmlns:conv="clr-namespace:AemulusModManager.Avalonia.Converters" x:Class="AemulusModManager.Avalonia.Views.ConfigWindow" x:DataType="vm:ConfigWindowViewModel" Title="{Binding GameTitle, StringFormat='{}{0} Config'}" Width="820" SizeToContent="Height" CanResize="False" WindowStartupLocation="CenterOwner" Background="#121212">
+  <Window.Resources>
+    <conv:GameColorConverter x:Key="GameColorConverter" />
+    <conv:AccentForegroundConverter x:Key="AccentForegroundConverter" />
+    <conv:AccentDarkenConverter x:Key="AccentDarkenConverter" />
+  </Window.Resources>
+  <Window.Styles>
+    <Style Selector="Button.Dark">
+      <Setter Property="Background" Value="#303030" />
+      <Setter Property="Foreground" Value="#f2f2f2" />
+    </Style>
+    <Style Selector="TextBox">
+      <Setter Property="Background" Value="#202020" />
+      <Setter Property="BorderBrush" Value="#424242" />
+      <Setter Property="Foreground" Value="#f2f2f2" />
+    </Style>
+    <Style Selector="TextBox:focus /template/ Border">
+      <Setter Property="BorderBrush" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+    </Style>
+    <Style Selector="CheckBox:checked /template/ Border#NormalRectangle">
+      <Setter Property="Background" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+      <Setter Property="BorderBrush" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+    </Style>
+    <Style Selector="CheckBox:pointerover /template/ Border#NormalRectangle">
+      <Setter Property="Opacity" Value="0.7" />
+    </Style>
+    <Style Selector="CheckBox:pressed /template/ Border#NormalRectangle">
+      <Setter Property="Opacity" Value="0.8" />
+    </Style>
+  </Window.Styles>
+  <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="600">
+    <StackPanel Margin="10" Spacing="6">
+      <!-- Path fields grid -->
+      <Grid ColumnDefinitions="120,*,75" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+        <!-- Output Folder (always shown) -->
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Output Folder" Foreground="LightGray" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center" />
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding OutputFolder}" IsReadOnly="True" Height="25" VerticalAlignment="Center" Margin="5,2" />
+        <Button Classes="Dark" Grid.Row="0" Grid.Column="2" Content="Browse"  HorizontalAlignment="Center" Click="BrowseOutputClick" />
 
-                <!-- Exe Path -->
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding ExeLabel}" Foreground="LightGray"
-                           FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           TextWrapping="Wrap" TextAlignment="Center"
-                           IsVisible="{Binding ShowExePath}"/>
-                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ExePath}" IsReadOnly="True"
-                         Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2" Height="25"
-                         VerticalAlignment="Center" Margin="5,2"
-                         IsVisible="{Binding ShowExePath}"/>
-                <Button Grid.Row="1" Grid.Column="2" Content="Browse" Background="White" Foreground="Black"
-                        Height="20" Width="60" HorizontalAlignment="Center" Click="BrowseExeClick"
-                        IsVisible="{Binding ShowExePath}"/>
+        <!-- Exe Path -->
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding ExeLabel}" Foreground="LightGray" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" IsVisible="{Binding ShowExePath}" />
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ExePath}" IsReadOnly="True" Height="25" VerticalAlignment="Center" Margin="5,2" IsVisible="{Binding ShowExePath}" />
+        <Button Classes="Dark" Grid.Row="1" Grid.Column="2" Content="Browse"  HorizontalAlignment="Center" Click="BrowseExeClick" IsVisible="{Binding ShowExePath}" />
 
-                <!-- ELF Path (P3F) -->
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding ElfLabel}" Foreground="LightGray"
-                           FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           TextWrapping="Wrap" TextAlignment="Center"
-                           IsVisible="{Binding ShowElfPath}"/>
-                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ElfPath}" IsReadOnly="True"
-                         Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2" Height="25"
-                         VerticalAlignment="Center" Margin="5,2"
-                         IsVisible="{Binding ShowElfPath}"/>
-                <Button Grid.Row="2" Grid.Column="2" Content="Browse" Background="White" Foreground="Black"
-                        Height="20" Width="60" HorizontalAlignment="Center" Click="BrowseElfClick"
-                        IsVisible="{Binding ShowElfPath}"/>
+        <!-- ELF Path (P3F) -->
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding ElfLabel}" Foreground="LightGray" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" IsVisible="{Binding ShowElfPath}" />
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ElfPath}" IsReadOnly="True" Height="25" VerticalAlignment="Center" Margin="5,2" IsVisible="{Binding ShowElfPath}" />
+        <Button Classes="Dark" Grid.Row="2" Grid.Column="2" Content="Browse"  HorizontalAlignment="Center" Click="BrowseElfClick" IsVisible="{Binding ShowElfPath}" />
 
-                <!-- Launcher Path -->
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding LauncherLabel}" Foreground="LightGray"
-                           FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           TextWrapping="Wrap" TextAlignment="Center"
-                           IsVisible="{Binding ShowLauncherPath}"/>
-                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding LauncherPath}" IsReadOnly="True"
-                         Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2" Height="25"
-                         VerticalAlignment="Center" Margin="5,2"
-                         IsVisible="{Binding ShowLauncherPath}"/>
-                <Button Grid.Row="3" Grid.Column="2" Content="Browse" Background="White" Foreground="Black"
-                        Height="20" Width="60" HorizontalAlignment="Center" Click="BrowseLauncherClick"
-                        IsVisible="{Binding ShowLauncherPath}"/>
+        <!-- Launcher Path -->
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding LauncherLabel}" Foreground="LightGray" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" IsVisible="{Binding ShowLauncherPath}" />
+        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding LauncherPath}" IsReadOnly="True" Height="25" VerticalAlignment="Center" Margin="5,2" IsVisible="{Binding ShowLauncherPath}" />
+        <Button Classes="Dark" Grid.Row="3" Grid.Column="2" Content="Browse"  HorizontalAlignment="Center" Click="BrowseLauncherClick" IsVisible="{Binding ShowLauncherPath}" />
 
-                <!-- Cheats Path (P3F, P3P, P1PSP) -->
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="{Binding CheatsLabel}" Foreground="LightGray"
-                           FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           TextWrapping="Wrap" TextAlignment="Center"
-                           IsVisible="{Binding ShowCheatsPath}"/>
-                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding CheatsPath}" IsReadOnly="True"
-                         Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2" Height="25"
-                         VerticalAlignment="Center" Margin="5,2"
-                         IsVisible="{Binding ShowCheatsPath}"/>
-                <Button Grid.Row="4" Grid.Column="2" Content="Browse" Background="White" Foreground="Black"
-                        Height="20" Width="60" HorizontalAlignment="Center" Click="BrowseCheatsClick"
-                        IsVisible="{Binding ShowCheatsPath}"/>
+        <!-- Cheats Path (P3F, P3P, P1PSP) -->
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="{Binding CheatsLabel}" Foreground="LightGray" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" IsVisible="{Binding ShowCheatsPath}" />
+        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding CheatsPath}" IsReadOnly="True" Height="25" VerticalAlignment="Center" Margin="5,2" IsVisible="{Binding ShowCheatsPath}" />
+        <Button Classes="Dark" Grid.Row="4" Grid.Column="2" Content="Browse"  HorizontalAlignment="Center" Click="BrowseCheatsClick" IsVisible="{Binding ShowCheatsPath}" />
 
-                <!-- Cheats WS Path (P3F only) -->
-                <TextBlock Grid.Row="5" Grid.Column="0" Text="{Binding CheatsWSLabel}" Foreground="LightGray"
-                           FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           TextWrapping="Wrap" TextAlignment="Center"
-                           IsVisible="{Binding ShowCheatsWSPath}"/>
-                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding CheatsWSPath}" IsReadOnly="True"
-                         Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2" Height="25"
-                         VerticalAlignment="Center" Margin="5,2"
-                         IsVisible="{Binding ShowCheatsWSPath}"/>
-                <Button Grid.Row="5" Grid.Column="2" Content="Browse" Background="White" Foreground="Black"
-                        Height="20" Width="60" HorizontalAlignment="Center" Click="BrowseCheatsWSClick"
-                        IsVisible="{Binding ShowCheatsWSPath}"/>
+        <!-- Cheats WS Path (P3F only) -->
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="{Binding CheatsWSLabel}" Foreground="LightGray" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" IsVisible="{Binding ShowCheatsWSPath}" />
+        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding CheatsWSPath}" IsReadOnly="True" Height="25" VerticalAlignment="Center" Margin="5,2" IsVisible="{Binding ShowCheatsWSPath}" />
+        <Button Classes="Dark" Grid.Row="5" Grid.Column="2" Content="Browse"  HorizontalAlignment="Center" Click="BrowseCheatsWSClick" IsVisible="{Binding ShowCheatsWSPath}" />
 
-                <!-- Textures Path (P3F, P3P, P1PSP) -->
-                <TextBlock Grid.Row="6" Grid.Column="0" Text="{Binding TexturesLabel}" Foreground="LightGray"
-                           FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           TextWrapping="Wrap" TextAlignment="Center"
-                           IsVisible="{Binding ShowTexturesPath}"/>
-                <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding TexturesPath}" IsReadOnly="True"
-                         Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2" Height="25"
-                         VerticalAlignment="Center" Margin="5,2"
-                         IsVisible="{Binding ShowTexturesPath}"/>
-                <Button Grid.Row="6" Grid.Column="2" Content="Browse" Background="White" Foreground="Black"
-                        Height="20" Width="60" HorizontalAlignment="Center" Click="BrowseTexturesClick"
-                        IsVisible="{Binding ShowTexturesPath}"/>
+        <!-- Textures Path (P3F, P3P, P1PSP) -->
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="{Binding TexturesLabel}" Foreground="LightGray" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" IsVisible="{Binding ShowTexturesPath}" />
+        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding TexturesPath}" IsReadOnly="True" Height="25" VerticalAlignment="Center" Margin="5,2" IsVisible="{Binding ShowTexturesPath}" />
+        <Button Classes="Dark" Grid.Row="6" Grid.Column="2" Content="Browse"  HorizontalAlignment="Center" Click="BrowseTexturesClick" IsVisible="{Binding ShowTexturesPath}" />
 
-                <!-- CPK Name (P5 editable) -->
-                <TextBlock Grid.Row="7" Grid.Column="0" Text="CPK Name" Foreground="LightGray"
-                           FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           IsVisible="{Binding ShowCpkName}"/>
-                <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding CpkName}"
-                         Background="#202020" BorderBrush="#424242" Foreground="#f2f2f2" Height="25"
-                         VerticalAlignment="Center" Margin="5,2"
-                         IsVisible="{Binding ShowCpkName}"/>
-            </Grid>
+        <!-- CPK Name (P5 editable) -->
+        <TextBlock Grid.Row="7" Grid.Column="0" Text="CPK Name" Foreground="LightGray" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding ShowCpkName}" />
+        <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding CpkName}" Height="25" VerticalAlignment="Center" Margin="5,2" IsVisible="{Binding ShowCpkName}" />
+      </Grid>
 
-            <!-- Checkboxes -->
-            <WrapPanel HorizontalAlignment="Center" Margin="0,6">
-                <CheckBox Content="Empty SND Folder" Foreground="White" IsChecked="{Binding EmptySND}"
-                          IsVisible="{Binding ShowEmptySND}" Margin="10,2"/>
-                <CheckBox Content="Use CPK Structure" Foreground="White" IsChecked="{Binding UseCpk}"
-                          IsVisible="{Binding ShowUseCpk}" Margin="10,2"/>
-                <CheckBox Content="Create ISO" Foreground="White" IsChecked="{Binding CreateIso}"
-                          IsVisible="{Binding ShowCreateIso}" Margin="10,2"/>
-                <CheckBox Content="Advanced Launch Options" Foreground="White" IsChecked="{Binding AdvancedLaunchOptions}"
-                          IsVisible="{Binding ShowAdvancedLaunch}" Margin="10,2"/>
-                <CheckBox Content="Build Finished Notification" Foreground="White" IsChecked="{Binding BuildFinished}" Margin="10,2"/>
-                <CheckBox Content="Build Warning" Foreground="White" IsChecked="{Binding BuildWarning}" Margin="10,2"/>
-                <CheckBox Content="Update Changelog" Foreground="White" IsChecked="{Binding UpdateChangelog}" Margin="10,2"/>
-                <CheckBox Content="Delete Old Versions" Foreground="White" IsChecked="{Binding DeleteOldVersions}" Margin="10,2"/>
-                <CheckBox Content="Check for Updates" Foreground="White" IsChecked="{Binding UpdatesEnabled}" Margin="10,2"/>
-                <CheckBox Content="Update All" Foreground="White" IsChecked="{Binding UpdateAll}"
-                          IsEnabled="{Binding UpdatesEnabled}" Margin="10,2"/>
-            </WrapPanel>
+      <!-- Checkboxes -->
+      <WrapPanel HorizontalAlignment="Center" Margin="0,6">
+        <CheckBox Content="Empty SND Folder" Foreground="White" IsChecked="{Binding EmptySND}" IsVisible="{Binding ShowEmptySND}" Margin="10,2" />
+        <CheckBox Content="Use CPK Structure" Foreground="White" IsChecked="{Binding UseCpk}" IsVisible="{Binding ShowUseCpk}" Margin="10,2" />
+        <CheckBox Content="Create ISO" Foreground="White" IsChecked="{Binding CreateIso}" IsVisible="{Binding ShowCreateIso}" Margin="10,2" />
+        <CheckBox Content="Advanced Launch Options" Foreground="White" IsChecked="{Binding AdvancedLaunchOptions}" IsVisible="{Binding ShowAdvancedLaunch}" Margin="10,2" />
+        <CheckBox Content="Build Finished Notification" Foreground="White" IsChecked="{Binding BuildFinished}" Margin="10,2" />
+        <CheckBox Content="Build Warning" Foreground="White" IsChecked="{Binding BuildWarning}" Margin="10,2" />
+        <CheckBox Content="Update Changelog" Foreground="White" IsChecked="{Binding UpdateChangelog}" Margin="10,2" />
+        <CheckBox Content="Delete Old Versions" Foreground="White" IsChecked="{Binding DeleteOldVersions}" Margin="10,2" />
+        <CheckBox Content="Check for Updates" Foreground="White" IsChecked="{Binding UpdatesEnabled}" Margin="10,2" />
+        <CheckBox Content="Update All" Foreground="White" IsChecked="{Binding UpdateAll}" IsEnabled="{Binding UpdatesEnabled}" Margin="10,2" />
+      </WrapPanel>
 
-            <!-- Selectors row -->
-            <WrapPanel HorizontalAlignment="Center" Margin="0,4">
-                <!-- Language -->
-                <StackPanel Orientation="Horizontal" Margin="10,0" IsVisible="{Binding ShowLanguage}">
-                    <TextBlock Text="Language:" Foreground="LightGray" FontWeight="Bold" FontSize="13"
-                               VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <ComboBox ItemsSource="{Binding Languages}" SelectedIndex="{Binding LanguageIndex}"
-                              Background="#202020" Foreground="#f2f2f2" Width="150"/>
-                </StackPanel>
-
-                <!-- CPK Format -->
-                <StackPanel Orientation="Horizontal" Margin="10,0" IsVisible="{Binding ShowCpkFormat}">
-                    <TextBlock Text="CPK Format:" Foreground="LightGray" FontWeight="Bold" FontSize="13"
-                               VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <ComboBox ItemsSource="{Binding CpkFormats}" SelectedIndex="{Binding CpkFormatIndex}"
-                              Background="#202020" Foreground="#f2f2f2" Width="130"/>
-                </StackPanel>
-
-                <!-- Version -->
-                <StackPanel Orientation="Horizontal" Margin="10,0" IsVisible="{Binding ShowVersion}">
-                    <TextBlock Text="Version:" Foreground="LightGray" FontWeight="Bold" FontSize="13"
-                               VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <ComboBox ItemsSource="{Binding Versions}" SelectedIndex="{Binding VersionIndex}"
-                              Background="#202020" Foreground="#f2f2f2" Width="120"/>
-                </StackPanel>
-            </WrapPanel>
-
-            <!-- Unpack Button -->
-            <Button Content="Unpack Base Files" Background="#9a0000" Foreground="White"
-                    FontWeight="Bold" Padding="20,8"
-                    HorizontalAlignment="Center" Margin="0,6"
-                    IsVisible="{Binding ShowUnpack}"
-                    Click="UnpackClick"/>
+      <!-- Selectors row -->
+      <WrapPanel HorizontalAlignment="Center" Margin="0,4">
+        <!-- Language -->
+        <StackPanel Orientation="Horizontal" Margin="10,0" IsVisible="{Binding ShowLanguage}">
+          <TextBlock Text="Language:" Foreground="LightGray" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0" />
+          <ComboBox ItemsSource="{Binding Languages}" SelectedIndex="{Binding LanguageIndex}" Background="#202020" Foreground="#f2f2f2" Width="150" />
         </StackPanel>
-    </ScrollViewer>
+
+        <!-- CPK Format -->
+        <StackPanel Orientation="Horizontal" Margin="10,0" IsVisible="{Binding ShowCpkFormat}">
+          <TextBlock Text="CPK Format:" Foreground="LightGray" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0" />
+          <ComboBox ItemsSource="{Binding CpkFormats}" SelectedIndex="{Binding CpkFormatIndex}" Background="#202020" Foreground="#f2f2f2" Width="130" />
+        </StackPanel>
+
+        <!-- Version -->
+        <StackPanel Orientation="Horizontal" Margin="10,0" IsVisible="{Binding ShowVersion}">
+          <TextBlock Text="Version:" Foreground="LightGray" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0" />
+          <ComboBox ItemsSource="{Binding Versions}" SelectedIndex="{Binding VersionIndex}" Background="#202020" Foreground="#f2f2f2" Width="120" />
+        </StackPanel>
+      </WrapPanel>
+
+      <!-- Unpack Button -->
+      <Button Classes="accent" Content="Unpack Base Files" FontWeight="Bold" Padding="20,8" HorizontalAlignment="Center" Margin="0,6" IsVisible="{Binding ShowUnpack}" Click="UnpackClick" />
+    </StackPanel>
+  </ScrollViewer>
 </Window>
