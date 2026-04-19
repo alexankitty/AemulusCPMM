@@ -23,6 +23,7 @@ public class AemulusConfig
     public bool bottomUpPriority { get; set; }
     public bool updateAemulus { get; set; } = true;
     public bool darkMode { get; set; } = true;
+    public bool showHiddenPackages { get; set; } = false;
     public ConfigP3F? p3fConfig { get; set; }
     public ConfigP3P? p3pConfig { get; set; }
     public ConfigP4G? p4gConfig { get; set; }
@@ -62,6 +63,7 @@ public class ConfigP4G
     public bool updatesEnabled { get; set; } = true;
     public string loadout { get; set; } = "";
     public string lastUnpacked { get; set; } = "";
+    public string lastLoadout { get; set; } = "";
 }
 
 public class ConfigP4GVita
@@ -77,7 +79,9 @@ public class ConfigP4GVita
     public bool updatesEnabled { get; set; } = true;
     public string loadout { get; set; } = "";
     public string lastUnpacked { get; set; } = "";
+    public string lastLoadout { get; set; } = "";
 }
+
 
 public class ConfigP1PSP
 {
@@ -96,6 +100,8 @@ public class ConfigP1PSP
     public bool createIso { get; set; } = false;
     public string loadout { get; set; } = "";
     public string lastUnpacked { get; set; } = "";
+    public string lastLoadout { get; set; } = "";
+
 }
 
 public class ConfigP3F
@@ -117,6 +123,8 @@ public class ConfigP3F
     public bool updatesEnabled { get; set; } = true;
     public string loadout { get; set; } = "";
     public string lastUnpacked { get; set; } = "";
+    public string lastLoadout { get; set; } = "";
+
 }
 
 public class ConfigP3P
@@ -136,6 +144,8 @@ public class ConfigP3P
     public bool updatesEnabled { get; set; } = true;
     public string loadout { get; set; } = "";
     public string lastUnpacked { get; set; } = "";
+    public string lastLoadout { get; set; } = "";
+
 }
 
 public class ConfigP5
@@ -153,6 +163,8 @@ public class ConfigP5
     public string CpkName { get; set; } = "mod";
     public string loadout { get; set; } = "";
     public string lastUnpacked { get; set; } = "";
+    public string lastLoadout { get; set; } = "";
+
 }
 
 public class ConfigP5R
@@ -170,6 +182,8 @@ public class ConfigP5R
     public bool updatesEnabled { get; set; } = true;
     public string loadout { get; set; } = "";
     public string lastUnpacked { get; set; } = "";
+    public string lastLoadout { get; set; } = "";
+
 }
 
 public class ConfigP5RSwitch
@@ -187,6 +201,8 @@ public class ConfigP5RSwitch
     public bool updatesEnabled { get; set; } = true;
     public string loadout { get; set; } = "";
     public string lastUnpacked { get; set; } = "";
+    public string lastLoadout { get; set; } = "";
+
 }
 
 public class ConfigPQ2
@@ -203,6 +219,8 @@ public class ConfigPQ2
     public bool updatesEnabled { get; set; } = true;
     public string loadout { get; set; } = "";
     public string lastUnpacked { get; set; } = "";
+    public string lastLoadout { get; set; } = "";
+
 }
 
 public class ConfigPQ
@@ -219,6 +237,8 @@ public class ConfigPQ
     public bool updatesEnabled { get; set; } = true;
     public string loadout { get; set; } = "";
     public string lastUnpacked { get; set; } = "";
+    public string lastLoadout { get; set; } = "";
+
 }
 
 public class ConfigP5S
@@ -232,6 +252,8 @@ public class ConfigP5S
     public bool deleteOldVersions { get; set; }
     public bool updatesEnabled { get; set; } = true;
     public string loadout { get; set; } = "";
+    public string lastLoadout { get; set; } = "";
+
 }
 
 public class Packages

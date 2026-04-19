@@ -9,8 +9,8 @@ public class HiddenTextConverter : IValueConverter
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         return value is true
-            ? "Hide All Hidden Packages\n(Ctrl+H)"
-            : "Show All Hidden Packages\n(Ctrl+H)";
+            ? "Hide All Hidden Packages"
+            : "Show All Hidden Packages";
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

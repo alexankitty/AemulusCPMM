@@ -1,6 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="AemulusModManager.Avalonia.Views.CreateLoadoutWindow"
+        x:Class="AemulusModManager.Avalonia.Views.CreateEditLoadoutWindow"
         Title="Create New Loadout" Height="110" Width="420"
         CanResize="False" WindowStartupLocation="CenterOwner"
         Background="#121212">
@@ -16,7 +16,7 @@
             <Button x:Name="DeleteButton" Content="Delete" Background="White" Foreground="Black"
                     Height="25" Width="100" Grid.Column="0" VerticalAlignment="Center"
                     HorizontalAlignment="Center" IsVisible="False" Click="DeleteButton_Click"/>
-            <Button x:Name="CreateButton" Content="Confirm" Background="White" Foreground="Black"
+            <Button x:Name="CreateButton" Content="Create" Background="White" Foreground="Black"
                     IsEnabled="False" Height="25" Width="100" Grid.Column="1"
                     VerticalAlignment="Center" HorizontalAlignment="Center" Click="CreateButton_Click"/>
             <Button x:Name="CancelButton" Content="Cancel" Background="White" Foreground="Black"

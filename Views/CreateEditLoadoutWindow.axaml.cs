@@ -7,23 +7,25 @@ using AemulusModManager.Utilities;
 
 namespace AemulusModManager.Avalonia.Views;
 
-public partial class CreateLoadoutWindow : Window
+public partial class CreateEditLoadoutWindow : Window
 {
     private readonly string _game;
     public string LoadoutName { get; set; } = "";
     public bool DeleteLoadout { get; set; }
     public bool CopyCurrentLoadout => CopyLoadout?.IsChecked == true;
     private readonly string? _originalName;
+    private readonly bool _editing;
 
-    public CreateLoadoutWindow()
+    public CreateEditLoadoutWindow()
     {
         InitializeComponent();
     }
 
-    public CreateLoadoutWindow(string game, string? currentName = null, bool noDelete = false)
+    public CreateEditLoadoutWindow(string game, string? currentName = null, bool editing = false)
     {
         _game = game;
         _originalName = currentName;
+        _editing = editing;
         InitializeComponent();
         if (currentName != null)
         {
@@ -33,7 +35,7 @@ public partial class CreateLoadoutWindow : Window
             CopyLoadout.IsVisible = false;
             Height = 120;
         }
-        if (currentName == null || noDelete)
+        if (currentName == null || !editing)
         {
             DeleteButton.IsVisible = false;
         }
@@ -41,6 +43,7 @@ public partial class CreateLoadoutWindow : Window
         {
             DeleteButton.IsVisible = true;
             CopyLoadout.IsVisible = false;
+            CreateButton.Content = "Save";
         }
 
         NameBox.TextChanged += (_, _) =>
@@ -52,11 +55,25 @@ public partial class CreateLoadoutWindow : Window
 
     private async void CreateButton_Click(object? sender, RoutedEventArgs e)
     {
+        if(_originalName != null && _originalName == NameBox.Text) Close();
         if (NameBox.Text == "Add new loadout")
         {
             ParallelLogger.Log("[ERROR] Invalid loadout name, try another one.");
             var notification = new NotificationBox("Invalid loadout name, try another one.");
             await notification.ShowDialog(this);
+        }
+        else if (_originalName != NameBox.Text && _editing)
+        {
+            string configPath = Path.Combine(
+                Utilities.AppPaths.ConfigDir,
+                _game, $"{_originalName}.xml");
+            if (File.Exists(configPath))            {
+                string newConfigPath = Path.Combine(
+                    Utilities.AppPaths.ConfigDir,
+                    _game, $"{NameBox.Text}.xml");
+                File.Move(configPath, newConfigPath);
+            }
+            Close();
         }
         else
         {
@@ -102,7 +119,13 @@ public partial class CreateLoadoutWindow : Window
             await notification.ShowDialog(this);
             if (notification.YesNo)
             {
-                DeleteLoadout = true;
+                configPath = Path.Combine(
+                Utilities.AppPaths.ConfigDir,
+                _game, $"{NameBox.Text}.xml");
+                if (File.Exists(configPath))
+                {
+                    File.Delete(configPath);
+                }
                 Close();
             }
         }

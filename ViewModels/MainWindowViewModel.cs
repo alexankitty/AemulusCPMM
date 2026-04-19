@@ -83,7 +83,7 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string _description = "";
     [ObservableProperty] private Bitmap? _previewImage;
     [ObservableProperty] private string _searchText = "";
-    [ObservableProperty] private bool _showHiddenPackages = true;
+    [ObservableProperty] private bool _showHiddenPackages = false;
     [ObservableProperty] private bool _isBuildEnabled = true;
     [ObservableProperty] private bool _isUiEnabled = true;
     [ObservableProperty] private string _packageStats = "";
@@ -267,6 +267,7 @@ public partial class MainWindowViewModel : ObservableObject
         BottomUpPriority = Config.bottomUpPriority;
         PriorityLabel = BottomUpPriority ? "higher priority ▲" : "higher priority ▼";
         DarkMode = Config.darkMode;
+        ShowHiddenPackages = Config.showHiddenPackages;
         if (!string.IsNullOrEmpty(Config.game))
             SelectedGame = Config.game;
 
@@ -317,6 +318,7 @@ public partial class MainWindowViewModel : ObservableObject
                 DeleteOldVersions = Config.p1pspConfig.deleteOldVersions;
                 UpdatesEnabled = Config.p1pspConfig.updatesEnabled;
                 UpdateAll = Config.p1pspConfig.updateAll;
+                SelectedLoadout = Config.p1pspConfig.lastLoadout ?? "Default";
                 break;
             case "Persona 3 FES":
                 Config.p3fConfig ??= new ConfigP3F();
@@ -334,6 +336,8 @@ public partial class MainWindowViewModel : ObservableObject
                 DeleteOldVersions = Config.p3fConfig.deleteOldVersions;
                 UpdatesEnabled = Config.p3fConfig.updatesEnabled;
                 UpdateAll = Config.p3fConfig.updateAll;
+                SelectedLoadout = Config.p3fConfig.lastLoadout ?? "Default";
+
                 break;
             case "Persona 3 Portable":
                 Config.p3pConfig ??= new ConfigP3P();
@@ -349,6 +353,8 @@ public partial class MainWindowViewModel : ObservableObject
                 DeleteOldVersions = Config.p3pConfig.deleteOldVersions;
                 UpdatesEnabled = Config.p3pConfig.updatesEnabled;
                 UpdateAll = Config.p3pConfig.updateAll;
+                SelectedLoadout = Config.p3pConfig.lastLoadout ?? "Default";
+
                 break;
             case "Persona 4 Golden":
                 Config.p4gConfig ??= new ConfigP4G();
@@ -364,6 +370,7 @@ public partial class MainWindowViewModel : ObservableObject
                 DeleteOldVersions = Config.p4gConfig.deleteOldVersions;
                 UpdatesEnabled = Config.p4gConfig.updatesEnabled;
                 UpdateAll = Config.p4gConfig.updateAll;
+                SelectedLoadout = Config.p4gConfig.lastLoadout ?? "Default";
                 break;
             case "Persona 4 Golden (Vita)":
                 Config.p4gVitaConfig ??= new ConfigP4GVita();
@@ -375,6 +382,8 @@ public partial class MainWindowViewModel : ObservableObject
                 DeleteOldVersions = Config.p4gVitaConfig.deleteOldVersions;
                 UpdatesEnabled = Config.p4gVitaConfig.updatesEnabled;
                 UpdateAll = Config.p4gVitaConfig.updateAll;
+                SelectedLoadout = Config.p4gVitaConfig.lastLoadout ?? "Default";
+
                 break;
             case "Persona 5":
                 Config.p5Config ??= new ConfigP5();
@@ -388,6 +397,7 @@ public partial class MainWindowViewModel : ObservableObject
                 DeleteOldVersions = Config.p5Config.deleteOldVersions;
                 UpdatesEnabled = Config.p5Config.updatesEnabled;
                 UpdateAll = Config.p5Config.updateAll;
+                SelectedLoadout = Config.p5Config.lastLoadout ?? "Default";
                 break;
             case "Persona 5 Royal (PS4)":
                 Config.p5rConfig ??= new ConfigP5R();
@@ -401,6 +411,8 @@ public partial class MainWindowViewModel : ObservableObject
                 DeleteOldVersions = Config.p5rConfig.deleteOldVersions;
                 UpdatesEnabled = Config.p5rConfig.updatesEnabled;
                 UpdateAll = Config.p5rConfig.updateAll;
+                SelectedLoadout = Config.p5rConfig.lastLoadout ?? "Default";
+
                 break;
             case "Persona 5 Royal (Switch)":
                 Config.p5rSwitchConfig ??= new ConfigP5RSwitch();
@@ -414,6 +426,7 @@ public partial class MainWindowViewModel : ObservableObject
                 DeleteOldVersions = Config.p5rSwitchConfig.deleteOldVersions;
                 UpdatesEnabled = Config.p5rSwitchConfig.updatesEnabled;
                 UpdateAll = Config.p5rSwitchConfig.updateAll;
+                SelectedLoadout = Config.p5rSwitchConfig.lastLoadout ?? "Default";
                 break;
             case "Persona 5 Strikers":
                 Config.p5sConfig ??= new ConfigP5S();
@@ -424,6 +437,7 @@ public partial class MainWindowViewModel : ObservableObject
                 DeleteOldVersions = Config.p5sConfig.deleteOldVersions;
                 UpdatesEnabled = Config.p5sConfig.updatesEnabled;
                 UpdateAll = Config.p5sConfig.updateAll;
+                SelectedLoadout = Config.p5sConfig.lastLoadout ?? "Default";
                 break;
             case "Persona Q":
                 Config.pqConfig ??= new ConfigPQ();
@@ -436,6 +450,7 @@ public partial class MainWindowViewModel : ObservableObject
                 DeleteOldVersions = Config.pqConfig.deleteOldVersions;
                 UpdatesEnabled = Config.pqConfig.updatesEnabled;
                 UpdateAll = Config.pqConfig.updateAll;
+                SelectedLoadout = Config.pqConfig.lastLoadout ?? "Default";
                 break;
             case "Persona Q2":
                 Config.pq2Config ??= new ConfigPQ2();
@@ -448,6 +463,7 @@ public partial class MainWindowViewModel : ObservableObject
                 DeleteOldVersions = Config.pq2Config.deleteOldVersions;
                 UpdatesEnabled = Config.pq2Config.updatesEnabled;
                 UpdateAll = Config.pq2Config.updateAll;
+                SelectedLoadout = Config.pq2Config.lastLoadout ?? "Default";
                 break;
         }
 
@@ -465,6 +481,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         // Load saved package list
         var loadoutFile = Path.Combine(_configPath, SelectedGame, $"{SelectedLoadout}.xml");
+        var defaultLoadoutFile = Path.Combine(_configPath, SelectedGame, "Default.xml");
         Directory.CreateDirectory(Path.Combine(_configPath, SelectedGame));
 
         _packageList = new ObservableCollection<Package>();
@@ -480,6 +497,19 @@ public partial class MainWindowViewModel : ObservableObject
             catch (Exception ex)
             {
                 AppendConsole($"[ERROR] Failed to load packages: {ex.Message}");
+            }
+        }else if (File.Exists(defaultLoadoutFile))
+        {
+            try
+            {
+                using var stream = File.OpenRead(defaultLoadoutFile);
+                var packages = (Packages?)_xp.Deserialize(stream);
+                if (packages?.packages != null)
+                    _packageList = new ObservableCollection<Package>(packages.packages);
+            }
+            catch (Exception ex)
+            {
+                AppendConsole($"[ERROR] Failed to load default packages: {ex.Message}");
             }
         }
 
@@ -727,6 +757,7 @@ public partial class MainWindowViewModel : ObservableObject
         if (!string.IsNullOrEmpty(value))
         {
             _lastLoadout = value;
+            ApplyLastLoadoutConfig();
             UpdateConfig();
             LoadPackages();
             AppendConsole($"[INFO] Switched to loadout {value}");
@@ -1547,6 +1578,36 @@ public partial class MainWindowViewModel : ObservableObject
         return vm;
     }
 
+    public void ApplyLastLoadoutConfig(){
+        switch (SelectedGame)
+        {
+            case "Persona 1 (PSP)":
+                if (Config.p1pspConfig != null)
+                    Config.p1pspConfig.lastLoadout = SelectedLoadout;
+                break;
+            case "Persona 3 FES":
+                if (Config.p3fConfig != null)
+                    Config.p3fConfig.lastLoadout = SelectedLoadout;
+                break;
+            case "Persona 3 Portable":
+                if (Config.p3pConfig != null)
+                    Config.p3pConfig.lastLoadout = SelectedLoadout;
+                break;
+            case "Persona 4 Golden":
+                if (Config.p4gConfig != null)
+                    Config.p4gConfig.lastLoadout = SelectedLoadout;
+                break;
+            case "Persona 4 Golden (Vita)":
+                if (Config.p4gVitaConfig != null)
+                    Config.p4gVitaConfig.lastLoadout = SelectedLoadout;
+                break;
+            case "Persona 5":
+                if (Config.p5Config != null)
+                    Config.p5Config.lastLoadout = SelectedLoadout;
+                break;
+        }
+    }
+
     public void ApplyConfigChanges(ConfigWindowViewModel configVm)
     {
         ModPath = configVm.OutputFolder;
@@ -1596,6 +1657,7 @@ public partial class MainWindowViewModel : ObservableObject
                 Config.p3fConfig.deleteOldVersions = DeleteOldVersions;
                 Config.p3fConfig.updatesEnabled = UpdatesEnabled;
                 Config.p3fConfig.updateAll = UpdateAll;
+                SaveCommonConfig(Config.p3fConfig);
                 break;
             case "Persona 3 Portable":
                 Config.p3pConfig ??= new ConfigP3P();
@@ -1681,7 +1743,7 @@ public partial class MainWindowViewModel : ObservableObject
                 SaveCommonConfig(Config.pq2Config);
                 break;
         }
-
+        ApplyLastLoadoutConfig();
         UpdateConfig();
         AppendConsole("[INFO] Config saved");
     }
@@ -2349,6 +2411,23 @@ public partial class MainWindowViewModel : ObservableObject
             AppendConsole($"[ERROR] Invalid loadout xml: {ex.Message}");
             return null;
         }
+    }
+
+    [RelayCommand]
+    private async Task EditLoadout(){
+        if (SelectedLoadout == null || _loadoutChanging) return;
+
+        var window = new Views.CreateEditLoadoutWindow(SelectedGame, SelectedLoadout, true);
+        await window.ShowDialog(_dialogService?.OwnerWindow);
+        LoadPackages();
+    }
+
+    [RelayCommand]
+    private void ToggleShowHidden()
+    {
+        Config.showHiddenPackages = !Config.showHiddenPackages;
+        UpdateConfig();
+        ShowHiddenPackages = !ShowHiddenPackages;
     }
 
     private string? Find7Zip()

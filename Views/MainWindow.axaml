@@ -21,7 +21,9 @@
             <conv:GameColorConverter x:Key="GameColorConverter" />
             <conv:UrlConverter x:Key="UrlConverter" />
             <conv:AccentForegroundConverter x:Key="AccentForegroundConverter" />
-
+            <conv:HiddenTextConverter x:Key="HiddenTextConverter" />
+            <conv:HiddenIconConverter x:Key="HiddenIconConverter" />
+            
             <SolidColorBrush x:Key="GameAccentIndicator" Color="#F5E63D"/>
 
             <ResourceDictionary.ThemeDictionaries>
@@ -177,6 +179,8 @@
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
@@ -219,8 +223,29 @@
                                           Background="{DynamicResource AppControl}"
                                           Foreground="{DynamicResource AppFg}" />
 
+                                <!-- Edit Loadout-->
+                                 <Button Grid.Column="2" Classes="darkBtn iconBtn"
+                                        Command="{Binding EditLoadoutCommand}"
+                                        IsEnabled="{Binding IsUiEnabled}"
+                                        ToolTip.Tip="Edit Loadout"
+                                        Margin="0,0,2,0">
+                                    <i:Icon Value="fa-solid fa-edit" FontSize="32" Foreground="{Binding GameAccentColor}"/>
+                                </Button>
+
+                                <!-- Show Hidden -->
+                                 <Button Grid.Column="3" Classes="darkBtn iconBtn"
+                                        Command="{Binding ToggleShowHiddenCommand}"
+                                        IsEnabled="{Binding IsUiEnabled}"
+                                        ToolTip.Tip="{Binding ShowHiddenPackages, Converter={StaticResource HiddenTextConverter}}"
+                                        Margin="0,0,2,0">
+                                    <i:Icon Value="{Binding ShowHiddenPackages, Converter={StaticResource HiddenIconConverter}}" FontSize="32" Foreground="{Binding GameAccentColor}"/>
+                                </Button>
+
+                                <Separator
+                                ></Separator>
+
                                 <!-- Config -->
-                                <Button Grid.Column="2" Classes="darkBtn iconBtn"
+                                <Button Grid.Column="4" Classes="darkBtn iconBtn"
                                         Click="ConfigButton_Click"
                                         IsEnabled="{Binding IsUiEnabled}"
                                         ToolTip.Tip="Config"
@@ -229,7 +254,7 @@
                                 </Button>
 
                                 <!-- Refresh -->
-                                <Button Grid.Column="3" Classes="darkBtn iconBtn"
+                                <Button Grid.Column="5" Classes="darkBtn iconBtn"
                                         Command="{Binding RefreshCommand}"
                                         IsEnabled="{Binding IsUiEnabled}"
                                         ToolTip.Tip="Refresh"
@@ -238,7 +263,7 @@
                                 </Button>
 
                                 <!-- Build -->
-                                <Button Grid.Column="4" Classes="darkBtn iconBtn"
+                                <Button Grid.Column="6" Classes="darkBtn iconBtn"
                                         Command="{Binding BuildCommand}"
                                         IsEnabled="{Binding IsBuildEnabled}"
                                         ToolTip.Tip="Build"
@@ -247,7 +272,7 @@
                                 </Button>
 
                                 <!-- Launch -->
-                                <Button Grid.Column="5" Classes="darkBtn iconBtn"
+                                <Button Grid.Column="7" Classes="darkBtn iconBtn"
                                         Command="{Binding LaunchGameCommand}"
                                         IsEnabled="{Binding IsUiEnabled}"
                                         ToolTip.Tip="Launch Game"
@@ -256,7 +281,7 @@
                                 </Button>
 
                                 <!-- Open Folder -->
-                                <Button Grid.Column="6" Classes="darkBtn iconBtn"
+                                <Button Grid.Column="8" Classes="darkBtn iconBtn"
                                         Command="{Binding OpenModDirCommand}"
                                         ToolTip.Tip="Open Mod Folder"
                                         Margin="0,0,2,0">
@@ -264,7 +289,7 @@
                                 </Button>
 
                                 <!-- Add Package -->
-                                <Button Grid.Column="7" Classes="darkBtn iconBtn"
+                                <Button Grid.Column="9" Classes="darkBtn iconBtn"
                                         Click="AddPackage_Click"
                                         IsEnabled="{Binding IsUiEnabled}"
                                         ToolTip.Tip="Add Package"
@@ -273,7 +298,7 @@
                                 </Button>
 
                                 <!-- Create New Package -->
-                                <Button Grid.Column="8" Classes="darkBtn iconBtn"
+                                <Button Grid.Column="10" Classes="darkBtn iconBtn"
                                         Click="CreatePackage_Click"
                                         IsEnabled="{Binding IsUiEnabled}"
                                         ToolTip.Tip="Create New Package"
@@ -282,7 +307,7 @@
                                 </Button>
 
                                 <!-- Priority Swap -->
-                                <Button Grid.Column="9" Classes="darkBtn iconBtn"
+                                <Button Grid.Column="11" Classes="darkBtn iconBtn"
                                         Command="{Binding SwapPriorityCommand}"
                                         ToolTip.Tip="{Binding PriorityLabel}"
                                         Margin="0,0,2,0">
@@ -290,7 +315,7 @@
                                 </Button>
 
                                 <!-- Dark Mode Toggle -->
-                                <Button Grid.Column="10" Classes="darkBtn iconBtn"
+                                <Button Grid.Column="12" Classes="darkBtn iconBtn"
                                         Command="{Binding ToggleDarkModeCommand}"
                                         ToolTip.Tip="Toggle Dark/Light Mode"
                                         HorizontalAlignment="Left"
