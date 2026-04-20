@@ -43,7 +43,12 @@ public class PackageDownloader
         {
             string? downloadUrl = null;
             string? downloadFileName = null;
-            if (record.Files.Count == 1)
+            if(record.Files.Count == 0)
+            {
+                await _dialogService.ShowNotification("No Aemulus compatible files found for this mod.", true);
+                return;
+            }
+            else if (record.Files.Count == 1)
             {
                 downloadUrl = record.Files[0].DownloadUrl;
                 downloadFileName = record.Files[0].FileName;
