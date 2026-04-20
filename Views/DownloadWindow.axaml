@@ -8,11 +8,6 @@
         xmlns:vm="using:AemulusModManager.Avalonia.ViewModels" xmlns:conv="clr-namespace:AemulusModManager.Avalonia.Converters"
         x:DataType="vm:DialogWindowViewModel"
         >
-        <Window.Resources>
-                <conv:GameColorConverter x:Key="GameColorConverter" />
-                <conv:AccentForegroundConverter x:Key="AccentForegroundConverter" />
-                <conv:AccentDarkenConverter x:Key="AccentDarkenConverter" />
-        </Window.Resources>
         <Window.Styles>
                 <Style Selector="Button">
                         <Setter Property="Background" Value="#303030" />
@@ -24,11 +19,14 @@
                         <Setter Property="Foreground" Value="#f2f2f2" />
                 </Style>
                 <Style Selector="TextBox:focus /template/ Border">
-                        <Setter Property="BorderBrush" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBackground}" />
                 </Style>
                 <Style Selector="CheckBox:checked /template/ Border#NormalRectangle">
-                        <Setter Property="Background" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
-                        <Setter Property="BorderBrush" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
+                        <Setter Property="Background" Value="{DynamicResource AccentButtonBackground}" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBackground}" />
+                </Style>
+                <Style Selector="CheckBox:checked /template/ Path#CheckGlyph">
+                        <Setter Property="Fill" Value="{DynamicResource AccentButtonForeground}" />
                 </Style>
                 <Style Selector="CheckBox:pointerover /template/ Border#NormalRectangle">
                         <Setter Property="Opacity" Value="0.7" />

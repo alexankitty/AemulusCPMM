@@ -407,6 +407,8 @@ public partial class MainWindow : Window
         _packageDownloader = new PackageDownloader(_dialogService);
         ViewModel.SetDialogService(_dialogService);
         ViewModel.UpdateStats();
+        // Required to ensure colors get set once the dialog service is available.
+        ViewModel.UpdateGameAccentColor();
     }
 
     private void SetupGuide_Click(object? sender, PointerPressedEventArgs e)
@@ -759,7 +761,7 @@ public partial class MainWindow : Window
         if (sender is Button btn && btn.Tag is GameBananaRecord record)
         {
             var desc = record.Text ?? record.Description ?? "No description available.";
-            var box = new NotificationBox($"{record.Title}\n\nby {record.Owner?.Name}\n\n{desc}", true);
+            var box = new NotificationBox(_dialogService.DialogWindow ,$"{record.Title}\n\nby {record.Owner?.Name}\n\n{desc}", true);
             await box.ShowDialog(this);
         }
     }

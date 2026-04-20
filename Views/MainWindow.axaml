@@ -627,9 +627,9 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Border Background="{DynamicResource AppFeedCard}" CornerRadius="5" Padding="8" Margin="2">
-                                        <Grid ColumnDefinitions="150,*,Auto">
+                                        <Grid ColumnDefinitions="320,*,Auto">
                                             <!-- Thumbnail -->
-                                            <Image Grid.Column="0" Width="150" Height="150" Stretch="UniformToFill"
+                                            <Image Grid.Column="0" Width="320" Height="180" Stretch="UniformToFill"
                                                    asyncImageLoader:ImageLoader.Source="{Binding Image}" Margin="0,0,8,0"/>
                                             <!-- Info -->
                                             <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">

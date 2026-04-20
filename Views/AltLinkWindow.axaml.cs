@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AemulusModManager.Avalonia.ViewModels;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
@@ -13,9 +14,14 @@ public partial class AltLinkWindow : Window
         InitializeComponent();
     }
 
-    public AltLinkWindow(List<GameBananaAlternateFileSource> sources)
+    public AltLinkWindow(DialogWindowViewModel dialogVm, List<GameBananaAlternateFileSource> sources)
     {
         InitializeComponent();
+        DataContext = dialogVm;
+        foreach(var prop in dialogVm.AccentProps)
+        {
+            this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
+        }
         LinkList.ItemsSource = sources;
         if (sources.Count > 0)
             LinkList.SelectedIndex = 0;

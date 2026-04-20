@@ -21,6 +21,9 @@
       <Setter Property="Background" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
       <Setter Property="BorderBrush" Value="{Binding GameTitle, Converter={StaticResource GameColorConverter}}" />
     </Style>
+    <Style Selector="CheckBox:checked /template/ Path#CheckGlyph">
+      <Setter Property="Fill" Value="{DynamicResource AccentButtonForeground}" />
+    </Style>
     <Style Selector="CheckBox:pointerover /template/ Border#NormalRectangle">
       <Setter Property="Opacity" Value="0.7" />
     </Style>

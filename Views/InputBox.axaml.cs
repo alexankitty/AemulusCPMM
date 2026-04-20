@@ -15,32 +15,14 @@ public partial class InputBox : Window
         InitializeComponent();
     }
 
-    public InputBox(DialogWindowViewModel viewModel, string prompt) : this()
+    public InputBox(DialogWindowViewModel dialogVm, string prompt) : this()
     {
-        DataContext = viewModel;
+        DataContext = dialogVm;
         PromptText.Text = prompt;
-        if (viewModel is not null)
+        foreach(var prop in dialogVm.AccentProps)
         {
-            SetAccentButtonBackground(viewModel.GameTitle);
-            viewModel.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(viewModel.GameTitle))
-                {
-                    SetAccentButtonBackground(viewModel.GameTitle);
-                }
-            };
+            this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
         }
-    }
-    private void SetAccentButtonBackground(string gameTitle)
-    {
-        var brush = AemulusModManager.Avalonia.Converters.GameColorConverter.GetBrush(gameTitle);
-        this.Resources["AccentButtonBackground"] = brush;
-
-        // Use AccentDarkenConverter logic for darkening
-        var color = ((SolidColorBrush)brush).Color;
-        this.Resources["AccentButtonBackgroundPressed"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.2));
-        this.Resources["AccentButtonBackgroundPointerOver"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.3));
-        this.Resources["AccentButtonBackgroundDisabled"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.7));
     }
 
     private void Confirm_Click(object? sender, RoutedEventArgs e)

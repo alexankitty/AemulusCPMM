@@ -14,19 +14,21 @@ namespace AemulusModManager.Avalonia.Utilities;
 
 public class DialogService
 {
+    public DialogWindowViewModel DialogWindow;
     private readonly Window _owner;
     public Window OwnerWindow => _owner;
 
     public DialogService(Window owner)
     {
         _owner = owner;
+        DialogWindow = new DialogWindowViewModel("");
     }
 
     public async Task<bool> ShowNotification(string message, bool isOkOnly = true)
     {
         return await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            var box = new NotificationBox(message, isOkOnly);
+            var box = new NotificationBox(DialogWindow, message, isOkOnly);
             await box.ShowDialog(_owner);
             return box.YesNo;
         });
@@ -38,7 +40,7 @@ public class DialogService
     {
         return await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            var box = new ChangelogBox(update, packageName, message, row, onlineVersion, packageXmlPath, isUpdate);
+            var box = new ChangelogBox(DialogWindow, update, packageName, message, row, onlineVersion, packageXmlPath, isUpdate);
             await box.ShowDialog(_owner);
             return (box.YesNo, null as string);
         });
@@ -48,7 +50,7 @@ public class DialogService
     {
         return await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            var box = new DownloadWindow(name, author ?? "", imageUri);
+            var box = new DownloadWindow(DialogWindow, name, author ?? "", imageUri);
             await box.ShowDialog(_owner);
             return box.YesNo;
         });
@@ -58,7 +60,7 @@ public class DialogService
     {
         return await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            var box = new DownloadWindow(record);
+            var box = new DownloadWindow(DialogWindow, record);
             await box.ShowDialog(_owner);
             return box.YesNo;
         });
@@ -69,7 +71,7 @@ public class DialogService
     {
         return await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            var box = new UpdateFileBox(files, packageName);
+            var box = new UpdateFileBox(DialogWindow, files, packageName);
             await box.ShowDialog(_owner);
             return (box.ChosenFileUrl, box.ChosenFileName);
         });
@@ -80,7 +82,7 @@ public class DialogService
     {
         return await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            var box = new UpdateFileBox(files, packageName);
+            var box = new UpdateFileBox(DialogWindow, files, packageName);
             await box.ShowDialog(_owner);
             return (box.ChosenFileUrl, box.ChosenFileName);
         });
@@ -90,14 +92,14 @@ public class DialogService
     {
         await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            var box = new AltLinkWindow(sources ?? new List<GameBananaAlternateFileSource>());
+            var box = new AltLinkWindow(DialogWindow, sources ?? new List<GameBananaAlternateFileSource>());
             await box.ShowDialog(_owner);
         });
     }
 
     public UpdateProgressBox CreateProgressBox(System.Threading.CancellationTokenSource cts)
     {
-        return new UpdateProgressBox(cts);
+        return new UpdateProgressBox(DialogWindow, cts);
     }
 
     public async Task ShowProgressBox(UpdateProgressBox box)
@@ -128,11 +130,11 @@ public class DialogService
         });
     }
 
-    public async Task<(string? name, bool copyLoadout)> ShowInputDialog(DialogWindowViewModel viewModel, string prompt)
+    public async Task<(string? name, bool copyLoadout)> ShowInputDialog( string prompt)
     {
         return await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            var box = new InputBox(viewModel, prompt);
+            var box = new InputBox(DialogWindow, prompt);
             await box.ShowDialog(_owner);
             return (box.Result, box.CopyLoadout);
         });
@@ -142,7 +144,7 @@ public class DialogService
     {
         return await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            var box = new NotificationBox(message, false);
+            var box = new NotificationBox(DialogWindow, message, false);
             await box.ShowDialog(_owner);
             return box.YesNo;
         });

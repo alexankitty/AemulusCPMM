@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using AemulusModManager.Avalonia.ViewModels;
 
 namespace AemulusModManager.Avalonia.Views;
 
@@ -12,8 +13,13 @@ public partial class PackageFolderBox : Window
         InitializeComponent();
     }
 
-    public PackageFolderBox(string[] folders, string packageName)
+    public PackageFolderBox(DialogWindowViewModel dialogVm, string[] folders, string packageName) : this()
     {
+        DataContext = dialogVm;
+        foreach(var prop in dialogVm.AccentProps)
+        {
+            this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
+        }
         InitializeComponent();
         FileGrid.ItemsSource = folders;
         FileGrid.SelectedIndex = 0;

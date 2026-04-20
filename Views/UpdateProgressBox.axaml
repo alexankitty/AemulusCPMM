@@ -4,10 +4,37 @@
         Title="Aemulus Package Manager" Height="175" Width="500"
         CanResize="False" WindowStartupLocation="CenterOwner"
         Background="#151515">
+        <Window.Styles>
+                <Style Selector="Button">
+                        <Setter Property="Background" Value="#303030" />
+                        <Setter Property="Foreground" Value="#f2f2f2" />
+                </Style>
+                <Style Selector="TextBox">
+                        <Setter Property="Background" Value="#202020" />
+                        <Setter Property="BorderBrush" Value="#424242" />
+                        <Setter Property="Foreground" Value="#f2f2f2" />
+                </Style>
+                <Style Selector="TextBox:focus /template/ Border">
+                        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBackground}" />
+                </Style>
+                <Style Selector="CheckBox:checked /template/ Border#NormalRectangle">
+                        <Setter Property="Background" Value="{DynamicResource AccentButtonBackground}" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBackground}" />
+                </Style>
+                <Style Selector="CheckBox:checked /template/ Path#CheckGlyph">
+                        <Setter Property="Fill" Value="{DynamicResource AccentButtonForeground}" />
+                </Style>
+                <Style Selector="CheckBox:pointerover /template/ Border#NormalRectangle">
+                        <Setter Property="Opacity" Value="0.7" />
+                </Style>
+                <Style Selector="CheckBox:pressed /template/ Border#NormalRectangle">
+                        <Setter Property="Opacity" Value="0.8" />
+                </Style>
+        </Window.Styles>
     <Grid RowDefinitions="*,*,*">
         <TextBlock Grid.Row="0" x:Name="ProgressTitle" HorizontalAlignment="Center"
                    TextWrapping="Wrap" Foreground="White" Text="" VerticalAlignment="Center" FontSize="15"/>
-        <ProgressBar Grid.Row="1" Foreground="#9a0000" Background="#202020"
+        <ProgressBar Grid.Row="1" Foreground="{DynamicResource AccentButtonBackground}" Background="#202020"
                      x:Name="ProgressBar" HorizontalAlignment="Center"
                      Height="24" VerticalAlignment="Center" Width="300"/>
         <TextBlock Grid.Row="2" x:Name="ProgressText" HorizontalAlignment="Center"

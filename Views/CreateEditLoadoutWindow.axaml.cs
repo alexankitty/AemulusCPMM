@@ -7,12 +7,14 @@ using AemulusModManager.Utilities;
 using Avalonia.Media;
 using System;
 using AemulusModManager.Avalonia.ViewModels;
+using System.Reflection.Metadata.Ecma335;
 
 namespace AemulusModManager.Avalonia.Views;
 
 public partial class CreateEditLoadoutWindow : Window
 {
     private readonly string _game;
+    private DialogWindowViewModel _dialogVm;
     public string LoadoutName { get; set; } = "";
     public bool DeleteLoadout { get; set; }
     public bool CopyCurrentLoadout => CopyLoadout.IsChecked ?? false;
@@ -25,14 +27,20 @@ public partial class CreateEditLoadoutWindow : Window
         InitializeComponent();
     }
 
-    public CreateEditLoadoutWindow(DialogWindowViewModel viewModel, string game, string? currentName = null, bool editing = false)
+    public CreateEditLoadoutWindow(DialogWindowViewModel dialogVm, string game, string? currentName = null, bool editing = false)
     {
-        DataContext = viewModel;
+        _dialogVm = dialogVm;
+        DataContext = dialogVm;
         Console.WriteLine("Opened window");
         _game = game;
         _originalName = currentName;
         _editing = editing;
+        DataContext = dialogVm;
         InitializeComponent();
+        foreach(var prop in dialogVm.AccentProps)
+        {
+            this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
+        }
         if (currentName != null && editing)
         {
             Title = $"Edit {currentName} loadout";
@@ -58,30 +66,13 @@ public partial class CreateEditLoadoutWindow : Window
             CreateButton.IsEnabled = !string.IsNullOrWhiteSpace(NameBox.Text);
         };
 
-        // Set AccentButtonBackground resource based on GameTitle
-        if (viewModel is not null)
-        {
-            SetAccentButtonBackground(viewModel.GameTitle);
-            viewModel.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(viewModel.GameTitle))
-                {
-                    SetAccentButtonBackground(viewModel.GameTitle);
-                }
-            };
-        }
     }
 
     private void SetAccentButtonBackground(string gameTitle)
     {
-        var brush = AemulusModManager.Avalonia.Converters.GameColorConverter.GetBrush(gameTitle);
-        this.Resources["AccentButtonBackground"] = brush;
-
-        // Use AccentDarkenConverter logic for darkening
-        var color = ((SolidColorBrush)brush).Color;
-        this.Resources["AccentButtonBackgroundPressed"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.2));
-        this.Resources["AccentButtonBackgroundPointerOver"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.3));
-        this.Resources["AccentButtonBackgroundDisabled"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.7));
+        var brush = Converters.GameColorConverter.GetBrush(gameTitle);
+        CreateButton.Background = brush;
+        DeleteButton.Background = brush;
     }
 
     private async void CreateButton_Click(object? sender, RoutedEventArgs e)
@@ -100,14 +91,14 @@ public partial class CreateEditLoadoutWindow : Window
         if (NameBox.Text == "Add new loadout")
         {
             ParallelLogger.Log("[ERROR] Invalid loadout name, try another one.");
-            var notification = new NotificationBox("Invalid loadout name, try another one.");
+            var notification = new NotificationBox(_dialogVm, "Invalid loadout name, try another one.");
             await notification.ShowDialog(this);
         }
         //check if name already exists
         else if (File.Exists(configPath))
         {
             ParallelLogger.Log($"[ERROR] Loadout name {NameBox.Text} already exists, try another one.");
-            var notification = new NotificationBox($"Loadout name {NameBox.Text} already exists, try another one.");
+            var notification = new NotificationBox(_dialogVm, $"Loadout name {NameBox.Text} already exists, try another one.");
             await notification.ShowDialog(this);
         }
         //editing but name is changed, rename file
@@ -116,7 +107,8 @@ public partial class CreateEditLoadoutWindow : Window
             configPath = Path.Combine(
                 Utilities.AppPaths.ConfigDir,
                 _game, $"{_originalName}.xml");
-            if (File.Exists(configPath))            {
+            if (File.Exists(configPath))
+            {
                 string newConfigPath = Path.Combine(
                     Utilities.AppPaths.ConfigDir,
                     _game, $"{NameBox.Text}.xml");
@@ -128,12 +120,12 @@ public partial class CreateEditLoadoutWindow : Window
         //Create new loadout
         else
         {
-            if(CopyCurrentLoadout == true && _originalName != null)
+            if (CopyCurrentLoadout == true && _originalName != null)
             {
                 string copyPath = Path.Combine(
                 Utilities.AppPaths.ConfigDir,
                 _game, $"{_originalName}.xml");
-                if(File.Exists(copyPath))
+                if (File.Exists(copyPath))
                 {
                     File.Copy(copyPath, configPath);
                 }
@@ -143,7 +135,7 @@ public partial class CreateEditLoadoutWindow : Window
             ResultName = NameBox.Text;
             Close();
         }
-        
+
     }
 
     private void CancelButton_Click(object? sender, RoutedEventArgs e)
@@ -161,13 +153,13 @@ public partial class CreateEditLoadoutWindow : Window
 
         if (loadoutFiles.Length == 1)
         {
-            var notification = new NotificationBox("You cannot delete the last loadout");
+            var notification = new NotificationBox(_dialogVm, "You cannot delete the last loadout");
             ParallelLogger.Log("[ERROR] You cannot delete the last loadout");
             await notification.ShowDialog(this);
         }
         else
         {
-            var notification = new NotificationBox(
+            var notification = new NotificationBox(_dialogVm,
                 $"Are you sure you want to delete {_originalName} loadout?\nThis cannot be undone.", false);
             await notification.ShowDialog(this);
             if (notification.YesNo)

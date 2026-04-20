@@ -5,6 +5,33 @@
         CanResize="False" SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner"
         Background="#121212">
+        <Window.Styles>
+                <Style Selector="Button">
+                        <Setter Property="Background" Value="#303030" />
+                        <Setter Property="Foreground" Value="#f2f2f2" />
+                </Style>
+                <Style Selector="TextBox">
+                        <Setter Property="Background" Value="#202020" />
+                        <Setter Property="BorderBrush" Value="#424242" />
+                        <Setter Property="Foreground" Value="#f2f2f2" />
+                </Style>
+                <Style Selector="TextBox:focus /template/ Border">
+                        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBackground}" />
+                </Style>
+                <Style Selector="CheckBox:checked /template/ Border#NormalRectangle">
+                        <Setter Property="Background" Value="{DynamicResource AccentButtonBackground}" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBackground}" />
+                </Style>
+                <Style Selector="CheckBox:checked /template/ Path#CheckGlyph">
+                        <Setter Property="Fill" Value="{DynamicResource AccentButtonForeground}" />
+                </Style>
+                <Style Selector="CheckBox:pointerover /template/ Border#NormalRectangle">
+                        <Setter Property="Opacity" Value="0.7" />
+                </Style>
+                <Style Selector="CheckBox:pressed /template/ Border#NormalRectangle">
+                        <Setter Property="Opacity" Value="0.8" />
+                </Style>
+        </Window.Styles>
     <Grid RowDefinitions="Auto,*,Auto" MinWidth="300">
         <TextBlock Padding="20" Foreground="White" VerticalAlignment="Top"
                    TextWrapping="WrapWithOverflow" FontSize="15"
@@ -20,10 +47,10 @@
         </DataGrid>
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
                     Margin="0,0,0,10" Spacing="20">
-            <Button x:Name="SelectButton" Content="Select" Width="75" Height="25"
-                    Background="White" Foreground="Black" Click="SelectButton_Click"/>
-            <Button x:Name="CancelButton" Content="Cancel" Width="75" Height="25"
-                    Background="White" Foreground="Black" Click="CancelButton_Click"/>
+            <Button x:Name="SelectButton" Content="Select" 
+                    Classes="accent" Click="SelectButton_Click"/>
+            <Button x:Name="CancelButton" Content="Cancel" 
+                    Click="CancelButton_Click"/>
         </StackPanel>
     </Grid>
 </Window>

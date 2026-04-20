@@ -88,7 +88,6 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private bool _isUiEnabled = true;
     [ObservableProperty] private string _packageStats = "";
     [ObservableProperty] private global::Avalonia.Media.IBrush _gameAccentColor = global::Avalonia.Media.SolidColorBrush.Parse("#F5E63D");
-
     private DialogService? _dialogService;
     private FileSystemWatcher? _fileSystemWatcher;
     private CancellationTokenSource _cancellationToken = new();
@@ -146,10 +145,10 @@ public partial class MainWindowViewModel : ObservableObject
         LoadAemulusConfig();
         LoadGameConfig();
         LoadPackages();
-        UpdateGameAccentColor();
         SetupFileSystemWatcher();
         AppendConsole("[INFO] Aemulus Package Manager started (Avalonia cross-platform build)");
         PreviewImage = DarkMode ? _placeholderImage_dark.Value : _placeholderImage_light.Value;
+        UpdateGameAccentColor();
     }
 
     private void SetupFileSystemWatcher()
@@ -776,8 +775,7 @@ public partial class MainWindowViewModel : ObservableObject
                 SelectedLoadout = _lastLoadout;
                 return;
             }
-            DialogWindowViewModel dialogvm = CreateDialogViewModel();
-            var window = new Views.CreateEditLoadoutWindow(dialogvm, SelectedGame, _lastLoadout, false);
+            var window = new Views.CreateEditLoadoutWindow(_dialogService.DialogWindow, SelectedGame, _lastLoadout, false);
             await window.ShowDialog(_dialogService?.OwnerWindow);
             var name = window.LoadoutName?.Trim() ?? "";
             if(string.IsNullOrEmpty(name))
@@ -1567,16 +1565,6 @@ public partial class MainWindowViewModel : ObservableObject
         return vm;
     }
 
-    public DialogWindowViewModel CreateDialogViewModel()
-    {
-        var vm = new DialogWindowViewModel
-        {
-            GameTitle = SelectedGame,
-            LoadoutName = "",
-        };
-        return vm;
-    }
-
     public void ApplyLastLoadoutConfig(){
         switch (SelectedGame)
         {
@@ -1960,9 +1948,7 @@ public partial class MainWindowViewModel : ObservableObject
             skippedVersion = SelectedPackage.skippedVersion
         };
 
-
-        DialogWindowViewModel vmdialog = CreateDialogViewModel();
-        var window = new Views.CreatePackageWindow(vmdialog, m);
+        var window = new Views.CreatePackageWindow(_dialogService.DialogWindow, m);
         await window.ShowDialog(_dialogService.OwnerWindow);
 
         if (window.ResultMetadata != null)
@@ -2395,8 +2381,7 @@ public partial class MainWindowViewModel : ObservableObject
                 if (_dialogService != null)
                 {
                     await _dialogService.ShowNotification($"A loadout named \"{loadoutName}\" already exists.");
-                    var dialogvm = CreateDialogViewModel();
-                    var (newName, _) = await _dialogService.ShowInputDialog(dialogvm, "Enter a new name for the loadout:");
+                    var (newName, _) = await _dialogService.ShowInputDialog("Enter a new name for the loadout:");
                     if (string.IsNullOrWhiteSpace(newName)) return null;
                     loadoutName = newName;
                     loadoutFile = Path.Combine(_configPath, game, $"{loadoutName}.xml");
@@ -2418,9 +2403,8 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private async Task EditLoadout(){
         if (SelectedLoadout == null || _loadoutChanging) return;
-        DialogWindowViewModel dialogvm = CreateDialogViewModel();
 
-        var window = new Views.CreateEditLoadoutWindow(dialogvm, SelectedGame, SelectedLoadout, true);
+        var window = new Views.CreateEditLoadoutWindow(_dialogService.DialogWindow, SelectedGame, SelectedLoadout, true);
         await window.ShowDialog(_dialogService?.OwnerWindow);
         LoadPackages();
     }
@@ -2602,9 +2586,10 @@ public partial class MainWindowViewModel : ObservableObject
         ConsoleEntries.Clear();
     }
 
-    private void UpdateGameAccentColor()
+    public void UpdateGameAccentColor()
     {
-        GameAccentColor = Converters.GameColorConverter.GetBrush(SelectedGame);
+        _dialogService?.DialogWindow.UpdateAccentColors(SelectedGame);
+        GameAccentColor = SolidColorBrush.Parse(Converters.GameColorConverter.GetHex(SelectedGame));
     }
 
     public async void UpdateStats()
@@ -2642,7 +2627,7 @@ public partial class MainWindowViewModel : ObservableObject
                 PackageStats = $"{packageCount} packages \u2022 {enabledCount} enabled \u2022 v{version}";
             }
         });
-    }
+    } 
 }
 
 public record LogEntry(string Text, IBrush Foreground);

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Xml.Serialization;
+using AemulusModManager.Avalonia.ViewModels;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
@@ -18,13 +19,18 @@ public partial class ChangelogBox : Window
         InitializeComponent();
     }
 
-    public ChangelogBox(GameBananaItemUpdate update, string packageName, string text,
+    public ChangelogBox(DialogWindowViewModel dialogVm, GameBananaItemUpdate update, string packageName, string text,
         DisplayedMetadata row, string version, string path, bool ok = true)
     {
         _row = row;
         _version = version;
         _path = path;
         InitializeComponent();
+        DataContext = dialogVm;
+        foreach (var prop in dialogVm.AccentProps)
+        {
+            this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
+        }
         ChangesGrid.ItemsSource = update.Changes;
         Title = $"{packageName} Changelog";
         VersionLabel.Text = update.Title;
@@ -43,9 +49,14 @@ public partial class ChangelogBox : Window
         }
     }
 
-    public ChangelogBox(GameBananaItemUpdate update, string packageName, string text, bool ok = true)
+    public ChangelogBox(DialogWindowViewModel dialogVm, GameBananaItemUpdate update, string packageName, string text, bool ok = true)
     {
         InitializeComponent();
+        DataContext = dialogVm;
+        foreach (var prop in dialogVm.AccentProps)
+        {
+            this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
+        }
         ChangesGrid.ItemsSource = update.Changes;
         Title = $"{packageName} Changelog";
         VersionLabel.Text = update.Title;

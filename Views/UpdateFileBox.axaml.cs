@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Octokit;
+using AemulusModManager.Avalonia.ViewModels;
 
 namespace AemulusModManager.Avalonia.Views;
 
@@ -17,18 +18,28 @@ public partial class UpdateFileBox : Window
     }
 
     // GameBanana Files
-    public UpdateFileBox(List<GameBananaItemFile> files, string packageName)
+    public UpdateFileBox(DialogWindowViewModel dialogVm, List<GameBananaItemFile> files, string packageName) : this()
     {
         InitializeComponent();
+        DataContext = dialogVm;
+        foreach(var prop in dialogVm.AccentProps)
+        {
+            this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
+        }
         FileList.ItemsSource = files;
         TitleBox.Text = packageName;
         Host = "gamebanana";
     }
 
     // GitHub Files
-    public UpdateFileBox(IReadOnlyList<ReleaseAsset> files, string packageName)
+    public UpdateFileBox(DialogWindowViewModel dialogVm, IReadOnlyList<ReleaseAsset> files, string packageName) : this()
     {
         InitializeComponent();
+        DataContext = dialogVm;
+        foreach(var prop in dialogVm.AccentProps)
+        {
+            this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
+        }
         TitleBox.Text = packageName;
         var convList = new List<GithubFile>();
         foreach (var file in files)

@@ -55,6 +55,13 @@ public class GameColorConverter : IValueConverter
         return SolidColorBrush.Parse("#F5E63D");
     }
 
+    public static string GetHex(string gameName)
+    {
+        if (GameColors.TryGetValue(gameName, out var hex))
+            return hex;
+        return "#F5E63D";
+    }
+
     public static IBrush GetHoverBrush(string gameName)
     {
         if (GameHoverColors.TryGetValue(gameName, out var hex))

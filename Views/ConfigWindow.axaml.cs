@@ -46,6 +46,13 @@ public partial class ConfigWindow : Window
         this.Resources["AccentButtonBackgroundPressed"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.2));
         this.Resources["AccentButtonBackgroundPointerOver"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.3));
         this.Resources["AccentButtonBackgroundDisabled"] = new SolidColorBrush(Utilities.Colors.Darken(color, 0.7));
+        // Set foreground to either black or white based on brightness
+        double brightness = (color.R * 0.299 + color.G * 0.587 + color.B * 0.114) / 255;
+        var foreground = brightness > 0.6 ? Brushes.Black : Brushes.White;
+        this.Resources["AccentButtonForeground"] = foreground;
+        this.Resources["AccentButtonForegroundPressed"] = foreground;
+        this.Resources["AccentButtonForegroundPointerOver"] = foreground;
+        this.Resources["AccentButtonForegroundDisabled"] = foreground;
     }
 
     private async void BrowseOutputClick(object? sender, RoutedEventArgs e)
