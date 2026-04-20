@@ -23,14 +23,8 @@ public static class FlowMerger
 
         foreach (string dir in ModList)
         {
-            // Sort so .bf files are processed before .flow files — on Linux, enumeration
-            // order is not guaranteed, and a .flow that hooks into a same-named .bf needs
-            // the .bf to already be registered in compiledFiles as its base.
             var flowFiles = Directory.EnumerateFiles(dir, "*.*", SearchOption.AllDirectories)
-                .Where(s => (s.ToLower().EndsWith(".flow") || s.ToLower().EndsWith(".bf"))
-                    && !s.ToLower().EndsWith(".bf.flow"))
-                .OrderBy(s => s.ToLower().EndsWith(".bf") ? 0 : 1)
-                .ThenBy(s => s);
+                    .Where(s => (s.ToLower().EndsWith(".flow", System.StringComparison.OrdinalIgnoreCase) || s.ToLower().EndsWith(".bf", System.StringComparison.OrdinalIgnoreCase)) && !s.ToLower().EndsWith(".bf.flow", System.StringComparison.OrdinalIgnoreCase));
 
             string[]? aemIgnore = File.Exists(Path.Combine(dir, "Ignore.aem"))
                 ? File.ReadAllLines(Path.Combine(dir, "Ignore.aem"))
@@ -46,8 +40,8 @@ public static class FlowMerger
                 {
                     if (File.Exists(Path.ChangeExtension(file, "flow")))
                         continue; // Skip bf if flow exists (flow will be compiled)
-                    // Standalone bf — add as base, BinMerger.Unpack will copy it to output
-                    compiledFiles.Add(new[] { filePath, dir, bf });
+                    // Standalone bf - add as base, BinMerger.Unpack will copy it to output
+                    compiledFiles.Add([filePath, dir, bf]);
                     continue;
                 }
 
@@ -67,6 +61,7 @@ public static class FlowMerger
                     // Get the path of the file in original
                     string ogPath = Path.Combine(DataDir, "Original", game,
                         ScriptCompiler.GetRelativePath(bf, dir, game, false));
+                    ogPath = FileManagement.GetActualCaseForFileName(ogPath);
 
                     if (File.Exists(ogPath))
                         File.Copy(ogPath, bf, true);
@@ -80,7 +75,7 @@ public static class FlowMerger
                 if (!ScriptCompiler.Compile(file, bf, game, language, Path.GetFileName(dir)))
                     continue;
 
-                compiledFiles.Add(new[] { filePath, dir, bf });
+                compiledFiles.Add([filePath, dir, bf]);
                 // The compiled .bf stays in the package dir; BinMerger.Unpack copies it to output
             }
         }

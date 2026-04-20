@@ -697,7 +697,7 @@ public partial class MainWindowViewModel : ObservableObject
             oldIndex >= DisplayedPackages.Count || newIndex >= DisplayedPackages.Count)
             return;
 
-        // Avalonia DataGrid does not handle ObservableCollection.Move correctly —
+        // Avalonia DataGrid does not handle ObservableCollection.Move correctly -
         // use Remove + Insert so it gets separate Remove/Add CollectionChanged events.
         var item = DisplayedPackages[oldIndex];
         DisplayedPackages.RemoveAt(oldIndex);
@@ -984,7 +984,7 @@ public partial class MainWindowViewModel : ObservableObject
                 var path = GetOutputPath(game);
                 Directory.CreateDirectory(path);
 
-                // FlowMerger/BmdMerger/PM1Merger — cross-platform CLI-based script merging
+                // FlowMerger/BmdMerger/PM1Merger - cross-platform CLI-based script merging
                 string? scriptLang = game.Contains("Persona 5 Royal") 
                     ? (game == "Persona 5 Royal (Switch)" ? Config.p5rSwitchConfig?.language : Config.p5rConfig?.language)
                     : null;
@@ -2450,7 +2450,7 @@ public partial class MainWindowViewModel : ObservableObject
         LoadPreviewImage(SelectedPackage);
         UpdateConfig();
 
-        // Switch Avalonia theme variant — DynamicResource ThemeDictionaries handle the rest
+        // Switch Avalonia theme variant - DynamicResource ThemeDictionaries handle the rest
         if (Application.Current != null)
             Application.Current.RequestedThemeVariant = DarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
 

@@ -158,7 +158,7 @@ public static class binMerge
         var pakPackAvailable = PAKPackHelper.IsAvailable();
         if (!pakPackAvailable)
         {
-            ParallelLogger.Log("[WARNING] PAKPack not available — archive unpacking will be skipped, but loose files will still be copied.");
+            ParallelLogger.Log("[WARNING] PAKPack not available - archive unpacking will be skipped, but loose files will still be copied.");
             ParallelLogger.Log("[WARNING] Please check Dependencies/PAKPack/ and ensure mono is installed on Linux.");
         }
         ParallelLogger.Log("[INFO] Beginning to unpack...");
@@ -438,7 +438,7 @@ public static class binMerge
     {
         ParallelLogger.Log("[INFO] Beginning to merge...");
 
-        // Check if loose folder matches vanilla bin file — copy originals as base
+        // Check if loose folder matches vanilla bin file - copy originals as base
         foreach (var d in Directory.GetDirectories(modDir, "*", SearchOption.AllDirectories))
         {
             var relPath = Path.GetRelativePath(modDir, d);
@@ -712,7 +712,7 @@ public static class binMerge
             }
             else
             {
-                // Need nested unpacking — find best matching content entry
+                // Need nested unpacking - find best matching content entry
                 var longestPrefix = FindBestMatch(contents, relPath);
 
                 if (string.IsNullOrEmpty(longestPrefix))
@@ -957,7 +957,7 @@ public static class binMerge
         if (!File.Exists(cpkMake))
         {
             // Try system-installed alternative on Linux
-            ParallelLogger.Log($"[WARNING] cpkmakec.exe not found at {cpkMake}. CPK creation skipped — this is a Windows-only tool.");
+            ParallelLogger.Log($"[WARNING] cpkmakec.exe not found at {cpkMake}. CPK creation skipped - this is a Windows-only tool.");
             ParallelLogger.Log("[INFO] If your game requires CPK output, copy the built files manually or use a CPK tool.");
             return;
         }
