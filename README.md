@@ -8,7 +8,6 @@ Tekka's [Aemulus Mod Manager](https://github.com/TekkaGB/AemulusModManager) port
 Welcome partner, you're in for a wild ride of testing this software. I don't have the time and energy to test every single use-case so I am counting on you to report issues to me along with the steps to reproduce them so I can take a look and get it fixed. 
 
 # Known Issues
-* Flow compiler doesn't properly compile down mods that add additional files that don't exist in the unpack (Ex: Persona 3's Quick travel)
 * One click install isn't implemented
 * Drag and drop doesn't function due to limitations of Avalonia under Wayland. Either run the application under xorg, or use the add package button.
 * PCSX2 launch is busted.
