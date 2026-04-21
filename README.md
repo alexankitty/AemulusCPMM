@@ -1,7 +1,8 @@
 > [!WARNING]
 > This is in early stages of development. You can and will run into problems.
 
-<center><img width="1158" height="741" alt="image" src="https://github.com/user-attachments/assets/da60d9de-ece2-463a-ac63-671f78c94b76" /></center>
+<center><img width="1277" height="1393" alt="image" src="https://github.com/user-attachments/assets/ea9351ca-a9c4-4649-92e8-30a800b09907" />
+</center>
 
 
 # Aemulus Cross-Platform Mod Manager
