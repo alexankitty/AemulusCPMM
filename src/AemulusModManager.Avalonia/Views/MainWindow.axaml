@@ -10,8 +10,8 @@
         x:Class="AemulusModManager.Avalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="{Binding WindowTitle}"
-        Width="1080" Height="720"
-        MinWidth="1080" MinHeight="720"
+        Width="1120" Height="720"
+        MinWidth="1120" MinHeight="720"
         Background="{DynamicResource AppBg}"
         DragDrop.AllowDrop="True">
 

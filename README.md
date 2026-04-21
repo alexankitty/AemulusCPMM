@@ -5,7 +5,7 @@
 </center>
 
 
-# Aemulus Cross-Platform Mod Manager
+# Aemulus Cross-Platform Mod Manager (Pending namechange to Banana-Peel)
 Tekka's [Aemulus Mod Manager](https://github.com/TekkaGB/AemulusModManager) ported to Avalonia and Dotnet 8. For the bulk of the documentation, I recommend you take a peak there, as I will only cover the important bits.
 
 # Bug Testing
@@ -22,3 +22,6 @@ I don't want to deal with packaging, so if you want to run an AUR package or som
 You can download a windows or linux build from [Releases](https://github.com/alexankitty/AemulusCPMM/releases)
 
 Linux builds are in both binary and appimage format
+
+# Long Term
+* Create a plugin system to support games arbitrarily???
