@@ -65,7 +65,8 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<DisplayedMetadata> _displayedPackages = new();
     [ObservableProperty] private DisplayedMetadata? _selectedPackage;
     [ObservableProperty] private string _selectedGame = "Persona 4 Golden";
-    [ObservableProperty] private ObservableCollection<string> _gameList = new()
+    [ObservableProperty]
+    private ObservableCollection<string> _gameList = new()
     {
         "Persona 1 (PSP)", "Persona 3 FES", "Persona 3 Portable",
         "Persona 4 Golden", "Persona 4 Golden (Vita)", "Persona 5",
@@ -497,7 +498,8 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 AppendConsole($"[ERROR] Failed to load packages: {ex.Message}");
             }
-        }else if (File.Exists(defaultLoadoutFile))
+        }
+        else if (File.Exists(defaultLoadoutFile))
         {
             try
             {
@@ -778,14 +780,14 @@ public partial class MainWindowViewModel : ObservableObject
             var window = new Views.CreateEditLoadoutWindow(_dialogService.DialogWindow, SelectedGame, _lastLoadout, false);
             await window.ShowDialog(_dialogService?.OwnerWindow);
             var name = window.LoadoutName?.Trim() ?? "";
-            if(string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name))
             {
                 SelectedLoadout = _lastLoadout;
                 return;
             }
             var loadoutFile = Path.Combine(_configPath, SelectedGame, $"{name}.xml");
             // If we got a name but the file doesn't exist, create a clean loadout.
-            if(!File.Exists(loadoutFile))
+            if (!File.Exists(loadoutFile))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(loadoutFile)!);
                 var empty = new Packages { packages = new ObservableCollection<Package>() };
@@ -985,7 +987,7 @@ public partial class MainWindowViewModel : ObservableObject
                 Directory.CreateDirectory(path);
 
                 // FlowMerger/BmdMerger/PM1Merger - cross-platform CLI-based script merging
-                string? scriptLang = game.Contains("Persona 5 Royal") 
+                string? scriptLang = game.Contains("Persona 5 Royal")
                     ? (game == "Persona 5 Royal (Switch)" ? Config.p5rSwitchConfig?.language : Config.p5rConfig?.language)
                     : null;
 
@@ -1214,54 +1216,54 @@ public partial class MainWindowViewModel : ObservableObject
             switch (game)
             {
                 case "Persona 5":
-                {
-                    var cpk = Path.Combine(modPath, (Config.p5Config?.CpkName ?? "mod.cpk") + ".cpk");
-                    if (File.Exists(cpk)) File.Delete(cpk);
-                    break;
-                }
+                    {
+                        var cpk = Path.Combine(modPath, (Config.p5Config?.CpkName ?? "mod.cpk") + ".cpk");
+                        if (File.Exists(cpk)) File.Delete(cpk);
+                        break;
+                    }
                 case "Persona 3 Portable":
-                {
-                    var cpkName = Config.p3pConfig?.cpkName ?? "data.cpk";
-                    var cpk = Path.Combine(modPath, cpkName);
-                    if (!cpkName.EndsWith(".cpk")) cpk += ".cpk";
-                    if (File.Exists(cpk)) File.Delete(cpk);
-                    var fmvDir = Path.Combine(modPath, "FMV");
-                    if (Directory.Exists(fmvDir)) Directory.Delete(fmvDir, true);
-                    break;
-                }
+                    {
+                        var cpkName = Config.p3pConfig?.cpkName ?? "data.cpk";
+                        var cpk = Path.Combine(modPath, cpkName);
+                        if (!cpkName.EndsWith(".cpk")) cpk += ".cpk";
+                        if (File.Exists(cpk)) File.Delete(cpk);
+                        var fmvDir = Path.Combine(modPath, "FMV");
+                        if (Directory.Exists(fmvDir)) Directory.Delete(fmvDir, true);
+                        break;
+                    }
                 case "Persona 1 (PSP)":
-                {
-                    var iso = Path.Combine(modPath, "P1PSP.iso");
-                    if (File.Exists(iso)) File.Delete(iso);
-                    break;
-                }
+                    {
+                        var iso = Path.Combine(modPath, "P1PSP.iso");
+                        if (File.Exists(iso)) File.Delete(iso);
+                        break;
+                    }
                 case "Persona 4 Golden (Vita)":
-                {
-                    var cpkName = Config.p4gVitaConfig?.cpkName ?? "data.cpk";
-                    var cpk = Path.Combine(modPath, cpkName);
-                    if (!cpkName.EndsWith(".cpk")) cpk += ".cpk";
-                    if (File.Exists(cpk)) File.Delete(cpk);
-                    break;
-                }
+                    {
+                        var cpkName = Config.p4gVitaConfig?.cpkName ?? "data.cpk";
+                        var cpk = Path.Combine(modPath, cpkName);
+                        if (!cpkName.EndsWith(".cpk")) cpk += ".cpk";
+                        if (File.Exists(cpk)) File.Delete(cpk);
+                        break;
+                    }
                 case "Persona Q2" or "Persona Q":
-                {
-                    var cpk = Path.Combine(modPath, "mod.cpk");
-                    if (File.Exists(cpk)) File.Delete(cpk);
-                    break;
-                }
+                    {
+                        var cpk = Path.Combine(modPath, "mod.cpk");
+                        if (File.Exists(cpk)) File.Delete(cpk);
+                        break;
+                    }
                 case "Persona 5 Royal (PS4)":
-                {
-                    var cpkBase = (Config.p5rConfig?.cpkName ?? "bind").Replace(".cpk", "");
-                    var cpk = Path.Combine(modPath, cpkBase + GetP5RLanguageSuffix() + ".cpk");
-                    if (File.Exists(cpk)) File.Delete(cpk);
-                    break;
-                }
+                    {
+                        var cpkBase = (Config.p5rConfig?.cpkName ?? "bind").Replace(".cpk", "");
+                        var cpk = Path.Combine(modPath, cpkBase + GetP5RLanguageSuffix() + ".cpk");
+                        if (File.Exists(cpk)) File.Delete(cpk);
+                        break;
+                    }
                 case "Persona 5 Royal (Switch)":
-                {
-                    var cpk = Path.Combine(modPath, "mods", "romfs", "CPK", "PATCH1.CPK");
-                    if (File.Exists(cpk)) File.Delete(cpk);
-                    break;
-                }
+                    {
+                        var cpk = Path.Combine(modPath, "mods", "romfs", "CPK", "PATCH1.CPK");
+                        if (File.Exists(cpk)) File.Delete(cpk);
+                        break;
+                    }
             }
         }
         catch (Exception ex)
@@ -1318,22 +1320,13 @@ public partial class MainWindowViewModel : ObservableObject
                     if (!string.IsNullOrEmpty(GamePath))
                     {
                         var elf = !string.IsNullOrEmpty(ElfPath) ? ElfPath : null;
-                        // Detect PCSX2 version by launcher name
+                        // PCSX2 version detection was removed, upgrade already or else.
                         var launcherName = Path.GetFileNameWithoutExtension(LauncherPath).ToLowerInvariant();
-                        if (launcherName.Contains("pcsx2"))
-                        {
-                            if (elf != null)
-                                psi.Arguments = $"--nogui --elf=\"{elf}\" \"{GamePath}\"";
-                            else
-                                psi.Arguments = $"--nogui \"{GamePath}\"";
-                        }
+                        if (elf != null)
+                            psi.Arguments = $"-nogui -elf \"{elf}\" -fastboot -- \"{GamePath}\"";
                         else
-                        {
-                            if (elf != null)
-                                psi.Arguments = $"-nogui -elf \"{elf}\" -fastboot -- \"{GamePath}\"";
-                            else
-                                psi.Arguments = $"-nogui -fastboot -- \"{GamePath}\"";
-                        }
+                            psi.Arguments = $"-nogui -fastboot -- \"{GamePath}\"";
+
                     }
                     break;
                 case "Persona 5":
@@ -1565,7 +1558,8 @@ public partial class MainWindowViewModel : ObservableObject
         return vm;
     }
 
-    public void ApplyLastLoadoutConfig(){
+    public void ApplyLastLoadoutConfig()
+    {
         switch (SelectedGame)
         {
             case "Persona 1 (PSP)":
@@ -2401,7 +2395,8 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task EditLoadout(){
+    private async Task EditLoadout()
+    {
         if (SelectedLoadout == null || _loadoutChanging) return;
 
         var window = new Views.CreateEditLoadoutWindow(_dialogService.DialogWindow, SelectedGame, SelectedLoadout, true);
@@ -2430,7 +2425,8 @@ public partial class MainWindowViewModel : ObservableObject
         {
             var psi = new ProcessStartInfo("7z", "--help")
             {
-                CreateNoWindow = true, UseShellExecute = false,
+                CreateNoWindow = true,
+                UseShellExecute = false,
                 RedirectStandardOutput = true
             };
             using var proc = Process.Start(psi);
@@ -2556,15 +2552,15 @@ public partial class MainWindowViewModel : ObservableObject
 
     private static IBrush BrushForLine(string line)
     {
-        if (line.Contains("[ERROR]"))   return SolidColorBrush.Parse("#FF6060");
+        if (line.Contains("[ERROR]")) return SolidColorBrush.Parse("#FF6060");
         if (line.Contains("[WARNING]")) return SolidColorBrush.Parse("#FFD060");
-        if (line.Contains("[DEBUG]"))   return SolidColorBrush.Parse("#60A0FF");
+        if (line.Contains("[DEBUG]")) return SolidColorBrush.Parse("#60A0FF");
         return SolidColorBrush.Parse("#90EE90");
     }
 
     public void AppendConsole(string message)
     {
-        if(message.Contains("[DEBUG]") && Environment.GetEnvironmentVariable("DEBUG_LOGGING") != "1")
+        if (message.Contains("[DEBUG]") && Environment.GetEnvironmentVariable("DEBUG_LOGGING") != "1")
             return;
         ConsoleOutput += message + Environment.NewLine;
         ConsoleEntries.Add(new LogEntry(message, BrushForLine(message)));
@@ -2572,7 +2568,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     public void AppendConsoleRaw(string text)
     {
-        if(text.Contains("[DEBUG]") && Environment.GetEnvironmentVariable("DEBUG_LOGGING") != "1")
+        if (text.Contains("[DEBUG]") && Environment.GetEnvironmentVariable("DEBUG_LOGGING") != "1")
             return;
         ConsoleOutput += text;
         // Raw text may contain multiple newline-terminated lines from ParallelLogger
@@ -2632,7 +2628,7 @@ public partial class MainWindowViewModel : ObservableObject
                 PackageStats = $"{packageCount} packages \u2022 {enabledCount} enabled \u2022 v{version}";
             }
         });
-    } 
+    }
 }
 
 public record LogEntry(string Text, IBrush Foreground);

@@ -13,7 +13,6 @@ usage() {
     echo "  --windows      Build Windows x64 zip"
     echo "  --linux        Build Linux x64 tar.gz"
     echo "  --appimage     Build Linux x86_64 AppImage"
-    echo "  --dependencies Build project dependencies"
     exit 1
 }
 
@@ -27,7 +26,6 @@ else
             --windows)      TARGETS+=(windows); shift ;;
             --linux)        TARGETS+=(linux); shift ;;
             --appimage)     TARGETS+=(appimage); shift ;;
-            --dependencies) TARGETS+=(dependencies); shift ;;
             -h|--help)      usage ;;
             *)              echo "Unknown option: $1"; usage ;;
         esac
@@ -41,7 +39,6 @@ build_windows() {
     dotnet publish "$SCRIPT_DIR/$PROJECT" \
         -c Release \
         -r win-x64 \
-        -p:PublishSingleFile=true \
         -p:SelfContained=true \
         -o "$SCRIPT_DIR/publish/win-x64"
 
@@ -55,7 +52,6 @@ build_linux() {
     dotnet publish "$SCRIPT_DIR/$PROJECT" \
         -c Release \
         -r linux-x64 \
-        -p:PublishSingleFile=true \
         -p:SelfContained=true \
         -o "$SCRIPT_DIR/publish/linux-x64"
 
@@ -79,7 +75,6 @@ build_appimage() {
     dotnet publish "$SCRIPT_DIR/$PROJECT" \
         -c Release \
         -r linux-x64 \
-        -p:PublishSingleFile=false \
         -p:SelfContained=true \
         -o "$SCRIPT_DIR/publish/linux-x64-appimage"
 
@@ -132,28 +127,11 @@ EOF
     echo "    -> $OUT_DIR/AemulusPackageManager-x86_64.AppImage"
 }
 
-build_dependencies() {
-    echo "==> Building dependencies..."
-    git clone --depth 1 https://github.com/tge-was-taken/Atlus-Script-Tools.git atlus-tools
-          dotnet publish atlus-tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj \
-            -r linux-x64 \
-            -c Release \
-            -o Dependencies/AtlusScriptCompiler-linux --self-contained true /p:PublishSingleFile=true
-          chmod +x Dependencies/AtlusScriptCompiler-linux/AtlusScriptCompiler
-          dotnet publish atlus-tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj \
-            -r win-x64 \
-            -c Release \
-            -o Dependencies/AtlusScriptCompiler-windows --self-contained true /p:PublishSingleFile=true
-          chmod +x Dependencies/AtlusScriptCompiler-windows/AtlusScriptCompiler.exe
-          rm -rf atlus-tools
-}
-
 for target in "${TARGETS[@]}"; do
     case "$target" in
         windows)  build_windows  ;;
         linux)    build_linux    ;;
         appimage) build_appimage ;;
-        dependencies) build_dependencies ;;
     esac
 done
 

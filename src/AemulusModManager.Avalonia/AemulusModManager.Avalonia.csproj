@@ -21,7 +21,6 @@
 
   <!-- Publish settings (applied via dotnet publish) -->
   <PropertyGroup Condition="'$(PublishSingleFile)' == 'true' Or '$(SelfContained)' == 'true'">
-    <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
@@ -31,7 +30,11 @@
     <AvaloniaResource Include="Assets/**" />
   </ItemGroup>
 
-  <Target Name="BuildAtlusScriptCompiler" BeforeTargets="BeforeBuild">
+  <Target Name="BuildAtlusScriptCompiler" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
+    <Exec Command="dotnet build ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release -r $(RuntimeIdentifier)" />
+  </Target>
+
+  <Target Name="BuildAtlusScriptCompiler" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
     <Exec Command="dotnet build ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release" />
   </Target>
 
@@ -67,10 +70,15 @@
     <None Include="Dependencies/PAKPack/**" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Dependencies/AtlusScriptCompiler/**" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Dependencies/PM1MessageScriptEditor/**" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="../../modules/Atlus-Script-Tools/Build/Release/net8.0/**">
+    <Content Include="../../modules/Atlus-Script-Tools/Build/Release/net8.0/$(RuntimeIdentifier)/**" Condition="'$(RuntimeIdentifier)' != ''">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <Link>Dependencies/AtlusScriptCompiler/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <TargetPath>Dependencies/AtlusScriptCompiler/%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
+    </Content>
+    <Content Include="../../modules/Atlus-Script-Tools/Build/Release/net8.0/**" Exclude="../../modules/Atlus-Script-Tools/Build/Release/net8.0/$(RuntimeIdentifier)/**" Condition="'$(RuntimeIdentifier)' == ''">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>Dependencies/AtlusScriptCompiler/%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
     </Content>
   </ItemGroup>
 </Project>
