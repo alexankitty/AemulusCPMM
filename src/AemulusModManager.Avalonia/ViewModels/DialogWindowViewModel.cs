@@ -31,7 +31,6 @@ public partial class DialogWindowViewModel : ObservableObject
     
     private void UpdateAccentColors()
     {
-        Console.WriteLine("Updating accent colors for game: " + GameTitle);
         if(string.IsNullOrWhiteSpace(GameTitle))
             return;
         var hex = Converters.GameColorConverter.GetHex(GameTitle);

@@ -317,8 +317,6 @@ public partial class MainWindow : Window
     private void OnDragOver(object? sender, DragEventArgs e)
     {
         if (_dropFromIndex >= 0) return;
-        Console.WriteLine($"[DnD] OnDragOver route={e.Route} handled={e.Handled} inEffects={e.DragEffects}");
-        Console.WriteLine($"[DnD]   Files={e.Data.Contains(DataFormats.Files)} Text={e.Data.Contains(DataFormats.Text)} uri-list={e.Data.Contains("text/uri-list")} text/plain={e.Data.Contains("text/plain")}");
         if (HasFiles(e.Data))
         {
             e.DragEffects = DragDropEffects.Copy;
@@ -338,10 +336,8 @@ public partial class MainWindow : Window
         if (_dropFromIndex >= 0) return;
         DropOverlay.IsVisible = false;
         e.Handled = true;
-        Console.WriteLine($"[DnD] OnDrop fired");
 
         var paths = GetDroppedPaths(e.Data);
-        Console.WriteLine($"[DnD] paths extracted: {paths.Length}");
         if (paths.Length == 0) return;
 
         ViewModel.IsUiEnabled = false;
