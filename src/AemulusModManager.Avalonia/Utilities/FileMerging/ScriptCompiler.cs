@@ -18,12 +18,11 @@ public static class ScriptCompiler
 {
     private static readonly string AppDir = AppPaths.ExeDir;
     private static readonly string DataDir = AppPaths.DataDir;
+
     private static string? _monoPath;
     private static bool _monoChecked;
-
-    private static string CompilerPath => Path.Combine(AppDir, "Dependencies", "AtlusScriptCompiler-windows", "AtlusScriptCompiler.exe");
+    private static string CompilerPath => Path.Combine(AppDir, "Dependencies", "AtlusScriptCompiler", "AtlusScriptCompiler.exe");
     // Native self-contained linux-x64 binary (no .exe, no mono required)
-    private static string LinuxCompilerPath => Path.Combine(AppDir, "Dependencies", "AtlusScriptCompiler-linux", "AtlusScriptCompiler");
     private static string PM1Path => Path.Combine(AppDir, "Dependencies", "PM1MessageScriptEditor", "PM1MessageScriptEditor.exe");
 
     private static readonly Dictionary<string, (string Library, string Encoding, string FlowFormat, string MsgFormat)> GameInfo = new()
@@ -62,35 +61,8 @@ public static class ScriptCompiler
         return _monoPath;
     }
 
-    public static bool CompilerExists(bool pm1 = false)
-    {
-        // On Linux, prefer the self-contained native binary for AtlusScriptCompiler
-        if (!OperatingSystem.IsWindows() && !pm1 && File.Exists(LinuxCompilerPath))
-            return true;
-
-        var path = pm1 ? PM1Path : CompilerPath;
-        if (!File.Exists(path))
-        {
-            ParallelLogger.Log($"[ERROR] Couldn't find {path}.");
-            return false;
-        }
-        if (!OperatingSystem.IsWindows() && FindMono() == null)
-        {
-            ParallelLogger.Log("[ERROR] Neither a native AtlusScriptCompiler binary nor mono was found. "
-                + "Install mono-runtime or use an AppImage build.");
-            return false;
-        }
-        return true;
-    }
-
     public static void RunExe(string exePath, string args)
     {
-        if (!File.Exists(exePath))
-        {
-            ParallelLogger.Log($"[ERROR] Couldn't find {exePath}.");
-            return;
-        }
-
         string fileName;
         string finalArgs;
         if (!OperatingSystem.IsWindows())
@@ -104,6 +76,7 @@ public static class ScriptCompiler
             }
             else
             {
+                ParallelLogger.Log($"[INFO] Native binary at {nativePath} not found. Attempting to run {exePath} via mono.");
                 var mono = FindMono();
                 if (mono == null)
                 {
@@ -119,7 +92,6 @@ public static class ScriptCompiler
             fileName = exePath;
             finalArgs = args;
         }
-
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo
         {
@@ -131,12 +103,13 @@ public static class ScriptCompiler
             RedirectStandardError = true,
             WindowStyle = ProcessWindowStyle.Hidden,
         };
+        
         process.Start();
         string stdout = process.StandardOutput.ReadToEnd();
         string stderr = process.StandardError.ReadToEnd();
         process.WaitForExit();
-        if (!string.IsNullOrWhiteSpace(stdout))
-            ParallelLogger.Log($"[INFO] {Path.GetFileName(exePath)}: {stdout.Trim()}");
+        //if (!string.IsNullOrWhiteSpace(stdout))
+            //ParallelLogger.Log($"[INFO] {Path.GetFileName(exePath)}: {stdout.Trim()}");
         if (!string.IsNullOrWhiteSpace(stderr))
             ParallelLogger.Log($"[ERROR] {Path.GetFileName(exePath)}: {stderr.Trim()}");
         if (process.ExitCode != 0)

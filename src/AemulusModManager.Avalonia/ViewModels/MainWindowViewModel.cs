@@ -1122,7 +1122,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            AppendConsole($"[ERROR] Build failed: {ex.Message}");
+            AppendConsole($"[ERROR] Build failed: {ex}");
             ParallelLogger.Log($"[ERROR] {ex.StackTrace}");
         }
         finally
@@ -2558,17 +2558,22 @@ public partial class MainWindowViewModel : ObservableObject
     {
         if (line.Contains("[ERROR]"))   return SolidColorBrush.Parse("#FF6060");
         if (line.Contains("[WARNING]")) return SolidColorBrush.Parse("#FFD060");
+        if (line.Contains("[DEBUG]"))   return SolidColorBrush.Parse("#60A0FF");
         return SolidColorBrush.Parse("#90EE90");
     }
 
     public void AppendConsole(string message)
     {
+        if(message.Contains("[DEBUG]") && Environment.GetEnvironmentVariable("DEBUG_LOGGING") != "1")
+            return;
         ConsoleOutput += message + Environment.NewLine;
         ConsoleEntries.Add(new LogEntry(message, BrushForLine(message)));
     }
 
     public void AppendConsoleRaw(string text)
     {
+        if(text.Contains("[DEBUG]") && Environment.GetEnvironmentVariable("DEBUG_LOGGING") != "1")
+            return;
         ConsoleOutput += text;
         // Raw text may contain multiple newline-terminated lines from ParallelLogger
         foreach (var line in text.Split('\n'))

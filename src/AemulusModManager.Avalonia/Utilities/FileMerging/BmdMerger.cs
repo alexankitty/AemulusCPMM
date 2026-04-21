@@ -16,7 +16,6 @@ public static class BmdMerger
 
     public static void Merge(List<string> ModList, string game, string language)
     {
-        if (!ScriptCompiler.CompilerExists()) return;
 
         var foundBmds = new List<string[]>();
 

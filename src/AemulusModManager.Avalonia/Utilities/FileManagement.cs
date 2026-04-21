@@ -2,43 +2,74 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 namespace AemulusModManager.Avalonia.Utilities;
 
 public static class FileManagement
 {
-    public static string GetActualCaseForFileName(string pathAndFileName)
-{
-    string directory = Path.GetDirectoryName(pathAndFileName) ?? string.Empty;
-    if(string.IsNullOrWhiteSpace(directory))
+    public readonly static bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+    public static string ValidatePathCaseInsensitive(string pathAndFileName)
     {
-        throw new ArgumentException("Invalid path: " + pathAndFileName);
-    }
-    string pattern = Path.GetFileName(pathAndFileName);
-    string resultFileName;
+        string resultFileName = pathAndFileName;
+        if (IsWindows && (File.Exists(pathAndFileName) || Directory.Exists(pathAndFileName)))
+            return pathAndFileName; // File exists as is, return it
+        if(File.Exists(pathAndFileName) || Directory.Exists(pathAndFileName))
+            return pathAndFileName; // File exists as is, return it
 
-    // Enumerate all files in the directory, using the file name as a pattern
-    // This will list all case variants of the filename even on file systems that
-    // are case sensitive
-    IEnumerable<string> foundFiles = Directory.EnumerateFiles(directory)
-        .Where(s => Path.GetFileName(s).Equals(pattern, StringComparison.OrdinalIgnoreCase));
+        string file = Path.GetFileName(pathAndFileName);
+        string[] directories = Path.GetDirectoryName(Path.Combine(pathAndFileName))?
+                                    .Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries) ?? [];
 
-    if (foundFiles.Any())
-    {
-        if (foundFiles.Count() > 1)
+        string finalPath = Path.GetPathRoot(pathAndFileName) ?? "";
+        string parentDirectory = Path.GetDirectoryName(pathAndFileName) ?? "";
+
+        foreach (string dir in directories)
         {
-            // More than two files with the same name but different case spelling found
-            throw new Exception("Ambiguous File reference for " + pathAndFileName);
+            IEnumerable<string> foundDirs = Directory.EnumerateDirectories(finalPath)
+            .Where(s => Path.GetFileName(s).Equals(dir, StringComparison.OrdinalIgnoreCase));
+            if (foundDirs.Any())
+            {
+                if (foundDirs.Count() > 1)
+                {
+                    // More than two directories with the same name but different case spelling found
+                    throw new Exception("Ambiguous Directory reference for " + dir);
+                }
+                else
+                {
+                    finalPath = foundDirs.First();
+                }
+            }
+            else
+            {
+                return null; // Directory not found
+            }
+        }
+
+        IEnumerable<string> foundFiles = Directory.EnumerateFiles(finalPath)
+            .Where(s => Path.GetFileName(s).Equals(file, StringComparison.OrdinalIgnoreCase));
+        if (!foundFiles.Any())
+        {
+            foundFiles = Directory.EnumerateDirectories(finalPath)
+            .Where(s => Path.GetFileName(s).Equals(file, StringComparison.OrdinalIgnoreCase));//Fall back to directory check
+        }
+
+        if (foundFiles.Any())
+        {
+            if (foundFiles.Count() > 1)
+            {
+                // More than two files with the same name but different case spelling found
+                throw new Exception("Ambiguous File reference for " + pathAndFileName);
+            }
+            else
+            {
+                resultFileName = foundFiles.First();
+            }
         }
         else
         {
-            resultFileName = foundFiles.First();
+            return null; // File not found
         }
-    }
-    else
-    {
-        throw new FileNotFoundException("File not found" + pathAndFileName, pathAndFileName);
-    }
 
-    return resultFileName;
+        return resultFileName;
     }
 }

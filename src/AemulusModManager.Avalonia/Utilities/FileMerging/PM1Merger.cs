@@ -17,7 +17,6 @@ public static class PM1Merger
 
     public static void Merge(List<string> ModList, string game, string language)
     {
-        if (!ScriptCompiler.CompilerExists(true)) return;
 
         var foundFiles = new List<string[]>();
 
