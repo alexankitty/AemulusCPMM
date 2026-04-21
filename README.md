@@ -1,6 +1,9 @@
 > [!WARNING]
 > This is in early stages of development. You can and will run into problems.
 
+<center><img width="1158" height="741" alt="image" src="https://github.com/user-attachments/assets/da60d9de-ece2-463a-ac63-671f78c94b76" /></center>
+
+
 # Aemulus Cross-Platform Mod Manager
 Tekka's [Aemulus Mod Manager](https://github.com/TekkaGB/AemulusModManager) ported to Avalonia and Dotnet 8. For the bulk of the documentation, I recommend you take a peak there, as I will only cover the important bits.
 
