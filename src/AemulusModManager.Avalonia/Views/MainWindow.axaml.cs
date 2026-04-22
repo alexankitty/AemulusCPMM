@@ -45,9 +45,11 @@ public partial class MainWindow : Window
     private PointerEventArgs? _triggerEvent;
     private bool _dragLock;
     private bool _dragCaptured;
+    public string[] Args;
 
-    public MainWindow()
+    public MainWindow(string[] args)
     {
+        Args = args;
         InitializeComponent();
         DataContext = new MainWindowViewModel();
         SetupConsoleRedirect();
@@ -404,7 +406,28 @@ public partial class MainWindow : Window
         ViewModel.SetDialogService(_dialogService);
         ViewModel.UpdateStats();
         // Required to ensure colors get set once the dialog service is available.
+        if (!ProtocolRegistration.CheckRegistration())
+        {
+            _dialogService.ShowConfirmation("The Aemulus Protocol is not registered. Would you like to register it now? This is required for some features such as downloading packages directly from GameBanana.").ContinueWith(t =>
+            {
+                if (t.Result)
+                {
+                    ProtocolRegistration.RegisterProtocol();
+                    Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        ViewModel.UpdateGameAccentColor();
+                        _dialogService.ShowNotification("Protocol registered! You may now use 1-Click Install links.");
+                    });
+                }
+            });
+        }
+
         ViewModel.UpdateGameAccentColor();
+        if(Args.Length >= 1){
+            if(Args[0].Contains("://")){
+                _packageDownloader.DownloadTaskIPC(Args[0]);
+            }
+        }
     }
 
     private void SetupGuide_Click(object? sender, PointerPressedEventArgs e)

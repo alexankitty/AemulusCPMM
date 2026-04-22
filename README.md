@@ -12,7 +12,6 @@ Tekka's [Aemulus Mod Manager](https://github.com/TekkaGB/AemulusModManager) port
 Welcome partner, you're in for a wild ride of testing this software. I don't have the time and energy to test every single use-case so I am counting on you to report issues to me along with the steps to reproduce them so I can take a look and get it fixed. 
 
 # Known Issues
-* One click install isn't implemented
 * Drag and drop doesn't function due to limitations of Avalonia under Wayland. Either run the application under xorg, or use the add package button.
 * No CPK support under Linux (currently)
 

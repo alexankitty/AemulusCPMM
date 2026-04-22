@@ -19,6 +19,10 @@
     <!-- Platform detection for compiler macros -->
   </PropertyGroup>
 
+  <PropertyGroup>
+    <Guid>a59441db-e6e5-41a0-81db-a833ccd49939</Guid>
+  </PropertyGroup>
+
   <!-- Publish settings (applied via dotnet publish) -->
   <PropertyGroup Condition="'$(PublishSingleFile)' == 'true' Or '$(SelfContained)' == 'true'">
     <SelfContained>true</SelfContained>

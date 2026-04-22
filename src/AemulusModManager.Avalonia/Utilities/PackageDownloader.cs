@@ -12,6 +12,7 @@ using AemulusModManager.Avalonia.Utilities;
 using AemulusModManager.Avalonia.Views;
 using AemulusModManager.Utilities.PackageUpdating;
 using AemulusModManager.Utilities.PackageUpdating.DownloadUtils;
+using Avalonia.Threading;
 using Newtonsoft.Json;
 
 namespace AemulusModManager.Avalonia;
@@ -31,9 +32,16 @@ public class PackageDownloader
     private UpdateProgressBox? _progressBox;
     private readonly DialogService _dialogService;
 
+
     public PackageDownloader(DialogService dialogService)
     {
         _dialogService = dialogService;
+        App.Ipc?.RegisterMessageHandler(DownloadTaskIPC);
+    }
+
+    public async Task DownloadTaskIPC(string line)
+    {
+        Dispatcher.UIThread.Post(async () => await Download(line, true));
     }
 
     public async Task BrowserDownload(GameBananaRecord record, string gameName)
