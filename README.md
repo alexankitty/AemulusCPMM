@@ -14,6 +14,7 @@ Welcome partner, you're in for a wild ride of testing this software. I don't hav
 # Known Issues
 * Drag and drop doesn't function due to limitations of Avalonia under Wayland. Either run the application under xorg, or use the add package button.
 * No CPK support under Linux (currently)
+* There may be a few other build time dependencies missing for other games. They will be addressed in time.
 
 # Installation
 I don't want to deal with packaging, so if you want to run an AUR package or something let me know.

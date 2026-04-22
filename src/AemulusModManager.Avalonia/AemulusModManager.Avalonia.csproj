@@ -10,10 +10,10 @@
     <Title>Aemulus Package Manager</Title>
     <Description>Manage modding packages for Persona games</Description>
     <Copyright>Copyright © 2020-2021</Copyright>
-    <FileVersion>0.2.0.0</FileVersion>
+    <FileVersion>0.3.0.0</FileVersion>
     <Authors>Alexankitty, Tekka</Authors>
-    <Version>0.2.0.0</Version>
-    <AssemblyVersion>0.2.0.0</AssemblyVersion>
+    <Version>0.3.0.0</Version>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
     <Product>Aemulus Package Manager</Product>
     <ApplicationIcon>Assets/Aemulus.ico</ApplicationIcon>
     <!-- Platform detection for compiler macros -->
