@@ -2,3 +2,6 @@ bin/
 obj/
 AtlusScriptCompiler.log
 publish/
+*.exe
+modules/AwbTools/AWB_repacker
+modules/AwbTools/AWB_unpacker
