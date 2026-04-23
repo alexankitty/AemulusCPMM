@@ -23,6 +23,7 @@
             <conv:AccentForegroundConverter x:Key="AccentForegroundConverter" />
             <conv:HiddenTextConverter x:Key="HiddenTextConverter" />
             <conv:HiddenIconConverter x:Key="HiddenIconConverter" />
+            <conv:StringNotEmptyToVisibleConverter x:Key="StringNotEmptyToVisibleConverter" />
             
             <SolidColorBrush x:Key="GameAccentIndicator" Color="#F5E63D"/>
 
@@ -588,7 +589,7 @@
                 <Grid RowDefinitions="Auto,*,Auto">
                     <!-- Top Filter Bar -->
                     <WrapPanel Grid.Row="0" Margin="5" HorizontalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Spacing="5" Margin="2">
+                        <StackPanel Orientation="Horizontal" Spacing="5" Margin="2" IsVisible="False">
                             <TextBlock Text="Game:" Foreground="{DynamicResource AppFg}" VerticalAlignment="Center"/>
                             <ComboBox x:Name="GameFilterBox" Width="180" SelectionChanged="GameFilterSelectionChanged"/>
                         </StackPanel>
@@ -624,27 +625,28 @@
                             <TextBox x:Name="SearchBar" Width="150" Watermark="Search..." KeyDown="SearchBar_KeyDown"/>
                             <Button Content="Search" Click="SearchButton_Click"/>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Spacing="5" Margin="2">
-                            <TextBlock Text="Per Page:" Foreground="{DynamicResource AppFg}" VerticalAlignment="Center"/>
-                            <ComboBox x:Name="PerPageBox" Width="60" SelectionChanged="PerPageSelectionChanged"/>
-                        </StackPanel>
                     </WrapPanel>
 
                     <!-- Main Content: Feed List -->
                     <Grid Grid.Row="1">
                         <ListBox x:Name="FeedBox" Background="{DynamicResource AppBg}" Margin="5">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="{DynamicResource AppFeedCard}" CornerRadius="5" Padding="8" Margin="2">
-                                        <Grid ColumnDefinitions="320,*,Auto">
+                                    <Border Background="{DynamicResource AppFeedCard}" CornerRadius="5" Padding="5">
+                                        <Grid RowDefinitions="Auto,Auto,Auto" Margin="5" Width="330">
                                             <!-- Thumbnail -->
-                                            <Image Grid.Column="0" Width="320" Height="180" Stretch="UniformToFill"
-                                                   asyncImageLoader:ImageLoader.Source="{Binding Image}" Margin="0,0,8,0"/>
+                                            <Image Grid.Row="0" Width="320" Height="180" Stretch="UniformToFill"
+                                                   asyncImageLoader:ImageLoader.Source="{Binding Image}" Margin="0,0,0,8" />
                                             <!-- Info -->
-                                            <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="18"
-                                                           Foreground="{DynamicResource AppFg}" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Foreground="#909090" FontSize="14">
+                                            <StackPanel Grid.Row="1" Spacing="2" HorizontalAlignment="Center" Margin="0,0,0,5">
+                                                <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" TextAlignment="Center"
+                                                           Foreground="{DynamicResource AppFg}" TextTrimming="CharacterEllipsis" TextWrapping="Wrap" MaxLines="2" Margin="0,0,0,5"/>
+                                                <TextBlock Foreground="#909090" FontSize="14" HorizontalAlignment="Center" Margin="0,0,0,5">
                                                     <TextBlock.Text>
                                                         <MultiBinding StringFormat="by {0} | {1}">
                                                             <Binding Path="Owner.Name"/>
@@ -652,16 +654,18 @@
                                                         </MultiBinding>
                                                     </TextBlock.Text>
                                                 </TextBlock>
-                                                <StackPanel Orientation="Horizontal" Spacing="10">
-                                                    <TextBlock Text="{Binding Downloads, StringFormat='{}{0} DLs'}" Foreground="#707070" FontSize="14"/>
-                                                    <TextBlock Text="{Binding Likes, StringFormat='{}{0} Likes'}" Foreground="#707070" FontSize="14"/>
-                                                    <TextBlock Text="{Binding Views, StringFormat='{}{0} Views'}" Foreground="#707070" FontSize="14"/>
+                                                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,0,0,5">
+                                                    <TextBlock Text="{Binding Downloads, StringFormat='{}{0} DLs'}" Foreground="#707070" FontSize="14" HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Likes, StringFormat='{}{0} Likes'}" Foreground="#707070" FontSize="14" HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Views, StringFormat='{}{0} Views'}" Foreground="#707070" FontSize="14" HorizontalAlignment="Center"/>
                                                 </StackPanel>
-                                                <TextBlock Text="{Binding Description}" Foreground="#606060" FontSize="14"
-                                                           MaxLines="2" TextTrimming="CharacterEllipsis" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding Description}"
+                                                           IsVisible="{Binding Description, Converter={StaticResource StringNotEmptyToVisibleConverter}}"
+                                                           Foreground="#606060" FontSize="14" HorizontalAlignment="Center" TextAlignment="Center"
+                                                           MaxLines="2" TextTrimming="CharacterEllipsis" TextWrapping="Wrap" Margin="0,0,0,5"/>
                                             </StackPanel>
                                             <!-- Actions -->
-                                            <StackPanel Grid.Column="2" Orientation="Vertical" Spacing="5" VerticalAlignment="Center" Margin="5,0,0,0">
+                                            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center" Margin="0,0,0,5">
                                                 <Button Content="Download" Click="Download_Click" Tag="{Binding}" Padding="8,4"/>
                                                 <Button Content="More Info" Click="MoreInfo_Click" Tag="{Binding}" Padding="8,4"/>
                                                 <Button Content="Homepage" Click="Homepage_Click" Tag="{Binding}" Padding="8,4"/>

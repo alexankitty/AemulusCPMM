@@ -232,7 +232,6 @@ namespace AemulusModManager.Utilities
                 url += $"&_aCategoryRowIds[]={category.ID}";
             // Get page number
             url += $"&_nPage={page}";
-            Console.WriteLine(url);
             return url;
         }
     }

@@ -503,8 +503,6 @@ public partial class MainWindow : Window
         FilterBox.ItemsSource = new[] { "Featured", "Recent", "Popular" };
         FilterBox.SelectedIndex = 1;
 
-        PerPageBox.ItemsSource = new[] { "10", "25", "50" };
-        PerPageBox.SelectedIndex = 0;
 
         // Fetch categories using apiv4
         _cats = new Dictionary<GameFilter, Dictionary<TypeFilter, List<GameBananaCategory>>>();
@@ -633,13 +631,12 @@ public partial class MainWindow : Window
 
         var category = CatBox.SelectedItem as GameBananaCategory ?? AllCategory;
         var subcategory = SubCatBox.SelectedItem as GameBananaCategory ?? AllCategory;
-        int perPage = (Math.Max(0, PerPageBox.SelectedIndex) + 1) * 10;
         string? search = _searched ? SearchBar.Text : null;
 
         try
         {
             await FeedGenerator.GetFeed(_page, GetCurrentGameFilter(), GetCurrentTypeFilter(),
-                GetCurrentFeedFilter(), category, subcategory, perPage, search);
+                GetCurrentFeedFilter(), category, subcategory, 25, search);
 
             if (FeedGenerator.error)
             {
