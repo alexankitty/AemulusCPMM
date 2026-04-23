@@ -1,7 +1,14 @@
-bin/
-obj/
+# Ignore build artifacts and logs
 AtlusScriptCompiler.log
 publish/
-*.exe
-modules/AwbTools/AWB_repacker
-modules/AwbTools/AWB_unpacker
+obj/
+bin/
+
+# Ignore executables and tools
+**.o
+**/src/deceboot
+**/src/deceboot.exe
+**/AWB_repacker
+**/AWB_repacker.exe
+**/AWB_unpacker
+**/AWB_unpacker.exe

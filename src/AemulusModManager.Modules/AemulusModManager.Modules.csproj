@@ -1,0 +1,77 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!-- Dependency Applications-->
+
+  <!-- AtlusScriptCompiler -->
+  <Target Name="BuildAtlusScriptCompiler" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
+    <Exec Command="dotnet build ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release -r $(RuntimeIdentifier)" />
+  </Target>
+  <Target Name="BuildAtlusScriptCompiler" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
+    <Exec Command="dotnet build ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release" />
+  </Target>
+
+  <!-- AWBTools -->
+  <Target Name="BuildAWBTools" BeforeTargets="BeforeBuild">
+    <Exec Command="gcc ./AwbTools/AWB_unpacker.c -o ./AwbTools/AWB_unpacker" />
+    <Exec Command="gcc ./AwbTools/AWB_repacker.c -o ./AwbTools/AWB_repacker" />
+    <Exec Command="x86_64-w64-mingw32-gcc ./AwbTools/AWB_unpacker.c -o ./AwbTools/AWB_unpacker.exe" />
+    <Exec Command="x86_64-w64-mingw32-gcc ./AwbTools/AWB_repacker.c -o ./AwbTools/AWB_repacker.exe" />
+  </Target>
+
+  <!-- Deceboot -->
+  <Target Name="BuildDeceboot" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
+    <Exec Command="make -C ./deceboot/src all PLATFORM=$(RuntimeIdentifier)" />
+  </Target>
+  <Target Name="BuildDeceboot" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
+    <Exec Command="make -C ./deceboot/src all" />
+  </Target>
+
+  <!-- Copy built dependencies to output directory -->
+  <ItemGroup>
+    <Content Include="../../modules/Atlus-Script-Tools/Build/Release/net8.0/$(RuntimeIdentifier)/**" Condition="'$(RuntimeIdentifier)' != ''">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>Dependencies/AtlusScriptCompiler/%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
+    </Content>
+    <Content Include="../../modules/Atlus-Script-Tools/Build/Release/net8.0/**" Exclude="../../modules/Atlus-Script-Tools/Build/Release/net8.0/$(RuntimeIdentifier)/**" Condition="'$(RuntimeIdentifier)' == ''">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>Dependencies/AtlusScriptCompiler/%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
+    </Content>
+    <Content Include="./AwbTools/AWB_unpacker" Condition="'$(RuntimeIdentifier)' != 'win-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>Dependencies/AWBTools/AWB_unpacker</TargetPath>
+    </Content>
+    <Content Include="./AwbTools/AWB_repacker" Condition="'$(RuntimeIdentifier)' != 'win-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>Dependencies/AWBTools/AWB_repacker</TargetPath>
+    </Content>
+    <Content Include="./AwbTools/AWB_unpacker.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>Dependencies/AWBTools/AWB_unpacker.exe</TargetPath>
+    </Content>
+    <Content Include="./AwbTools/AWB_repacker.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>Dependencies/AWBTools/AWB_repacker.exe</TargetPath>
+    </Content>
+    <Content Include="./deceboot/src/$(RuntimeIdentifier)/deceboot" Condition="'$(RuntimeIdentifier)' != 'win-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>Dependencies/deceboot/deceboot</TargetPath>
+    </Content>
+    <Content Include="./deceboot/src/$(RuntimeIdentifier)/deceboot.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>Dependencies/deceboot/deceboot.exe</TargetPath>
+    </Content>
+  </ItemGroup>
+</Project>
