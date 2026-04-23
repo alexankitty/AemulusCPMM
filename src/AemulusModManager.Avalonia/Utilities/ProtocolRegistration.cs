@@ -11,9 +11,12 @@ namespace AemulusModManager.Avalonia.Utilities;
 public static class ProtocolRegistration
 {
     private static readonly string ProtocolName = "aemulus";
-    private static readonly string platform = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win" :
-                                      RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "linux" :
-                                      RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx" : "unknown";
+    private static readonly bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+    private static readonly bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+    private static readonly bool isOSX = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+    private static readonly string platform = isWindows ? "win" :
+                                      isLinux ? "linux" :
+                                      isOSX ? "osx" : "unknown";
     public static void RegisterProtocol()
     {
         switch (platform)
@@ -31,6 +34,10 @@ public static class ProtocolRegistration
     }
     public static void RegisterProtocolWindows()
     {
+        if(!isWindows)
+        {
+            return;
+        }
         try
         {
             Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey($"SOFTWARE\\Classes\\{ProtocolName}");
@@ -45,6 +52,10 @@ public static class ProtocolRegistration
     }
     public static void RegisterProtocolLinux()
     {
+        if(!isLinux)
+        {
+            return;
+        }
         // Linux protocol registration typically involves creating a .desktop file and updating the MIME database.
         // This is a simplified example and may require additional steps for a complete implementation.
         string desktopFileContent = $"[Desktop Entry]\n"+
@@ -82,6 +93,10 @@ public static class ProtocolRegistration
 
     public static bool CheckRegistrationWindows()
     {
+        if(!isWindows)
+        {
+            return false;
+        }
         try
         {
             Microsoft.Win32.RegistryKey? key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey($"SOFTWARE\\Classes\\{ProtocolName}");
@@ -100,6 +115,10 @@ public static class ProtocolRegistration
 
     public static bool CheckRegistrationLinux()
     {
+        if(!isLinux)
+        {
+            return false;
+        }
         string desktopFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share", "applications", $"{ProtocolName}-handler.desktop");
         if (!File.Exists(desktopFilePath))
         {

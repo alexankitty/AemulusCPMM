@@ -45,9 +45,9 @@ public partial class MainWindow : Window
     private PointerEventArgs? _triggerEvent;
     private bool _dragLock;
     private bool _dragCaptured;
-    public string[] Args;
+    public string[]? Args;
 
-    public MainWindow(string[] args)
+    public MainWindow(string[]? args)
     {
         Args = args;
         InitializeComponent();
@@ -416,16 +416,16 @@ public partial class MainWindow : Window
                     Dispatcher.UIThread.InvokeAsync(() =>
                     {
                         ViewModel.UpdateGameAccentColor();
-                        _dialogService.ShowNotification("Protocol registered! You may now use 1-Click Install links.");
+                        _ = _dialogService.ShowNotification("Protocol registered! You may now use 1-Click Install links.");
                     });
                 }
             });
         }
 
         ViewModel.UpdateGameAccentColor();
-        if(Args.Length >= 1){
+        if(Args != null && Args.Length >= 1){
             if(Args[0].Contains("://")){
-                _packageDownloader.DownloadTaskIPC(Args[0]);
+                _ = _packageDownloader.DownloadTaskIPC(Args[0]);
             }
         }
     }

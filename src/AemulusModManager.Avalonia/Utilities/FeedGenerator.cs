@@ -73,7 +73,6 @@ namespace AemulusModManager.Utilities
                 {
                     var response = await httpClient.GetAsync(requestUrl);
                     var responseString = await response.Content.ReadAsStringAsync();
-                    responseString = responseString.Replace(@"""_aModManagerIntegrations"": []", @"""_aModManagerIntegrations"": {}");
                     var records = JsonConvert.DeserializeObject<ObservableCollection<GameBananaRecord>>(responseString);
                     CurrentFeed = new GameBananaModList();
                     CurrentFeed.Records = records;
@@ -233,6 +232,7 @@ namespace AemulusModManager.Utilities
                 url += $"&_aCategoryRowIds[]={category.ID}";
             // Get page number
             url += $"&_nPage={page}";
+            Console.WriteLine(url);
             return url;
         }
     }

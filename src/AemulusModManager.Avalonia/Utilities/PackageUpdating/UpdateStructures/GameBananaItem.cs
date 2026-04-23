@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
 namespace AemulusModManager
@@ -111,6 +112,7 @@ namespace AemulusModManager
         [JsonIgnore]
         public bool HasAltLinks => AlternateFileSources != null;
         [JsonProperty("_aModManagerIntegrations")]
+        [JsonConverter(typeof(ModManagerIntegrationsConverter))]
         public Dictionary<string, List<GameBananaModManagerIntegration>> ModManagerIntegrations { get; set; }
         [JsonIgnore]
         public Uri Image => Media != null && Media.Where(x => x.Type == "image").ToList().Count > 0 ? new Uri($"{Media[0].Base}/{Media[0].File}")
@@ -127,7 +129,7 @@ namespace AemulusModManager
         public string ObsolescenceNotice { get; set; }
         [JsonIgnore]
         public string ConvertedObsolesenceNotice => String.IsNullOrEmpty(ObsolescenceNotice) ?
-            "This Mod has been marked as obsolete. It may no longer work and/or contain outdated information. It is retained for archival purposes." 
+            "This Mod has been marked as obsolete. It may no longer work and/or contain outdated information. It is retained for archival purposes."
             : ConvertHtmlToText(ObsolescenceNotice);
         [JsonProperty("_bIsObsolete")]
         public bool IsObsolete { get; set; }
@@ -255,4 +257,28 @@ namespace AemulusModManager
         [JsonProperty("_sCaption")]
         public string Caption { get; set; }
     }
+    // Handles both array and object for ModManagerIntegrations
+    public class ModManagerIntegrationsConverter : JsonConverter<Dictionary<string, List<GameBananaModManagerIntegration>>>
+    {
+        public override Dictionary<string, List<GameBananaModManagerIntegration>> ReadJson(JsonReader reader, Type objectType, Dictionary<string, List<GameBananaModManagerIntegration>> existingValue, bool hasExistingValue, JsonSerializer serializer)
+        {
+            if (reader.TokenType == JsonToken.StartArray)
+            {
+                // Handle [] as empty dictionary
+                reader.Skip();
+                return new Dictionary<string, List<GameBananaModManagerIntegration>>();
+            }
+            if (reader.TokenType == JsonToken.StartObject)
+            {
+                return serializer.Deserialize<Dictionary<string, List<GameBananaModManagerIntegration>>>(reader) ?? new Dictionary<string, List<GameBananaModManagerIntegration>>();
+            }
+            return new Dictionary<string, List<GameBananaModManagerIntegration>>();
+        }
+
+        public override void WriteJson(JsonWriter writer, Dictionary<string, List<GameBananaModManagerIntegration>> value, JsonSerializer serializer)
+        {
+            serializer.Serialize(writer, value);
+        }
+    }
 }
+
