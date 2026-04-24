@@ -5,14 +5,30 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+    
+
   <!-- Dependency Applications-->
+
+  <!-- Clean Publish Folders-->
+  <Target Name="CleanModulePublishFolders" BeforeTargets="BeforeBuild">
+      <RemoveDir Directories="../../modules/Atlus-Script-Tools/Publish" />
+      <RemoveDir Directories="../../modules/AtlusFileSystemLibrary/Publish" />
+  </Target>
 
   <!-- AtlusScriptCompiler -->
   <Target Name="BuildAtlusScriptCompiler" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet build ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release -r $(RuntimeIdentifier)" />
+    <Exec Command="dotnet publish ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=../../Publish" />
   </Target>
   <Target Name="BuildAtlusScriptCompiler" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet build ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release" />
+    <Exec Command="dotnet publish ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release --property:PublishDir=../../Publish" />
+  </Target>
+
+  <!-- Atlus File System Library-->
+  <Target Name="BuildAtlusFileSystemLibrary" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
+    <Exec Command="dotnet publish ../../modules/AtlusFileSystemLibrary/Source -c Release -r $(RuntimeIdentifier)" />
+  </Target>
+  <Target Name="BuildAtlusFileSystemLibrary" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
+    <Exec Command="dotnet publish ../../modules/AtlusFileSystemLibrary/Source -c Release" />
   </Target>
 
   <!-- AWBTools -->
@@ -33,15 +49,15 @@
 
   <!-- Copy built dependencies to output directory -->
   <ItemGroup>
-    <Content Include="../../modules/Atlus-Script-Tools/Build/Release/net8.0/$(RuntimeIdentifier)/**" Condition="'$(RuntimeIdentifier)' != ''">
+    <Content Include="../../modules/Atlus-Script-Tools/Publish/**" >
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <TargetPath>Dependencies/AtlusScriptCompiler/%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
     </Content>
-    <Content Include="../../modules/Atlus-Script-Tools/Build/Release/net8.0/**" Exclude="../../modules/Atlus-Script-Tools/Build/Release/net8.0/$(RuntimeIdentifier)/**" Condition="'$(RuntimeIdentifier)' == ''">
+    <Content Include="../../modules/AtlusFileSystemLibrary/Publish/**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <TargetPath>Dependencies/AtlusScriptCompiler/%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
+      <TargetPath>Dependencies/AtlusFileSystemLibrary/%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
     </Content>
     <Content Include="./AwbTools/AWB_unpacker" Condition="'$(RuntimeIdentifier)' != 'win-x64'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
