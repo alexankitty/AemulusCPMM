@@ -6,7 +6,24 @@
 
 
 # Aemulus Cross-Platform Mod Manager (Pending namechange to Banana-Peel)
-Tekka's [Aemulus Mod Manager](https://github.com/TekkaGB/AemulusModManager) ported to Avalonia and Dotnet 8. For the bulk of the documentation, I recommend you take a peak there, as I will only cover the important bits.
+Tekka's [Aemulus Mod Manager](https://github.com/TekkaGB/AemulusModManager) ported to Avalonia and Dotnet 8. For the bulk of the documentation, I recommend you take a peek there, as I will only cover the important bits (for now until the next major refactor).
+
+# Dependencies
+## Build
+### AemulsCPMM
+All build dependencies in ThirdParty.
+`dotnet-sdk-8.0`
+
+### ThirdParty
+deceboot: `gcc g++`
+awbtools: `gcc`
+Atlus-Script-Tools: `dotnet-sdk-8.0`
+AtlusFileSystemLibrary: `dotnet-sdk-8.0`
+
+## Runtime
+Linux: `7z mono` (Both of these will be phased out eventually)
+Windows: A not broken OS, idk.
+
 
 # Bug Testing
 Welcome partner, you're in for a wild ride of testing this software. I don't have the time and energy to test every single use-case so I am counting on you to report issues to me along with the steps to reproduce them so I can take a look and get it fixed. 

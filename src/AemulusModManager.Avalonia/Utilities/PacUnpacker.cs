@@ -434,8 +434,11 @@ public static class PacUnpacker
                 {
                     var patchSuffix = language switch
                     {
-                        "French" => "_F", "Italian" => "_I",
-                        "German" => "_G", "Spanish" => "_S", _ => ""
+                        "French" => "_F",
+                        "Italian" => "_I",
+                        "German" => "_G",
+                        "Spanish" => "_S",
+                        _ => ""
                     };
                     if (!string.IsNullOrEmpty(patchSuffix))
                     {
@@ -519,9 +522,12 @@ public static class PacUnpacker
 
             var localCpk = language switch
             {
-                "English" => "EN.CPK", "French" => "FR.CPK",
-                "Italian" => "IT.CPK", "German" => "DE.CPK",
-                "Spanish" => "ES.CPK", _ => "EN.CPK"
+                "English" => "EN.CPK",
+                "French" => "FR.CPK",
+                "Italian" => "IT.CPK",
+                "German" => "DE.CPK",
+                "Spanish" => "ES.CPK",
+                _ => "EN.CPK"
             };
             var localPath = Path.Combine(directory, localCpk);
             if (File.Exists(localPath))
@@ -544,9 +550,12 @@ public static class PacUnpacker
 
             var localCpk = language switch
             {
-                "English" => "EN.CPK", "French" => "FR.CPK",
-                "Italian" => "IT.CPK", "German" => "DE.CPK",
-                "Spanish" => "ES.CPK", _ => "EN.CPK"
+                "English" => "EN.CPK",
+                "French" => "FR.CPK",
+                "Italian" => "IT.CPK",
+                "German" => "DE.CPK",
+                "Spanish" => "ES.CPK",
+                _ => "EN.CPK"
             };
             var localPath = Path.Combine(directory, localCpk);
             if (File.Exists(localPath))
@@ -670,41 +679,15 @@ public static class PacUnpacker
 
     private static string? FindPAKPack()
     {
-        var pakPackExe = Path.Combine(AppDir, "Dependencies", "PAKPack", "PAKPack.exe");
-        if (File.Exists(pakPackExe)) return pakPackExe;
-        return null;
-    }
-
-    private static string? FindPAKPackRunner()
-    {
-        var pakPack = FindPAKPack();
-        if (pakPack == null) return null;
-
-        // On Linux/macOS, need mono to run .NET Framework exe
         if (!OperatingSystem.IsWindows())
         {
-            try
-            {
-                var proc = Process.Start(new ProcessStartInfo
-                {
-                    FileName = "which",
-                    Arguments = "mono",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                });
-                if (proc != null)
-                {
-                    var monoPath = proc.StandardOutput.ReadToEnd().Trim();
-                    proc.WaitForExit();
-                    if (proc.ExitCode == 0 && !string.IsNullOrEmpty(monoPath))
-                        return monoPath;
-                }
-            }
-            catch { }
-            return null;
+            var pakPack = Path.Combine(AppDir, "Dependencies", "AtlusFileSystemLibrary", "PAKPack");
+            if (File.Exists(pakPack)) return pakPack;
         }
-        return pakPack;
+        var pakPackExe = Path.Combine(AppDir, "Dependencies", "AtlusFileSystemLibrary", "PAKPack.exe");
+        if (File.Exists(pakPackExe)) return pakPackExe;
+
+        return null;
     }
 
     private static void PAKPackCMD(string args)
@@ -716,30 +699,11 @@ public static class PacUnpacker
             return;
         }
 
-        string fileName;
-        string finalArgs;
-        if (!OperatingSystem.IsWindows())
-        {
-            var mono = FindPAKPackRunner();
-            if (mono == null)
-            {
-                ParallelLogger.Log("[ERROR] mono is required to run PAKPack on Linux. Install mono-runtime.");
-                return;
-            }
-            fileName = mono;
-            finalArgs = $"\"{pakPack}\" {args}";
-        }
-        else
-        {
-            fileName = pakPack;
-            finalArgs = args;
-        }
-
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo
         {
-            FileName = fileName,
-            Arguments = finalArgs,
+            FileName = pakPack,
+            Arguments = args,
             CreateNoWindow = true,
             UseShellExecute = false,
             WindowStyle = ProcessWindowStyle.Hidden,
@@ -753,20 +717,8 @@ public static class PacUnpacker
         var pakPack = FindPAKPack();
         if (pakPack == null) return new List<string>();
 
-        string fileName;
-        string finalArgs;
-        if (!OperatingSystem.IsWindows())
-        {
-            var mono = FindPAKPackRunner();
-            if (mono == null) return new List<string>();
-            fileName = mono;
-            finalArgs = $"\"{pakPack}\" list \"{path}\"";
-        }
-        else
-        {
-            fileName = pakPack;
-            finalArgs = $"list \"{path}\"";
-        }
+        string fileName = pakPack;
+        string finalArgs = $"list \"{path}\"";
 
         var contents = new List<string>();
         using var process = new Process();
@@ -798,12 +750,6 @@ public static class PacUnpacker
         if (FindPAKPack() == null)
         {
             ParallelLogger.Log("[WARNING] PAKPack not found, skipping archive extraction. Some files may be missing.");
-            return;
-        }
-
-        if (!OperatingSystem.IsWindows() && FindPAKPackRunner() == null)
-        {
-            ParallelLogger.Log("[WARNING] mono not found, cannot run PAKPack. Install mono-runtime for full extraction.");
             return;
         }
 
