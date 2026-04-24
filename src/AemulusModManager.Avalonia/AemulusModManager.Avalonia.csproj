@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AemulusModManager.Modules\AemulusModManager.Modules.csproj" />
+    <ProjectReference Include="..\AemulusModManager.Dependencies\AemulusModManager.Modules.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,6 +50,8 @@
 
     <!-- MVVM -->
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="DiscUtils" Version="0.16.13" />
+    <PackageReference Include="DiscUtils.Iso9660" Version="0.16.13" />
 
     <!-- Cross-platform packages from original project -->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
