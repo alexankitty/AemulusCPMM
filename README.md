@@ -16,12 +16,17 @@ All build dependencies in ThirdParty.
 
 ### ThirdParty
 deceboot: `gcc g++`
+
 awbtools: `gcc`
+
 Atlus-Script-Tools: `dotnet-sdk-8.0`
+
 AtlusFileSystemLibrary: `dotnet-sdk-8.0`
+
 
 ## Runtime
 Linux: `7z mono` (Both of these will be phased out eventually)
+
 Windows: A not broken OS, idk.
 
 
