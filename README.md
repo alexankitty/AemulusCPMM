@@ -10,7 +10,7 @@ Tekka's [Aemulus Mod Manager](https://github.com/TekkaGB/AemulusModManager) port
 
 # Dependencies
 ## Build
-### AemulsCPMM
+### AemulusCPMM
 All build dependencies in ThirdParty.
 `dotnet-sdk-8.0`
 
