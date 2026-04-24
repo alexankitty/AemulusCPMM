@@ -1,3 +1,6 @@
 [submodule "src/AemulusModManager.Modules/Atlus-Script-Tools"]
 	path = modules/Atlus-Script-Tools
 	url = https://github.com/tge-was-taken/Atlus-Script-Tools
+[submodule "modules/AtlusFileSystemLibrary"]
+	path = modules/AtlusFileSystemLibrary
+	url = https://github.com/alexankitty/AtlusFileSystemLibrary
