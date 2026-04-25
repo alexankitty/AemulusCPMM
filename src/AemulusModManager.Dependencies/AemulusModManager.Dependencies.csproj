@@ -45,6 +45,14 @@
     <Exec Command="dotnet publish ../../modules/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release --property:PublishDir=$(GitRoot)/modules/Publish/AtlusPM1MessageScriptEditor/" />
   </Target>
 
+  <!-- preappfile -->
+  <Target Name="BuildPreappfile" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
+    <Exec Command="dotnet publish ../../modules/preappfile/preappfile/preappfile.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(GitRoot)/modules/Publish/preappfile/" />
+  </Target>
+  <Target Name="BuildPreappfile" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
+    <Exec Command="dotnet publish ../../modules/preappfile/preappfile/preappfile.csproj -c Release --property:PublishDir=$(GitRoot)/modules/Publish/preappfile/" />
+  </Target>
+
   <!-- AWBTools -->
   <Target Name="BuildAWBTools" BeforeTargets="BeforeBuild">
     <Exec Command="gcc ./AwbTools/AWB_unpacker.c -o ./AwbTools/AWB_unpacker" />
@@ -62,18 +70,12 @@
   </Target>
 
   <!-- Copy Dependencies -->
-
-  <Target Name="CopyDependencies" AfterTargets="Build">
-  <!-- I hate csproj -->
-    <ItemGroup>
-      <ModulePublishedFiles Include="$(GitRoot)/modules/Publish/**" />
-    </ItemGroup>
-    <ItemGroup>
-      <ModulePublishedFiles Remove="@(ModulePublishedFiles)" Condition="$([System.IO.Directory]::Exists('%(FullPath)'))" />
-    </ItemGroup>
-    <Copy SourceFiles="@(ModulePublishedFiles)" DestinationFiles="@(ModulePublishedFiles->'$(OutputPath)Dependencies\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-  </Target>
   <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+    <Content Include="$(GitRoot)/modules/Publish/**">
+      <!-- I still hate csproj -->
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="./AwbTools/AWB_unpacker.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/AWBTools/AWB_unpacker.exe" />
     <Content Include="./AwbTools/AWB_repacker.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/AWBTools/AWB_repacker.exe" />
     <Content Include="./deceboot/src/$(RuntimeIdentifier)/deceboot.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/deceboot/deceboot.exe" />
