@@ -232,7 +232,7 @@ public static class PacUnpacker
                 break;
         }
 
-        var preappfile = Path.Combine(AppDir, "Dependencies", "Preappfile", "preappfile.exe");
+        var preappfile = OperatingSystem.IsWindows() ? Path.Combine(AppDir, "Dependencies", "Preappfile", "preappfile.exe") : Path.Combine(AppDir, "Dependencies", "Preappfile", "preappfile");
         if (!File.Exists(preappfile))
         {
             ParallelLogger.Log($"[ERROR] Couldn't find preappfile. This tool is Windows-only.");

@@ -7,11 +7,10 @@ namespace AemulusModManager.Avalonia.Utilities;
 
 public static class FileManagement
 {
-    public readonly static bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     public static string ValidatePathCaseInsensitive(string pathAndFileName)
     {
         string resultFileName = pathAndFileName;
-        if (IsWindows && (File.Exists(pathAndFileName) || Directory.Exists(pathAndFileName)))
+        if (OperatingSystem.IsWindows() && (File.Exists(pathAndFileName) || Directory.Exists(pathAndFileName)))
             return pathAndFileName; // File exists as is, return it
         if(File.Exists(pathAndFileName) || Directory.Exists(pathAndFileName))
             return pathAndFileName; // File exists as is, return it
