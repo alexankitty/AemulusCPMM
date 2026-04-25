@@ -18,7 +18,7 @@ public static class ProtocolRegistration
         try
         {
             Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(
-                $"SOFTWARE\\Classes\\{ProtocolNName}"
+                $"SOFTWARE\\Classes\\{ProtocolName}"
             );
             key.SetValue("", "URL:Aemulus Protocol");
             key.SetValue("URL Protocol", "");
