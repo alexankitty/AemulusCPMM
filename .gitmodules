@@ -7,3 +7,6 @@
 [submodule "modules/AtlusPM1MessageScriptEditor"]
 	path = modules/AtlusPM1MessageScriptEditor
 	url = https://github.com/alexankitty/AtlusPM1MessageScriptEditor
+[submodule "modules/preappfile"]
+	path = modules/preappfile
+	url = https://github.com/alexankitty/preappfile
