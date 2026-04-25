@@ -4,3 +4,6 @@
 [submodule "modules/AtlusFileSystemLibrary"]
 	path = modules/AtlusFileSystemLibrary
 	url = https://github.com/alexankitty/AtlusFileSystemLibrary
+[submodule "modules/AtlusPM1MessageScriptEditor"]
+	path = modules/AtlusPM1MessageScriptEditor
+	url = git@github.com:alexankitty/AtlusPM1MessageScriptEditor.git
