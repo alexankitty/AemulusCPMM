@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AemulusModManager.Dependencies\AemulusModManager.Modules.csproj" />
+    <ProjectReference Include="..\AemulusModManager.Dependencies\AemulusModManager.Dependencies.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,6 +50,8 @@
 
     <!-- MVVM -->
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+
+    <!-- Disc Utils -->
     <PackageReference Include="DiscUtils" Version="0.16.13" />
     <PackageReference Include="DiscUtils.Iso9660" Version="0.16.13" />
 
@@ -69,8 +71,5 @@
     <!-- Content/data files -->
     <None Include="Libraries/**" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Dependencies/FilteredCpkCsv/**" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="Dependencies/PAKPack/**" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="Dependencies/AtlusScriptCompiler/**" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="Dependencies/PM1MessageScriptEditor/**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

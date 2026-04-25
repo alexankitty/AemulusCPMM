@@ -31,6 +31,14 @@
     <Exec Command="dotnet publish ../../modules/AtlusFileSystemLibrary/Source -c Release" />
   </Target>
 
+  <!-- AtlusPM1MessageScriptEditor -->
+  <Target Name="BuildAtlusPM1MessageScriptEditor" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
+    <Exec Command="dotnet publish ../../modules/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=../../Publish" />
+  </Target>
+  <Target Name="BuildAtlusPM1MessageScriptEditor" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
+    <Exec Command="dotnet publish ../../modules/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release --property:PublishDir=../../Publish" />
+  </Target>
+
   <!-- AWBTools -->
   <Target Name="BuildAWBTools" BeforeTargets="BeforeBuild">
     <Exec Command="gcc ./AwbTools/AWB_unpacker.c -o ./AwbTools/AWB_unpacker" />
@@ -88,6 +96,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <TargetPath>Dependencies/deceboot/deceboot.exe</TargetPath>
+    </Content>
+    <Content Include="../../modules/AtlusPM1MessageScriptEditor/Publish/**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <TargetPath>Dependencies/PM1MessageScriptEditor/%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
     </Content>
   </ItemGroup>
 </Project>

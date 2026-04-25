@@ -3,17 +3,19 @@ using AemulusModManager.Avalonia.Utilities;
 using System.IO;
 using System.Reflection;
 using AemulusModManager.Utilities;
+using System.Runtime.InteropServices;
 
 namespace AemulusModManager.Avalonia.Utilities.FileMerging;
 
 /// <summary>
-/// Cross-platform port of PM1Merger. Uses PM1MessageScriptEditor.exe via mono.
+/// Cross-platform port of PM1Merger.
 /// </summary>
 public static class PM1Merger
 {
     private static readonly string AppDir = AppPaths.ExeDir;
     private static readonly string DataDir = AppPaths.DataDir;
-    private static string PM1Path => Path.Combine(AppDir, "Dependencies", "PM1MessageScriptEditor", "PM1MessageScriptEditor.exe");
+    private static string PM1Path => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? Path.Combine(AppDir, "Dependencies", "PM1MessageScriptEditor", "AtlusPM1MessageScriptEditor.exe") : 
+                                     Path.Combine(AppDir, "Dependencies", "PM1MessageScriptEditor", "AtlusPM1MessageScriptEditor") + "\"";
 
     public static void Merge(List<string> ModList, string game, string language)
     {
