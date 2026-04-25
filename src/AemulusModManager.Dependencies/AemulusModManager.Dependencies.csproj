@@ -5,38 +5,44 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
-    
+  <Target Name="SetGitRoot" BeforeTargets="BeforeBuild">
+    <Exec Command="git rev-parse --show-toplevel > gitroot.txt" />
+    <ReadLinesFromFile File="gitroot.txt">
+      <Output TaskParameter="Lines" PropertyName="GitRoot" />
+    </ReadLinesFromFile>
+    <Delete Files="gitroot.txt" />
+  </Target>
+
 
   <!-- Dependency Applications-->
 
   <!-- Clean Publish Folders-->
   <Target Name="CleanModulePublishFolders" BeforeTargets="BeforeBuild">
-      <RemoveDir Directories="../../modules/Atlus-Script-Tools/Publish" />
-      <RemoveDir Directories="../../modules/AtlusFileSystemLibrary/Publish" />
+    <RemoveDir Directories="$(GitRoot)/modules/Publish" />
   </Target>
 
   <!-- AtlusScriptCompiler -->
   <Target Name="BuildAtlusScriptCompiler" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet publish ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=../../Publish" />
+    <Exec Command="dotnet publish ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(GitRoot)/modules/Publish/AtlusScriptCompiler/" />
   </Target>
   <Target Name="BuildAtlusScriptCompiler" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet publish ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release --property:PublishDir=../../Publish" />
+    <Exec Command="dotnet publish ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release --property:PublishDir=$(GitRoot)/modules/Publish/AtlusScriptCompiler/" />
   </Target>
 
   <!-- Atlus File System Library-->
   <Target Name="BuildAtlusFileSystemLibrary" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet publish ../../modules/AtlusFileSystemLibrary/Source -c Release -r $(RuntimeIdentifier)" />
+    <Exec Command="dotnet publish ../../modules/AtlusFileSystemLibrary/Source -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(GitRoot)/modules/Publish/AtlusFileSystemLibrary/" />
   </Target>
   <Target Name="BuildAtlusFileSystemLibrary" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet publish ../../modules/AtlusFileSystemLibrary/Source -c Release" />
+    <Exec Command="dotnet publish ../../modules/AtlusFileSystemLibrary/Source -c Release --property:PublishDir=$(GitRoot)/modules/Publish/AtlusFileSystemLibrary/" />
   </Target>
 
   <!-- AtlusPM1MessageScriptEditor -->
   <Target Name="BuildAtlusPM1MessageScriptEditor" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet publish ../../modules/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=../../Publish" />
+    <Exec Command="dotnet publish ../../modules/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(GitRoot)/modules/Publish/AtlusPM1MessageScriptEditor/" />
   </Target>
   <Target Name="BuildAtlusPM1MessageScriptEditor" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet publish ../../modules/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release --property:PublishDir=../../Publish" />
+    <Exec Command="dotnet publish ../../modules/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release --property:PublishDir=$(GitRoot)/modules/Publish/AtlusPM1MessageScriptEditor/" />
   </Target>
 
   <!-- AWBTools -->
@@ -55,52 +61,26 @@
     <Exec Command="make -C ./deceboot/src all" />
   </Target>
 
-  <!-- Copy built dependencies to output directory -->
-  <ItemGroup>
-    <Content Include="../../modules/Atlus-Script-Tools/Publish/**" >
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <TargetPath>Dependencies/AtlusScriptCompiler/%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
-    </Content>
-    <Content Include="../../modules/AtlusFileSystemLibrary/Publish/**">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <TargetPath>Dependencies/AtlusFileSystemLibrary/%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
-    </Content>
-    <Content Include="./AwbTools/AWB_unpacker" Condition="'$(RuntimeIdentifier)' != 'win-x64'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <TargetPath>Dependencies/AWBTools/AWB_unpacker</TargetPath>
-    </Content>
-    <Content Include="./AwbTools/AWB_repacker" Condition="'$(RuntimeIdentifier)' != 'win-x64'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <TargetPath>Dependencies/AWBTools/AWB_repacker</TargetPath>
-    </Content>
-    <Content Include="./AwbTools/AWB_unpacker.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <TargetPath>Dependencies/AWBTools/AWB_unpacker.exe</TargetPath>
-    </Content>
-    <Content Include="./AwbTools/AWB_repacker.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <TargetPath>Dependencies/AWBTools/AWB_repacker.exe</TargetPath>
-    </Content>
-    <Content Include="./deceboot/src/$(RuntimeIdentifier)/deceboot" Condition="'$(RuntimeIdentifier)' != 'win-x64'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <TargetPath>Dependencies/deceboot/deceboot</TargetPath>
-    </Content>
-    <Content Include="./deceboot/src/$(RuntimeIdentifier)/deceboot.exe" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <TargetPath>Dependencies/deceboot/deceboot.exe</TargetPath>
-    </Content>
-    <Content Include="../../modules/AtlusPM1MessageScriptEditor/Publish/**">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <TargetPath>Dependencies/PM1MessageScriptEditor/%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
-    </Content>
+  <!-- Copy Dependencies -->
+
+  <Target Name="CopyDependencies" AfterTargets="Build">
+  <!-- I hate csproj -->
+    <ItemGroup>
+      <ModulePublishedFiles Include="$(GitRoot)/modules/Publish/**" />
+    </ItemGroup>
+    <ItemGroup>
+      <ModulePublishedFiles Remove="@(ModulePublishedFiles)" Condition="$([System.IO.Directory]::Exists('%(FullPath)'))" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ModulePublishedFiles)" DestinationFiles="@(ModulePublishedFiles->'$(OutputPath)Dependencies\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+    <Content Include="./AwbTools/AWB_unpacker.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/AWBTools/AWB_unpacker.exe" />
+    <Content Include="./AwbTools/AWB_repacker.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/AWBTools/AWB_repacker.exe" />
+    <Content Include="./deceboot/src/$(RuntimeIdentifier)/deceboot.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/deceboot/deceboot.exe" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(RuntimeIdentifier)' != 'win-x64'">
+    <Content Include="./AwbTools/AWB_unpacker" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/AWBTools/AWB_unpacker" />
+    <Content Include="./AwbTools/AWB_repacker" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/AWBTools/AWB_repacker" />
+    <Content Include="./deceboot/src/$(RuntimeIdentifier)/deceboot" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/deceboot/deceboot" />
   </ItemGroup>
 </Project>

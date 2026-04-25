@@ -3,6 +3,7 @@ AtlusScriptCompiler.log
 publish/
 obj/
 bin/
+modules/Publish/
 
 # Ignore executables and tools
 **.o
