@@ -19,6 +19,19 @@
     <!-- Platform detection for compiler macros -->
   </PropertyGroup>
 
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <DefineConstants>WINDOWS</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+    <DefineConstants>LINUX</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('FreeBSD'))">
+    <DefineConstants>FREEBSD</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <DefineConstants>MAC</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup>
     <Guid>a59441db-e6e5-41a0-81db-a833ccd49939</Guid>
   </PropertyGroup>
@@ -46,7 +59,11 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.8" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.8" />
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.8" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.2.8" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference
+      Include="Avalonia.Diagnostics"
+      Version="11.2.8"
+      Condition="'$(Configuration)' == 'Debug'"
+    />
 
     <!-- MVVM -->
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />

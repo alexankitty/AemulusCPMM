@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AemulusModManager.Avalonia", "AemulusModManager.Avalonia.csproj", "{4814D791-1265-484C-B0D9-2DF0C7F31E08}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AemulusModManager.Avalonia", "AemulusModManager.Avalonia\AemulusModManager.Avalonia.csproj", "{4814D791-1265-484C-B0D9-2DF0C7F31E08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
