@@ -13,6 +13,10 @@
     <Delete Files="gitroot.txt" />
   </Target>
 
+  <PropertyGroup>
+    <DependenciesFolder>$(MSBuildThisFileDirectory)Dependencies</DependenciesFolder>
+    <ModulesFolder>../../modules</ModulesFolder>
+  </PropertyGroup>
 
   <!-- Dependency Applications-->
 
@@ -23,34 +27,42 @@
 
   <!-- AtlusScriptCompiler -->
   <Target Name="BuildAtlusScriptCompiler" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet publish ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(GitRoot)/modules/Publish/AtlusScriptCompiler/" />
+    <Exec Command="dotnet publish $(ModulesFolder)/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(DependenciesFolder)/AtlusScriptCompiler/" />
   </Target>
   <Target Name="BuildAtlusScriptCompiler" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet publish ../../modules/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release --property:PublishDir=$(GitRoot)/modules/Publish/AtlusScriptCompiler/" />
+    <Exec Command="dotnet publish $(ModulesFolder)/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release --property:PublishDir=$(DependenciesFolder)/AtlusScriptCompiler/" />
   </Target>
 
   <!-- Atlus File System Library-->
   <Target Name="BuildAtlusFileSystemLibrary" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet publish ../../modules/AtlusFileSystemLibrary/Source -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(GitRoot)/modules/Publish/AtlusFileSystemLibrary/" />
+    <Exec Command="dotnet publish $(ModulesFolder)/AtlusFileSystemLibrary/Source -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(DependenciesFolder)/AtlusFileSystemLibrary/" />
   </Target>
   <Target Name="BuildAtlusFileSystemLibrary" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet publish ../../modules/AtlusFileSystemLibrary/Source -c Release --property:PublishDir=$(GitRoot)/modules/Publish/AtlusFileSystemLibrary/" />
+    <Exec Command="dotnet publish $(ModulesFolder)/AtlusFileSystemLibrary/Source -c Release --property:PublishDir=$(DependenciesFolder)/AtlusFileSystemLibrary/" />
   </Target>
 
   <!-- AtlusPM1MessageScriptEditor -->
   <Target Name="BuildAtlusPM1MessageScriptEditor" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet publish ../../modules/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(GitRoot)/modules/Publish/AtlusPM1MessageScriptEditor/" />
+    <Exec Command="dotnet publish $(ModulesFolder)/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(DependenciesFolder)/AtlusPM1MessageScriptEditor/" />
   </Target>
   <Target Name="BuildAtlusPM1MessageScriptEditor" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet publish ../../modules/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release --property:PublishDir=$(GitRoot)/modules/Publish/AtlusPM1MessageScriptEditor/" />
+    <Exec Command="dotnet publish $(ModulesFolder)/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release --property:PublishDir=$(DependenciesFolder)/AtlusPM1MessageScriptEditor/" />
   </Target>
 
   <!-- preappfile -->
   <Target Name="BuildPreappfile" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet publish ../../modules/preappfile/preappfile/preappfile.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(GitRoot)/modules/Publish/preappfile/" />
+    <Exec Command="dotnet publish $(ModulesFolder)/preappfile/preappfile/preappfile.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(DependenciesFolder)/preappfile/" />
   </Target>
   <Target Name="BuildPreappfile" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet publish ../../modules/preappfile/preappfile/preappfile.csproj -c Release --property:PublishDir=$(GitRoot)/modules/Publish/preappfile/" />
+    <Exec Command="dotnet publish $(ModulesFolder)/preappfile/preappfile/preappfile.csproj -c Release --property:PublishDir=$(DependenciesFolder)/preappfile/" />
+  </Target>
+
+  <!-- AcbEditor -->
+  <Target Name="BuildAcbEditor" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
+    <Exec Command="dotnet publish $(ModulesFolder)/SonicAudioToolsCLI/Source/AcbEditor/AcbEditor.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(DependenciesFolder)/AcbEditor/" />
+  </Target>
+  <Target Name="BuildAcbEditor" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
+    <Exec Command="dotnet publish $(ModulesFolder)/SonicAudioToolsCLI/Source/AcbEditor/AcbEditor.csproj -c Release --property:PublishDir=$(DependenciesFolder)/AcbEditor/" />
   </Target>
 
   <!-- AWBTools -->
@@ -70,12 +82,8 @@
   </Target>
 
   <!-- Copy Dependencies -->
-  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-    <Content Include="$(GitRoot)/modules/Publish/**">
-      <!-- I still hate csproj -->
-      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+  <ItemGroup>
+    <Content Include="$(DependenciesFolder)/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="./AwbTools/AWB_unpacker.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/AWBTools/AWB_unpacker.exe" />
     <Content Include="./AwbTools/AWB_repacker.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/AWBTools/AWB_repacker.exe" />
     <Content Include="./deceboot/src/$(RuntimeIdentifier)/deceboot.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/deceboot/deceboot.exe" />

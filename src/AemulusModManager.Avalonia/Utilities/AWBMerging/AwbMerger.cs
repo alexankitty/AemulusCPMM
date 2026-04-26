@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,7 +9,6 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Globalization;
 using AemulusModManager.Utilities;
 
 namespace AemulusModManager.Utilities.AwbMerging
@@ -19,10 +19,24 @@ namespace AemulusModManager.Utilities.AwbMerging
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = true;
-            startInfo.FileName = $@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Dependencies\SonicAudioTools\AcbEditor.exe";
+            startInfo.FileName = OperatingSystem.IsWindows()
+                ? Path.Combine(
+                    Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                    "Dependencies",
+                    "SonicAudioTools",
+                    "AcbEditor.exe"
+                )
+                : Path.Combine(
+                    Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                    "Dependencies",
+                    "SonicAudioTools",
+                    "AcbEditor"
+                );
             if (!File.Exists(startInfo.FileName))
             {
-                Utilities.ParallelLogger.Log($"[ERROR] Couldn't find {startInfo.FileName}. Please check if it was blocked by your anti-virus.");
+                Utilities.ParallelLogger.Log(
+                    $"[ERROR] Couldn't find {startInfo.FileName}. Please check if it was blocked by your anti-virus."
+                );
                 return;
             }
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -35,21 +49,34 @@ namespace AemulusModManager.Utilities.AwbMerging
                 process.WaitForExit();
             }
         }
+
         private static void RunAwbUnpacker(string args, string extension)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = true;
-            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                startInfo.FileName = $@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Dependencies\AwbTools\AWB_unpacker.exe";
+                startInfo.FileName = Path.Combine(
+                    Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                    "Dependencies",
+                    "AwbTools",
+                    "AWB_unpacker.exe"
+                );
             }
             else
             {
-                startInfo.FileName = $@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Dependencies\AwbTools\AWB_unpacker";
+                startInfo.FileName = Path.Combine(
+                    Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                    "Dependencies",
+                    "AwbTools",
+                    "AWB_unpacker"
+                );
             }
             if (!File.Exists(startInfo.FileName))
             {
-                Utilities.ParallelLogger.Log($"[ERROR] Couldn't find {startInfo.FileName}. Please check if it was blocked by your anti-virus.");
+                Utilities.ParallelLogger.Log(
+                    $"[ERROR] Couldn't find {startInfo.FileName}. Please check if it was blocked by your anti-virus."
+                );
                 return;
             }
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -62,29 +89,48 @@ namespace AemulusModManager.Utilities.AwbMerging
                 process.WaitForExit();
             }
 
-            string awbPath = $@"{Path.GetDirectoryName(args)}\{Path.GetFileNameWithoutExtension(args)}";
+            string awbPath =
+                $@"{Path.GetDirectoryName(args)}\{Path.GetFileNameWithoutExtension(args)}";
             Directory.CreateDirectory(awbPath);
 
-            List<string> files = new List<string>(Directory.EnumerateFiles($@"{args}_extracted_files"));
-            foreach(var file in files)
-                File.Move(file, $@"{awbPath}\{Convert.ToString(int.Parse(Path.GetFileNameWithoutExtension(file), NumberStyles.HexNumber)).PadLeft(5, '0')}_streaming{extension}");
+            List<string> files = new List<string>(
+                Directory.EnumerateFiles($@"{args}_extracted_files")
+            );
+            foreach (var file in files)
+                File.Move(
+                    file,
+                    $@"{awbPath}\{Convert.ToString(int.Parse(Path.GetFileNameWithoutExtension(file), NumberStyles.HexNumber)).PadLeft(5, '0')}_streaming{extension}"
+                );
             Directory.Delete($@"{args}_extracted_files", true);
         }
+
         private static void RunAwbRepacker(string args)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = true;
-            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                startInfo.FileName = $@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Dependencies\AwbTools\AWB_repacker.exe";
+                startInfo.FileName = Path.Combine(
+                    Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                    "Dependencies",
+                    "AwbTools",
+                    "AWB_repacker.exe"
+                );
             }
             else
             {
-                startInfo.FileName = $@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Dependencies\AwbTools\AWB_repacker";
+                startInfo.FileName = Path.Combine(
+                    Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                    "Dependencies",
+                    "AwbTools",
+                    "AWB_repacker"
+                );
             }
             if (!File.Exists(startInfo.FileName))
             {
-                Utilities.ParallelLogger.Log($"[ERROR] Couldn't find {startInfo.FileName}. Please check if it was blocked by your anti-virus.");
+                Utilities.ParallelLogger.Log(
+                    $"[ERROR] Couldn't find {startInfo.FileName}. Please check if it was blocked by your anti-virus."
+                );
                 return;
             }
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -101,20 +147,31 @@ namespace AemulusModManager.Utilities.AwbMerging
                 process.WaitForExit();
             }
 
-            File.Move($@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\OUT.AWB", Path.ChangeExtension(args, ".awb"), true);
+            File.Move(
+                Path.Combine(
+                    Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                    "OUT.AWB"
+                ),
+                Path.ChangeExtension(args, ".awb"),
+                true
+            );
         }
+
         public static bool AcbExists(string path)
         {
             return File.Exists(Path.ChangeExtension(path, ".acb"));
         }
+
         public static bool AwbExists(string path)
         {
             return File.Exists(Path.ChangeExtension(path, ".awb"));
         }
+
         public static bool SoundArchiveExists(string path)
         {
             return AcbExists(path) || AwbExists(path);
         }
+
         private static void CopyAndUnpackArchive(string acbPath, string ogAcbPath, string extension)
         {
             ogAcbPath = Path.ChangeExtension(ogAcbPath, ".acb");
@@ -128,9 +185,16 @@ namespace AemulusModManager.Utilities.AwbMerging
                 Utilities.ParallelLogger.Log($"[INFO] Copying over {ogAwbPath} to use as base.");
                 File.Copy(ogAwbPath, awbPath, true);
             }
-            else if (AwbExists(ogAwbPath = $@"{Path.GetDirectoryName(ogAwbPath)}\{Path.GetFileNameWithoutExtension(ogAwbPath)}_streamfiles.awb"))
+            else if (
+                AwbExists(
+                    ogAwbPath = Path.Combine(
+                        Path.GetDirectoryName(ogAwbPath),
+                        $"{Path.GetFileNameWithoutExtension(ogAwbPath)}_streamfiles.awb"
+                    )
+                )
+            )
             {
-                awbPath = $@"{Path.GetDirectoryName(acbPath)}\{Path.GetFileName(ogAwbPath)}";
+                awbPath = Path.Combine(Path.GetDirectoryName(acbPath), Path.GetFileName(ogAwbPath));
                 Utilities.ParallelLogger.Log($"[INFO] Copying over {ogAwbPath} to use as base.");
                 File.Copy(ogAwbPath, awbPath, true);
             }
@@ -148,21 +212,31 @@ namespace AemulusModManager.Utilities.AwbMerging
                 RunAwbUnpacker(awbPath, extension);
             }
         }
+
         public static void Merge(List<string> ModList, string game, string modDir)
         {
             List<string> acbs = new List<string>();
-            foreach(string mod in ModList)
+            foreach (string mod in ModList)
             {
-                List<string> directories = new List<string>(Directory.EnumerateDirectories(mod, "*", SearchOption.AllDirectories));
-                string[] AemIgnore = File.Exists($@"{mod}\Ignore.aem") ? File.ReadAllLines($@"{mod}\Ignore.aem") : null;
+                List<string> directories = new List<string>(
+                    Directory.EnumerateDirectories(mod, "*", SearchOption.AllDirectories)
+                );
+                string[] AemIgnore = File.Exists(Path.Combine(mod, "Ignore.aem"))
+                    ? File.ReadAllLines(Path.Combine(mod, "Ignore.aem"))
+                    : null;
 
                 foreach (string dir in directories)
                 {
-                    List<string> folders = new List<string>(dir.Split(char.Parse("\\")));
+                    List<string> folders = new List<string>(dir.Split(Path.DirectorySeparatorChar));
                     int idx = folders.IndexOf(Path.GetFileName(mod));
                     folders = folders.Skip(idx + 1).ToList();
-                    string acbPath = $@"{modDir}\{string.Join("\\", folders.ToArray())}";
-                    string ogAcbPath = $@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Original\{game}\{string.Join("\\", folders.ToArray())}";
+                    string acbPath = Path.Combine(modDir, Path.Combine(folders.ToArray()));
+                    string ogAcbPath = Path.Combine(
+                        Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
+                        "Original",
+                        game,
+                        Path.Combine(folders.ToArray())
+                    );
 
                     if (SoundArchiveExists(ogAcbPath))
                     {
@@ -177,17 +251,22 @@ namespace AemulusModManager.Utilities.AwbMerging
                                 CopyAndUnpackArchive(acbPath, ogAcbPath, Path.GetExtension(file));
                                 acbs.Add(acbPath);
                             }
-                            string fileName = Path.GetFileNameWithoutExtension(file).IndexOf('_') == -1 ? $@"{Path.GetFileNameWithoutExtension(file).PadLeft(5, '0')}{Path.GetExtension(file)}" : $@"{Path.GetFileName(file).Substring(0, Path.GetFileName(file).IndexOf('_')).PadLeft(5, '0')}_streaming{Path.GetExtension(file)}";
+                            string fileName =
+                                Path.GetFileNameWithoutExtension(file).IndexOf('_') == -1
+                                    ? $@"{Path.GetFileNameWithoutExtension(file).PadLeft(5, '0')}{Path.GetExtension(file)}"
+                                    : $@"{Path.GetFileName(file).Substring(0, Path.GetFileName(file).IndexOf('_')).PadLeft(5, '0')}_streaming{Path.GetExtension(file)}";
                             File.Copy(file, $@"{acbPath}\{fileName}", true);
-                            Utilities.ParallelLogger.Log($"[INFO] Copying over {file} to {acbPath}");
+                            Utilities.ParallelLogger.Log(
+                                $"[INFO] Copying over {file} to {acbPath}"
+                            );
                         }
                     }
                 }
             }
-            foreach(string acb in acbs)
+            foreach (string acb in acbs)
             {
                 Utilities.ParallelLogger.Log($"[INFO] Repacking {acb}");
-                if(AcbExists(acb))
+                if (AcbExists(acb))
                     RunAcbEditor(acb);
                 else
                     RunAwbRepacker(acb);
