@@ -72,7 +72,7 @@ namespace AemulusModManager
                             Process process = new Process();
                             ProcessStartInfo startInfo = new ProcessStartInfo();
                             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                            startInfo.FileName = $@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Dependencies\SpdPatcher\SPD Patcher.exe";
+                            startInfo.FileName = OperatingSystem.IsWindows() ? $@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Dependencies\P5-SPD-Patcher\SPD Patcher.exe" : $@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}/Dependencies/P5-SPD-Patcher/SPD Patcher";
                             startInfo.Arguments = $"\"{t}\" " + $"\"{outputFile}\" " + $"\"{outputFile}\"";
                             process.StartInfo = startInfo;
                             process.Start();

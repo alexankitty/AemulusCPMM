@@ -65,6 +65,14 @@
     <Exec Command="dotnet publish $(ModulesFolder)/SonicAudioToolsCLI/Source/AcbEditor/AcbEditor.csproj -c Release --property:PublishDir=$(DependenciesFolder)/AcbEditor/" />
   </Target>
 
+  <!-- P5 SPD Patcher -->
+  <Target Name="BuildP5SPDTool" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
+    <Exec Command="dotnet publish $(ModulesFolder)/P5-SPD-Patcher/src/SPDPatcher/SPDPatcher.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(DependenciesFolder)/P5-SPD-Patcher/" />
+  </Target>
+  <Target Name="BuildP5SPDTool" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
+    <Exec Command="dotnet publish $(ModulesFolder)/P5-SPD-Patcher/src/SPDPatcher/SPDPatcher.csproj -c Release --property:PublishDir=$(DependenciesFolder)/P5-SPD-Patcher/" />
+  </Target>
+
   <!-- AWBTools -->
   <Target Name="BuildAWBTools" BeforeTargets="BeforeBuild">
     <Exec Command="gcc ./AwbTools/AWB_unpacker.c -o ./AwbTools/AWB_unpacker" />

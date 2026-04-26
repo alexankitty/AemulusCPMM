@@ -13,3 +13,6 @@
 [submodule "modules/SonicAudioToolsCLI"]
 	path = modules/SonicAudioToolsCLI
 	url = https://github.com/alexankitty/SonicAudioToolsCLI
+[submodule "modules/P5-SPD-Patcher"]
+	path = modules/P5-SPD-Patcher
+	url = https://github.com/alexankitty/P5-SPD-Patcher
