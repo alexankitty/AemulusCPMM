@@ -10,3 +10,6 @@
 [submodule "modules/preappfile"]
 	path = modules/preappfile
 	url = https://github.com/alexankitty/preappfile
+[submodule "modules/SonicAudioToolsCLI"]
+	path = modules/SonicAudioToolsCLI
+	url = https://github.com/alexankitty/SonicAudioToolsCLI
