@@ -206,7 +206,7 @@ namespace AemulusModManager.Utilities.KT
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = true;
-            startInfo.FileName = $@"{Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)}\Dependencies\rdb_tool.exe";
+            startInfo.FileName = OperatingSystem.IsWindows() ? Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Dependencies", "rdb_tool.exe") : Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Dependencies", "rdb_tool");
             if (!File.Exists(startInfo.FileName))
             {
                 ParallelLogger.Log($"[ERROR] Couldn't find {startInfo.FileName}. Please check if it was blocked by your anti-virus.");
