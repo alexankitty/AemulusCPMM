@@ -16,7 +16,7 @@ public static class Info {
     public const string Author = "Alexankitty";
 }
 class Program {
-    static Mutex? mutex;
+    private static Mutex? _mutex;
 
     [STAThread]
     public static void Main(string[] args) {
@@ -26,8 +26,7 @@ class Program {
 
         string mutexId = string.Format("Global\\{{{0}}}", appGuid);
 
-        bool createdNew;
-        mutex = new Mutex(true, mutexId, out createdNew);
+        _mutex = new Mutex(true, mutexId, out var createdNew);
 
         if (!createdNew) {
             if (args.Length >= 1) {
@@ -43,18 +42,18 @@ class Program {
             BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
         }
-        mutex.ReleaseMutex();
+        _mutex.ReleaseMutex();
     }
 
 
-    public static AppBuilder BuildAvaloniaApp() {
+    private static AppBuilder BuildAvaloniaApp() {
         IconProvider.Current.Register<FontAwesomeIconProvider>();
         return AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
     }
-    static void Error(Application app, string[] args) {
+    private static void Error(Application app, string[] args) {
         var cts = new CancellationTokenSource();
         var errorDialog = new Views.ErrorDialog(args[0], cts);
         errorDialog.Show();
