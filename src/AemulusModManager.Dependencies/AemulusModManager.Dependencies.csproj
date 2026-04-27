@@ -16,89 +16,114 @@
   <PropertyGroup>
     <DependenciesFolder>$(MSBuildThisFileDirectory)Dependencies</DependenciesFolder>
     <ModulesFolder>../../modules</ModulesFolder>
+    <RidFlag Condition="'$(RuntimeIdentifier)' != ''">-r $(RuntimeIdentifier)</RidFlag>
+    <RidFlag Condition="'$(RuntimeIdentifier)' == ''"></RidFlag>
   </PropertyGroup>
 
-  <!-- Dependency Applications-->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+    <CargoBuildTarget>x86_64-pc-windows-gnu</CargoBuildTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+    <CargoBuildTarget>x86_64-unknown-linux-gnu</CargoBuildTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
+    <CargoBuildTarget>x86_64-apple-darwin</CargoBuildTarget>
+  </PropertyGroup>
 
-  <!-- Clean Publish Folders-->
-  <Target Name="CleanModulePublishFolders" BeforeTargets="BeforeBuild">
-    <RemoveDir Directories="$(GitRoot)/modules/Publish" />
-  </Target>
+  <!-- Individual build targets (no BeforeTargets — driven by BuildDependencies) -->
 
-  <!-- AtlusScriptCompiler -->
-  <Target Name="BuildAtlusScriptCompiler" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet publish $(ModulesFolder)/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(DependenciesFolder)/AtlusScriptCompiler/" />
-  </Target>
-  <Target Name="BuildAtlusScriptCompiler" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet publish $(ModulesFolder)/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release --property:PublishDir=$(DependenciesFolder)/AtlusScriptCompiler/" />
-  </Target>
-
-  <!-- Atlus File System Library-->
-  <Target Name="BuildAtlusFileSystemLibrary" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet publish $(ModulesFolder)/AtlusFileSystemLibrary/Source -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(DependenciesFolder)/AtlusFileSystemLibrary/" />
-  </Target>
-  <Target Name="BuildAtlusFileSystemLibrary" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet publish $(ModulesFolder)/AtlusFileSystemLibrary/Source -c Release --property:PublishDir=$(DependenciesFolder)/AtlusFileSystemLibrary/" />
+  <Target Name="CleanModulePublishFolders">
+    <RemoveDir Directories="$(DependenciesFolder)" />
   </Target>
 
-  <!-- AtlusPM1MessageScriptEditor -->
-  <Target Name="BuildAtlusPM1MessageScriptEditor" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet publish $(ModulesFolder)/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(DependenciesFolder)/AtlusPM1MessageScriptEditor/" />
-  </Target>
-  <Target Name="BuildAtlusPM1MessageScriptEditor" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet publish $(ModulesFolder)/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release --property:PublishDir=$(DependenciesFolder)/AtlusPM1MessageScriptEditor/" />
+  <Target Name="BuildAtlusScriptCompiler">
+    <Exec Command="dotnet publish $(ModulesFolder)/Atlus-Script-Tools/Source/AtlusScriptCompiler/AtlusScriptCompiler.csproj -c Release $(RidFlag) --property:PublishDir=$(DependenciesFolder)/AtlusScriptCompiler/" />
   </Target>
 
-  <!-- preappfile -->
-  <Target Name="BuildPreappfile" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet publish $(ModulesFolder)/preappfile/preappfile/preappfile.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(DependenciesFolder)/preappfile/" />
-  </Target>
-  <Target Name="BuildPreappfile" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet publish $(ModulesFolder)/preappfile/preappfile/preappfile.csproj -c Release --property:PublishDir=$(DependenciesFolder)/preappfile/" />
+  <Target Name="BuildAtlusFileSystemLibrary">
+    <Exec Command="dotnet publish $(ModulesFolder)/AtlusFileSystemLibrary/Source -c Release $(RidFlag) --property:PublishDir=$(DependenciesFolder)/AtlusFileSystemLibrary/" />
   </Target>
 
-  <!-- AcbEditor -->
-  <Target Name="BuildAcbEditor" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet publish $(ModulesFolder)/SonicAudioToolsCLI/Source/AcbEditor/AcbEditor.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(DependenciesFolder)/AcbEditor/" />
-  </Target>
-  <Target Name="BuildAcbEditor" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet publish $(ModulesFolder)/SonicAudioToolsCLI/Source/AcbEditor/AcbEditor.csproj -c Release --property:PublishDir=$(DependenciesFolder)/AcbEditor/" />
+  <Target Name="BuildAtlusPM1MessageScriptEditor">
+    <Exec Command="dotnet publish $(ModulesFolder)/AtlusPM1MessageScriptEditor/src/AtlusPM1MessageScriptEditor/AtlusPM1MessageScriptEditor.csproj -c Release $(RidFlag) --property:PublishDir=$(DependenciesFolder)/AtlusPM1MessageScriptEditor/" />
   </Target>
 
-  <!-- P5 SPD Patcher -->
-  <Target Name="BuildP5SPDTool" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
-    <Exec Command="dotnet publish $(ModulesFolder)/P5-SPD-Patcher/src/SPDPatcher/SPDPatcher.csproj -c Release -r $(RuntimeIdentifier) --property:PublishDir=$(DependenciesFolder)/P5-SPD-Patcher/" />
-  </Target>
-  <Target Name="BuildP5SPDTool" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
-    <Exec Command="dotnet publish $(ModulesFolder)/P5-SPD-Patcher/src/SPDPatcher/SPDPatcher.csproj -c Release --property:PublishDir=$(DependenciesFolder)/P5-SPD-Patcher/" />
+  <Target Name="BuildPreappfile">
+    <Exec Command="dotnet publish $(ModulesFolder)/preappfile/preappfile/preappfile.csproj -c Release $(RidFlag) --property:PublishDir=$(DependenciesFolder)/preappfile/" />
   </Target>
 
-  <!-- AWBTools -->
-  <Target Name="BuildAWBTools" BeforeTargets="BeforeBuild">
+  <Target Name="BuildAcbEditor">
+    <Exec Command="dotnet publish $(ModulesFolder)/SonicAudioToolsCLI/Source/AcbEditor/AcbEditor.csproj -c Release $(RidFlag) --property:PublishDir=$(DependenciesFolder)/AcbEditor/" />
+  </Target>
+
+  <Target Name="BuildP5SPDTool">
+    <Exec Command="dotnet publish $(ModulesFolder)/P5-SPD-Patcher/src/SPDPatcher/SPDPatcher.csproj -c Release $(RidFlag) --property:PublishDir=$(DependenciesFolder)/P5-SPD-Patcher/" />
+  </Target>
+
+  <Target Name="BuildRdbTool">
+    <Exec Condition="'$(RuntimeIdentifier)' != ''"
+          Command="cargo build --target $(CargoBuildTarget) --manifest-path=$(ModulesFolder)/rdb_tool/Cargo.toml -r" />
+    <Exec Condition="'$(RuntimeIdentifier)' == ''"
+          Command="cargo build --manifest-path=$(ModulesFolder)/rdb_tool/Cargo.toml -r" />
+    <Exec Command="mkdir -p $(DependenciesFolder)/rdb_tool" />
+    <Exec Condition="'$(RuntimeIdentifier)' != ''"
+          Command="cp $(ModulesFolder)/rdb_tool/target/$(CargoBuildTarget)/release/rdb_tool* $(DependenciesFolder)/rdb_tool/" />
+    <Exec Condition="'$(RuntimeIdentifier)' == ''"
+          Command="cp $(ModulesFolder)/rdb_tool/target/release/rdb_tool* $(DependenciesFolder)/rdb_tool/" />
+  </Target>
+
+  <Target Name="BuildAWBTools">
     <Exec Command="gcc ./AwbTools/AWB_unpacker.c -o ./AwbTools/AWB_unpacker" />
     <Exec Command="gcc ./AwbTools/AWB_repacker.c -o ./AwbTools/AWB_repacker" />
     <Exec Command="x86_64-w64-mingw32-gcc ./AwbTools/AWB_unpacker.c -o ./AwbTools/AWB_unpacker.exe" />
     <Exec Command="x86_64-w64-mingw32-gcc ./AwbTools/AWB_repacker.c -o ./AwbTools/AWB_repacker.exe" />
   </Target>
 
-  <!-- Deceboot -->
-  <Target Name="BuildDeceboot" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' != ''">
+  <Target Name="BuildDecebootRT" Condition="'$(RuntimeIdentifier)' != ''">
     <Exec Command="make -C ./deceboot/src all PLATFORM=$(RuntimeIdentifier)" />
   </Target>
-  <Target Name="BuildDeceboot" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == ''">
+  <Target Name="BuildDeceboot" Condition="'$(RuntimeIdentifier)' == ''">
     <Exec Command="make -C ./deceboot/src all" />
   </Target>
 
-  <!-- Copy Dependencies -->
+  <!-- Master orchestrator: clean first, then build everything in order -->
+  <Target Name="BuildDependencies" BeforeTargets="BeforeBuild"
+          DependsOnTargets="CleanModulePublishFolders;
+                            BuildAtlusScriptCompiler;
+                            BuildAtlusFileSystemLibrary;
+                            BuildAtlusPM1MessageScriptEditor;
+                            BuildPreappfile;
+                            BuildAcbEditor;
+                            BuildP5SPDTool;
+                            BuildRdbTool;
+                            BuildAWBTools;
+                            BuildDecebootRT;
+                            BuildDeceboot" />
+
+
+<!-- Add dependencies to output and publish directories -->
+<Target Name="CollectDependencies" AfterTargets="BuildDependencies">
   <ItemGroup>
-    <Content Include="$(DependenciesFolder)/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="./AwbTools/AWB_unpacker.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/AWBTools/AWB_unpacker.exe" />
-    <Content Include="./AwbTools/AWB_repacker.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/AWBTools/AWB_repacker.exe" />
-    <Content Include="./deceboot/src/$(RuntimeIdentifier)/deceboot.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/deceboot/deceboot.exe" />
+    <_BuiltDependencies Include="$(DependenciesFolder)/**" 
+                        DefaultItemExcludes=""
+                        DefaultExcludesInProjectDirectory=""/>
+    
+    <_ExtraDependencies Include="./AwbTools/AWB_unpacker.exe"  TargetPath="Dependencies/AWBTools/AWB_unpacker.exe" />
+    <_ExtraDependencies Include="./AwbTools/AWB_repacker.exe"  TargetPath="Dependencies/AWBTools/AWB_repacker.exe" />
+    <_ExtraDependencies Include="./AwbTools/AWB_unpacker"      Condition="'$(RuntimeIdentifier)' != 'win-x64'" TargetPath="Dependencies/AWBTools/AWB_unpacker" />
+    <_ExtraDependencies Include="./AwbTools/AWB_repacker"      Condition="'$(RuntimeIdentifier)' != 'win-x64'" TargetPath="Dependencies/AWBTools/AWB_repacker" />
+    <_ExtraDependencies Include="./deceboot/src/deceboot.exe"  TargetPath="Dependencies/deceboot/deceboot.exe" />
+    <_ExtraDependencies Include="./deceboot/src/deceboot"      Condition="'$(RuntimeIdentifier)' != 'win-x64'" TargetPath="Dependencies/deceboot/deceboot" />
   </ItemGroup>
-  <ItemGroup Condition="'$(RuntimeIdentifier)' != 'win-x64'">
-    <Content Include="./AwbTools/AWB_unpacker" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/AWBTools/AWB_unpacker" />
-    <Content Include="./AwbTools/AWB_repacker" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/AWBTools/AWB_repacker" />
-    <Content Include="./deceboot/src/$(RuntimeIdentifier)/deceboot" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="Dependencies/deceboot/deceboot" />
-  </ItemGroup>
+
+  <!-- Glob items: preserve subdirectory structure under Dependencies/ -->
+  <Copy SourceFiles="@(_BuiltDependencies)"
+        DestinationFiles="@(_BuiltDependencies->'$(OutputPath)Dependencies/%(RecursiveDir)%(Filename)%(Extension)')"
+        SkipUnchangedFiles="true" />
+
+  <!-- Manually specified items with explicit target paths -->
+  <Copy SourceFiles="@(_ExtraDependencies)"
+        DestinationFiles="@(_ExtraDependencies->'$(OutputPath)%(TargetPath)')"
+        SkipUnchangedFiles="true" />
+</Target>
 </Project>

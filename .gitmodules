@@ -16,3 +16,6 @@
 [submodule "modules/P5-SPD-Patcher"]
 	path = modules/P5-SPD-Patcher
 	url = https://github.com/alexankitty/P5-SPD-Patcher
+[submodule "modules/rdb_tool"]
+	path = modules/rdb_tool
+	url = https://github.com/Raytwo/rdb_tool
