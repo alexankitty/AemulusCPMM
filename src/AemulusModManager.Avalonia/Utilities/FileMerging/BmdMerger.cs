@@ -10,27 +10,22 @@ namespace AemulusModManager.Avalonia.Utilities.FileMerging;
 /// Cross-platform port of BmdMerger. Uses CLI decompile/recompile for BMD merging
 /// instead of in-process AtlusScriptLibrary.
 /// </summary>
-public static class BmdMerger
-{
+public static class BmdMerger {
     private static readonly string DataDir = AppPaths.DataDir;
 
-    public static void Merge(List<string> ModList, string game, string language)
-    {
+    public static void Merge(List<string> ModList, string game, string language) {
 
         var foundBmds = new List<string[]>();
 
-        foreach (string dir in ModList)
-        {
+        foreach (string dir in ModList) {
             string[] bmdFiles = Directory.GetFiles(dir, "*.bmd", SearchOption.AllDirectories);
-            foreach (string file in bmdFiles)
-            {
+            foreach (string file in bmdFiles) {
                 string filePath = ScriptCompiler.GetRelativePath(file, dir, game);
                 string[]? previousFileArr = foundBmds.FindLast(p => p[0] == filePath);
                 string? previousFile = previousFileArr?[2];
 
                 // Merge bmds if there are two with the same relative path
-                if (previousFile != null)
-                {
+                if (previousFile != null) {
                     string ogPath = Path.Combine(DataDir, "Original", game,
                         ScriptCompiler.GetRelativePath(file, dir, game, false));
                     MergeBmds(new[] { previousFile, file }, ogPath, game, language);
@@ -40,10 +35,8 @@ public static class BmdMerger
         }
     }
 
-    private static void MergeBmds(string[] bmds, string ogPath, string game, string language)
-    {
-        if (!File.Exists(ogPath))
-        {
+    private static void MergeBmds(string[] bmds, string ogPath, string game, string language) {
+        if (!File.Exists(ogPath)) {
             ParallelLogger.Log($"[WARNING] Cannot find {ogPath}. Make sure you have unpacked the game's files if merging is needed.");
             return;
         }
@@ -60,17 +53,14 @@ public static class BmdMerger
         ScriptCompiler.MergeFiles(game, bmds, new[] { messages0, messages1 }, ogMessages, language);
     }
 
-    private static Dictionary<string, string>? DecompileAndGetMessages(string bmdPath, string game, string language)
-    {
-        if (!File.Exists(bmdPath))
-        {
+    private static Dictionary<string, string>? DecompileAndGetMessages(string bmdPath, string game, string language) {
+        if (!File.Exists(bmdPath)) {
             ParallelLogger.Log($"[ERROR] BMD file not found: {bmdPath}");
             return null;
         }
 
         // Decompile BMD to MSG
-        if (!ScriptCompiler.Decompile(bmdPath, game, language))
-        {
+        if (!ScriptCompiler.Decompile(bmdPath, game, language)) {
             ParallelLogger.Log($"[ERROR] Failed to decompile {bmdPath}");
             return null;
         }

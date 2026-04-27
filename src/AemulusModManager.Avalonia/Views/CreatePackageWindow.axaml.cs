@@ -8,31 +8,26 @@ using Avalonia.Media;
 
 namespace AemulusModManager.Avalonia.Views;
 
-public partial class CreatePackageWindow : Window
-{
+public partial class CreatePackageWindow : Window {
     public Metadata? ResultMetadata { get; set; }
     public string? ThumbnailPath { get; set; }
     private bool _edited;
     private bool _editing;
     private string? _skippedVersion = "";
 
-    public CreatePackageWindow()
-    {
+    public CreatePackageWindow() {
         InitializeComponent();
         SetupTextChangedHandlers();
     }
 
-    public CreatePackageWindow(DialogWindowViewModel dialogVm, Metadata? m)
-    {
+    public CreatePackageWindow(DialogWindowViewModel dialogVm, Metadata? m) {
         DataContext = dialogVm;
-        foreach(var prop in dialogVm.AccentProps)
-        {
+        foreach (var prop in dialogVm.AccentProps) {
             this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
         }
         InitializeComponent();
         SetupTextChangedHandlers();
-        if (m != null)
-        {
+        if (m != null) {
             Title = $"Edit {m.name}";
             NameBox.Text = m.name;
             AuthorBox.Text = m.author;
@@ -51,21 +46,18 @@ public partial class CreatePackageWindow : Window
         }
     }
 
-    private void SetupTextChangedHandlers()
-    {
+    private void SetupTextChangedHandlers() {
         NameBox.TextChanged += (_, _) => OnNameOrAuthorChanged();
         AuthorBox.TextChanged += (_, _) => OnNameOrAuthorChanged();
         LinkBox.TextChanged += (_, _) => UpdateAllowUpdates();
         IDBox.GotFocus += (_, _) => { if (!_edited) _edited = true; };
     }
 
-    private void OnNameOrAuthorChanged()
-    {
+    private void OnNameOrAuthorChanged() {
         CreateButton.IsEnabled = !string.IsNullOrWhiteSpace(NameBox.Text);
         if (string.IsNullOrEmpty(NameBox.Text) && string.IsNullOrEmpty(AuthorBox.Text) && string.IsNullOrEmpty(IDBox.Text))
             _edited = false;
-        if (!_edited && !_editing)
-        {
+        if (!_edited && !_editing) {
             var name = NameBox.Text?.Replace(" ", "").ToLower() ?? "";
             var author = AuthorBox.Text?.Replace(" ", "").ToLower() ?? "";
             IDBox.Text = !string.IsNullOrEmpty(author) && !string.IsNullOrEmpty(name)
@@ -74,8 +66,7 @@ public partial class CreatePackageWindow : Window
         }
     }
 
-    private void UpdateAllowUpdates()
-    {
+    private void UpdateAllowUpdates() {
         bool updatable = PackageUpdatable();
         AllowUpdates.IsEnabled = updatable;
         if (!updatable) AllowUpdates.IsChecked = false;
@@ -83,15 +74,13 @@ public partial class CreatePackageWindow : Window
         else AllowUpdates.IsChecked = true;
     }
 
-    private void CreateButton_Click(object? sender, RoutedEventArgs e)
-    {
+    private void CreateButton_Click(object? sender, RoutedEventArgs e) {
         var metadata = new Metadata();
         string dirName = !string.IsNullOrEmpty(VersionBox.Text)
             ? $"{NameBox.Text} {VersionBox.Text}" : NameBox.Text ?? "";
         dirName = $"Packages{Path.DirectorySeparatorChar}{string.Join("_", dirName.Split(Path.GetInvalidFileNameChars()))}";
 
-        if (!Directory.Exists(dirName) || _editing)
-        {
+        if (!Directory.Exists(dirName) || _editing) {
             metadata.skippedVersion = AllowUpdates.IsChecked != true ? "all" : null;
             metadata.name = NameBox.Text ?? "";
             metadata.author = AuthorBox.Text ?? "";
@@ -102,35 +91,29 @@ public partial class CreatePackageWindow : Window
             ResultMetadata = metadata;
             Close();
         }
-        else
-        {
+        else {
             ParallelLogger.Log($"[ERROR] Package name {NameBox.Text} already exists, try another one.");
         }
     }
 
-    private void CancelButton_Click(object? sender, RoutedEventArgs e)
-    {
+    private void CancelButton_Click(object? sender, RoutedEventArgs e) {
         Close();
     }
 
-    private async void PreviewButton_Click(object? sender, RoutedEventArgs e)
-    {
+    private async void PreviewButton_Click(object? sender, RoutedEventArgs e) {
         var topLevel = GetTopLevel(this);
         if (topLevel?.StorageProvider == null) return;
-        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new global::Avalonia.Platform.Storage.FilePickerOpenOptions
-        {
+        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new global::Avalonia.Platform.Storage.FilePickerOpenOptions {
             Title = "Select Preview",
             AllowMultiple = false
         });
-        if (files.Count > 0)
-        {
+        if (files.Count > 0) {
             PreviewBox.Text = files[0].Path.LocalPath;
             ThumbnailPath = files[0].Path.LocalPath;
         }
     }
 
-    private bool PackageUpdatable()
-    {
+    private bool PackageUpdatable() {
         if (string.IsNullOrEmpty(LinkBox.Text)) return false;
         string host = AemulusModManager.Avalonia.Converters.UrlConverter.ConvertUrl(LinkBox.Text);
         return (host == "GameBanana" || host == "GitHub") && !string.IsNullOrEmpty(VersionBox.Text);

@@ -6,10 +6,8 @@ using Avalonia.Media.Imaging;
 
 namespace AemulusModManager.Avalonia.Converters;
 
-public class GameIconConverter : IValueConverter
-{
-    private static readonly Dictionary<string, string> GameIconMap = new()
-    {
+public class GameIconConverter : IValueConverter {
+    private static readonly Dictionary<string, string> GameIconMap = new() {
         ["Persona 1 (PSP)"] = "avares://AemulusPackageManager/Assets/p1pspicon.png",
         ["Persona 3 FES"] = "avares://AemulusPackageManager/Assets/p3ficon.png",
         ["Persona 3 Portable"] = "avares://AemulusPackageManager/Assets/p3picon.png",
@@ -25,23 +23,19 @@ public class GameIconConverter : IValueConverter
 
     private static readonly Dictionary<string, Bitmap?> _cache = new();
 
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        if (value is string gameName && GameIconMap.TryGetValue(gameName, out var uri))
-        {
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) {
+        if (value is string gameName && GameIconMap.TryGetValue(gameName, out var uri)) {
             if (_cache.TryGetValue(gameName, out var cached))
                 return cached;
 
-            try
-            {
+            try {
                 var assetUri = new Uri(uri);
                 using var stream = global::Avalonia.Platform.AssetLoader.Open(assetUri);
                 var bitmap = new Bitmap(stream);
                 _cache[gameName] = bitmap;
                 return bitmap;
             }
-            catch
-            {
+            catch {
                 _cache[gameName] = null;
                 return null;
             }
@@ -49,8 +43,7 @@ public class GameIconConverter : IValueConverter
         return null;
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) {
         throw new NotImplementedException();
     }
 }

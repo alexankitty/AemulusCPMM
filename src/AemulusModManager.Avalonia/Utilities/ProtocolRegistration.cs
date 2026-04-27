@@ -8,12 +8,10 @@ using System.Runtime.InteropServices;
 
 namespace AemulusModManager.Avalonia.Utilities;
 
-public static class ProtocolRegistration
-{
+public static class ProtocolRegistration {
     private static readonly string ProtocolName = "aemulus";
 
-    public static void RegisterProtocol()
-    {
+    public static void RegisterProtocol() {
 #if WINDOWS
         try
         {
@@ -44,8 +42,7 @@ public static class ProtocolRegistration
             "applications",
             $"{ProtocolName}-handler.desktop"
         );
-        try
-        {
+        try {
             File.WriteAllText(desktopFilePath, desktopFileContent);
             // Update the MIME database (this may require additional permissions)
             Process.Start(
@@ -57,15 +54,13 @@ public static class ProtocolRegistration
                 $"default {ProtocolName}-handler.desktop x-scheme-handler/{ProtocolName}"
             );
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             Console.WriteLine($"Failed to register protocol: {ex}");
         }
 #endif
     }
 
-    public static bool CheckRegistration()
-    {
+    public static bool CheckRegistration() {
 #if WINDOWS
 
         try
@@ -96,8 +91,7 @@ public static class ProtocolRegistration
             $"{ProtocolName}-handler.desktop"
         );
 
-        if (!File.Exists(desktopFilePath))
-        {
+        if (!File.Exists(desktopFilePath)) {
             return false;
         }
 

@@ -15,14 +15,11 @@ using CriFsV2Lib.Encryption.Game;
 
 namespace AemulusModManager;
 
-public static class PacUnpacker
-{
-    internal class FileToExtract : IBatchFileExtractorItem
-    {
+public static class PacUnpacker {
+    internal class FileToExtract : IBatchFileExtractorItem {
         public string FullPath { get; set; }
         public CpkFile File { get; set; }
-        public FileToExtract(string fullPath, CpkFile file)
-        {
+        public FileToExtract(string fullPath, CpkFile file) {
             FullPath = fullPath;
             File = file;
         }
@@ -31,8 +28,7 @@ public static class PacUnpacker
     private static string AppDir => AemulusModManager.Avalonia.Utilities.AppPaths.ExeDir;
     private static string DataDir => AemulusModManager.Avalonia.Utilities.AppPaths.DataDir;
 
-    private static string? FindSevenZip()
-    {
+    private static string? FindSevenZip() {
         // Check bundled first
         var bundled = Path.Combine(AppDir, "Dependencies", "7z", "7z.exe");
         if (File.Exists(bundled)) return bundled;
@@ -40,20 +36,16 @@ public static class PacUnpacker
         if (File.Exists(bundled2)) return bundled2;
 
         // Check system path (Linux)
-        foreach (var name in new[] { "7z", "7za", "7zz" })
-        {
-            try
-            {
-                var proc = Process.Start(new ProcessStartInfo
-                {
+        foreach (var name in new[] { "7z", "7za", "7zz" }) {
+            try {
+                var proc = Process.Start(new ProcessStartInfo {
                     FileName = "which",
                     Arguments = name,
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 });
-                if (proc != null)
-                {
+                if (proc != null) {
                     var path = proc.StandardOutput.ReadToEnd().Trim();
                     proc.WaitForExit();
                     if (proc.ExitCode == 0 && !string.IsNullOrEmpty(path))
@@ -66,19 +58,16 @@ public static class PacUnpacker
     }
 
     // P1PSP
-    public static async Task UnzipAndUnBin(string iso)
-    {
+    public static async Task UnzipAndUnBin(string iso) {
         var outputDir = Path.Combine(DataDir, "Original", "Persona 1 (PSP)");
         Directory.CreateDirectory(outputDir);
-        if (!File.Exists(iso))
-        {
+        if (!File.Exists(iso)) {
             ParallelLogger.Log($"[ERROR] Couldn't find {iso}. Please correct the file path in config.");
             return;
         }
 
         var sevenZip = FindSevenZip();
-        if (sevenZip == null)
-        {
+        if (sevenZip == null) {
             ParallelLogger.Log("[ERROR] Couldn't find 7z. Please install p7zip or 7zip.");
             return;
         }
@@ -89,21 +78,18 @@ public static class PacUnpacker
         var ebootPath = Path.Combine(outputDir, "PSP_GAME", "SYSDIR", "EBOOT.BIN");
         var ebootEncPath = Path.Combine(outputDir, "PSP_GAME", "SYSDIR", "EBOOT_ENC.BIN");
 
-        if (File.Exists(ebootPath))
-        {
+        if (File.Exists(ebootPath)) {
             File.Move(ebootPath, ebootEncPath, true);
 
             // DecEboot is Windows-only, check if available
             var decEboot = Path.Combine(AppDir, "Dependencies", "DecEboot", "deceboot.exe");
-            if (File.Exists(decEboot))
-            {
+            if (File.Exists(decEboot)) {
                 ParallelLogger.Log("[INFO] Decrypting EBOOT.BIN");
                 await RunProcess(decEboot, $"\"{ebootEncPath}\" \"{ebootPath}\"");
                 if (File.Exists(ebootEncPath))
                     File.Delete(ebootEncPath);
             }
-            else
-            {
+            else {
                 ParallelLogger.Log("[WARNING] DecEboot not found - EBOOT.BIN not decrypted. Copy decrypted EBOOT.BIN manually.");
                 File.Move(ebootEncPath, ebootPath, true);
             }
@@ -113,17 +99,14 @@ public static class PacUnpacker
     }
 
     // P3F
-    public static async Task Unzip(string iso)
-    {
-        if (!File.Exists(iso))
-        {
+    public static async Task Unzip(string iso) {
+        if (!File.Exists(iso)) {
             ParallelLogger.Log($"[ERROR] Couldn't find {iso}. Please correct the file path in config.");
             return;
         }
 
         var sevenZip = FindSevenZip();
-        if (sevenZip == null)
-        {
+        if (sevenZip == null) {
             ParallelLogger.Log("[ERROR] Couldn't find 7z. Please install p7zip or 7zip.");
             return;
         }
@@ -154,19 +137,16 @@ public static class PacUnpacker
     }
 
     // P3P
-    public static async Task UnzipAndUnpackCPK(string iso)
-    {
+    public static async Task UnzipAndUnpackCPK(string iso) {
         var outputDir = Path.Combine(DataDir, "Original", "Persona 3 Portable");
         Directory.CreateDirectory(outputDir);
-        if (!File.Exists(iso))
-        {
+        if (!File.Exists(iso)) {
             ParallelLogger.Log($"[ERROR] Couldn't find {iso}. Please correct the file path in config.");
             return;
         }
 
         var sevenZip = FindSevenZip();
-        if (sevenZip == null)
-        {
+        if (sevenZip == null) {
             ParallelLogger.Log("[ERROR] Couldn't find 7z. Please install p7zip or 7zip.");
             return;
         }
@@ -177,14 +157,12 @@ public static class PacUnpacker
         var csvPath = Path.Combine(AppDir, "Dependencies", "FilteredCpkCsv", "filtered_umd0.csv");
         var umd0Path = Path.Combine(outputDir, "PSP_GAME", "USRDIR", "umd0.cpk");
 
-        if (File.Exists(csvPath) && File.Exists(umd0Path))
-        {
+        if (File.Exists(csvPath) && File.Exists(umd0Path)) {
             var fileList = File.ReadAllLines(csvPath);
             ParallelLogger.Log("[INFO] Extracting files from umd0.cpk");
             CriFsUnpack(umd0Path, outputDir, fileList);
         }
-        else
-        {
+        else {
             ParallelLogger.Log("[ERROR] Couldn't find umd0.cpk or filter CSV.");
         }
 
@@ -199,19 +177,16 @@ public static class PacUnpacker
     }
 
     // P4G
-    public static void Unpack(string directory, string cpk)
-    {
+    public static void Unpack(string directory, string cpk) {
         var outputDir = Path.Combine(DataDir, "Original", "Persona 4 Golden");
         Directory.CreateDirectory(outputDir);
-        if (!Directory.Exists(directory))
-        {
+        if (!Directory.Exists(directory)) {
             ParallelLogger.Log($"[ERROR] Couldn't find {directory}. Please correct the file path in config.");
             return;
         }
 
         List<string> pacs = new();
-        switch (cpk)
-        {
+        switch (cpk) {
             case "data_e.cpk":
                 pacs.Add("data00004.pac");
                 pacs.Add("data_e.cpk");
@@ -233,32 +208,26 @@ public static class PacUnpacker
         }
 
         var preappfile = OperatingSystem.IsWindows() ? Path.Combine(AppDir, "Dependencies", "Preappfile", "preappfile.exe") : Path.Combine(AppDir, "Dependencies", "Preappfile", "preappfile");
-        if (!File.Exists(preappfile))
-        {
+        if (!File.Exists(preappfile)) {
             ParallelLogger.Log($"[ERROR] Couldn't find preappfile. This tool is Windows-only.");
             ParallelLogger.Log("[INFO] For P4G on Linux, consider extracting the CPK manually with a CRI tool.");
             return;
         }
 
         List<string> globs = new() { "*[!0-9].bin", "*2[0-1][0-9].bin", "*.arc", "*.pac", "*.pack", "*.bf", "*.bmd", "*.pm1" };
-        foreach (var pac in pacs)
-        {
+        foreach (var pac in pacs) {
             ParallelLogger.Log($"[INFO] Unpacking files for {pac}...");
-            foreach (var glob in globs)
-            {
+            foreach (var glob in globs) {
                 var args = $"-i \"{Path.Combine(directory, pac)}\" -o \"{Path.Combine(outputDir, Path.GetFileNameWithoutExtension(pac))}\" --unpack-filter {glob}";
-                var proc = Process.Start(new ProcessStartInfo
-                {
+                var proc = Process.Start(new ProcessStartInfo {
                     FileName = preappfile,
                     Arguments = args,
                     CreateNoWindow = true,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                 });
-                if (proc != null)
-                {
-                    while (!proc.HasExited)
-                    {
+                if (proc != null) {
+                    while (!proc.HasExited) {
                         var text = proc.StandardOutput.ReadLine();
                         if (!string.IsNullOrEmpty(text))
                             ParallelLogger.Log($"[INFO] {text}");
@@ -268,19 +237,16 @@ public static class PacUnpacker
             }
         }
 
-        foreach (var pac in pacs)
-        {
+        foreach (var pac in pacs) {
             var pacDir = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(pac));
             ExtractWantedFiles(pacDir);
         }
 
         // Backup CPK
-        foreach (var cpkFile in new[] { cpk, "movie.cpk" })
-        {
+        foreach (var cpkFile in new[] { cpk, "movie.cpk" }) {
             var srcPath = Path.Combine(directory, cpkFile);
             var dstPath = Path.Combine(outputDir, cpkFile);
-            if (File.Exists(srcPath) && !File.Exists(dstPath))
-            {
+            if (File.Exists(srcPath) && !File.Exists(dstPath)) {
                 ParallelLogger.Log($"[INFO] Backing up {cpkFile}");
                 File.Copy(srcPath, dstPath, true);
             }
@@ -290,10 +256,8 @@ public static class PacUnpacker
     }
 
     // P5
-    public static async Task UnpackP5CPK(string directory)
-    {
-        if (!Directory.Exists(directory))
-        {
+    public static async Task UnpackP5CPK(string directory) {
+        if (!Directory.Exists(directory)) {
             ParallelLogger.Log($"[ERROR] Couldn't find {directory}. Please correct the file path in config.");
             return;
         }
@@ -303,12 +267,10 @@ public static class PacUnpacker
         if (!File.Exists(ps3Cpk) &&
             File.Exists(Path.Combine(directory, "ps3.cpk.66600")) &&
             File.Exists(Path.Combine(directory, "ps3.cpk.66601")) &&
-            File.Exists(Path.Combine(directory, "ps3.cpk.66602")))
-        {
+            File.Exists(Path.Combine(directory, "ps3.cpk.66602"))) {
             ParallelLogger.Log("[INFO] Combining ps3.cpk parts");
             using var output = File.Create(ps3Cpk);
-            foreach (var part in new[] { "ps3.cpk.66600", "ps3.cpk.66601", "ps3.cpk.66602" })
-            {
+            foreach (var part in new[] { "ps3.cpk.66600", "ps3.cpk.66601", "ps3.cpk.66602" }) {
                 using var input = File.OpenRead(Path.Combine(directory, part));
                 await input.CopyToAsync(output);
             }
@@ -320,23 +282,20 @@ public static class PacUnpacker
         var dataCsv = Path.Combine(AppDir, "Dependencies", "FilteredCpkCsv", "filtered_data.csv");
         var ps3Csv = Path.Combine(AppDir, "Dependencies", "FilteredCpkCsv", "filtered_ps3.csv");
 
-        if (!File.Exists(dataCsv) || !File.Exists(ps3Csv))
-        {
+        if (!File.Exists(dataCsv) || !File.Exists(ps3Csv)) {
             ParallelLogger.Log("[ERROR] Couldn't find CSV files used for unpacking in Dependencies/FilteredCpkCsv");
             return;
         }
 
         var dataCpk = Path.Combine(directory, "data.cpk");
-        if (File.Exists(dataCpk))
-        {
+        if (File.Exists(dataCpk)) {
             ParallelLogger.Log("[INFO] Extracting data.cpk");
             CriFsUnpack(dataCpk, outputDir, File.ReadAllLines(dataCsv));
         }
         else
             ParallelLogger.Log($"[ERROR] Couldn't find data.cpk in {directory}.");
 
-        if (File.Exists(ps3Cpk))
-        {
+        if (File.Exists(ps3Cpk)) {
             ParallelLogger.Log("[INFO] Extracting ps3.cpk");
             CriFsUnpack(ps3Cpk, outputDir, File.ReadAllLines(ps3Csv));
         }
@@ -349,10 +308,8 @@ public static class PacUnpacker
     }
 
     // P5R (PS4)
-    public static async Task UnpackP5RCPKs(string directory, string language, string version)
-    {
-        if (!Directory.Exists(directory))
-        {
+    public static async Task UnpackP5RCPKs(string directory, string language, string version) {
+        if (!Directory.Exists(directory)) {
             ParallelLogger.Log($"[ERROR] Couldn't find {directory}. Please correct the file path.");
             return;
         }
@@ -363,15 +320,13 @@ public static class PacUnpacker
         var dataCsv = Path.Combine(AppDir, "Dependencies", "FilteredCpkCsv", "filtered_dataR.csv");
         var ps4Csv = Path.Combine(AppDir, "Dependencies", "FilteredCpkCsv", "filtered_ps4R.csv");
 
-        if (!File.Exists(dataCsv) || !File.Exists(ps4Csv))
-        {
+        if (!File.Exists(dataCsv) || !File.Exists(ps4Csv)) {
             ParallelLogger.Log("[ERROR] Couldn't find CSV files used for unpacking in Dependencies/FilteredCpkCsv");
             return;
         }
 
         var dataRCpk = Path.Combine(directory, "dataR.cpk");
-        if (File.Exists(dataRCpk))
-        {
+        if (File.Exists(dataRCpk)) {
             ParallelLogger.Log("[INFO] Extracting dataR.cpk");
             CriFsUnpack(dataRCpk, outputDir, File.ReadAllLines(dataCsv));
         }
@@ -379,8 +334,7 @@ public static class PacUnpacker
             ParallelLogger.Log($"[ERROR] Couldn't find dataR.cpk in {directory}.");
 
         var ps4RCpk = Path.Combine(directory, "ps4R.cpk");
-        if (File.Exists(ps4RCpk))
-        {
+        if (File.Exists(ps4RCpk)) {
             ParallelLogger.Log("[INFO] Extracting ps4R.cpk");
             CriFsUnpack(ps4RCpk, outputDir, File.ReadAllLines(ps4Csv));
         }
@@ -388,24 +342,19 @@ public static class PacUnpacker
             ParallelLogger.Log($"[ERROR] Couldn't find ps4R.cpk in {directory}.");
 
         // Localized CPK
-        if (language != "English")
-        {
-            var localizedCpk = language switch
-            {
+        if (language != "English") {
+            var localizedCpk = language switch {
                 "French" => "dataR_F.cpk",
                 "Italian" => "dataR_I.cpk",
                 "German" => "dataR_G.cpk",
                 "Spanish" => "dataR_S.cpk",
                 _ => ""
             };
-            if (!string.IsNullOrEmpty(localizedCpk))
-            {
+            if (!string.IsNullOrEmpty(localizedCpk)) {
                 var localizedCsv = Path.Combine(AppDir, "Dependencies", "FilteredCpkCsv", "filtered_dataR_Localized.csv");
-                if (File.Exists(localizedCsv))
-                {
+                if (File.Exists(localizedCsv)) {
                     var fullPath = Path.Combine(directory, localizedCpk);
-                    if (File.Exists(fullPath))
-                    {
+                    if (File.Exists(fullPath)) {
                         ParallelLogger.Log($"[INFO] Extracting {localizedCpk}");
                         CriFsUnpack(fullPath, outputDir, File.ReadAllLines(localizedCsv));
                     }
@@ -416,36 +365,29 @@ public static class PacUnpacker
         }
 
         // Patch files for >= 1.02
-        if (version == ">= 1.02")
-        {
+        if (version == ">= 1.02") {
             var patchCsv = Path.Combine(AppDir, "Dependencies", "FilteredCpkCsv", "filtered_patch2R.csv");
-            if (File.Exists(patchCsv))
-            {
+            if (File.Exists(patchCsv)) {
                 var patchCpk = Path.Combine(directory, "patch2R.cpk");
-                if (File.Exists(patchCpk))
-                {
+                if (File.Exists(patchCpk)) {
                     ParallelLogger.Log("[INFO] Extracting patch2R.cpk");
                     CriFsUnpack(patchCpk, outputDir, File.ReadAllLines(patchCsv));
                 }
                 else
                     ParallelLogger.Log("[ERROR] Couldn't find patch2R.cpk in {directory}.");
 
-                if (language != "English")
-                {
-                    var patchSuffix = language switch
-                    {
+                if (language != "English") {
+                    var patchSuffix = language switch {
                         "French" => "_F",
                         "Italian" => "_I",
                         "German" => "_G",
                         "Spanish" => "_S",
                         _ => ""
                     };
-                    if (!string.IsNullOrEmpty(patchSuffix))
-                    {
+                    if (!string.IsNullOrEmpty(patchSuffix)) {
                         var localPatchCsv = Path.Combine(AppDir, "Dependencies", "FilteredCpkCsv", $"filtered_patch2R{patchSuffix}.csv");
                         var localPatchCpk = Path.Combine(directory, $"patch2R{patchSuffix}.cpk");
-                        if (File.Exists(localPatchCsv) && File.Exists(localPatchCpk))
-                        {
+                        if (File.Exists(localPatchCsv) && File.Exists(localPatchCpk)) {
                             ParallelLogger.Log($"[INFO] Extracting patch2R{patchSuffix}.cpk");
                             CriFsUnpack(localPatchCpk, outputDir, File.ReadAllLines(localPatchCsv));
                         }
@@ -460,10 +402,8 @@ public static class PacUnpacker
     }
 
     // P5R Switch
-    public static async Task UnpackP5RSwitchCPKs(string directory, string language)
-    {
-        if (!Directory.Exists(directory))
-        {
+    public static async Task UnpackP5RSwitchCPKs(string directory, string language) {
+        if (!Directory.Exists(directory)) {
             ParallelLogger.Log($"[ERROR] Couldn't find {directory}. Please correct the file path.");
             return;
         }
@@ -472,8 +412,7 @@ public static class PacUnpacker
         Directory.CreateDirectory(outputDir);
 
         var patch1 = Path.Combine(directory, "PATCH1.CPK");
-        if (File.Exists(patch1))
-        {
+        if (File.Exists(patch1)) {
             ParallelLogger.Log("[INFO] Extracting PATCH1.CPK");
             CriFsUnpack(patch1, outputDir);
         }
@@ -481,8 +420,7 @@ public static class PacUnpacker
             ParallelLogger.Log($"[ERROR] Couldn't find PATCH1.CPK in {directory}.");
 
         var allUseu = Path.Combine(directory, "ALL_USEU.CPK");
-        if (File.Exists(allUseu))
-        {
+        if (File.Exists(allUseu)) {
             ParallelLogger.Log("[INFO] Extracting ALL_USEU.CPK (This will take awhile)");
             CriFsUnpack(allUseu, outputDir);
         }
@@ -495,10 +433,8 @@ public static class PacUnpacker
     }
 
     // P5R PC
-    public static async Task UnpackP5RPCCPKs(string directory, string language)
-    {
-        if (!Directory.Exists(directory))
-        {
+    public static async Task UnpackP5RPCCPKs(string directory, string language) {
+        if (!Directory.Exists(directory)) {
             ParallelLogger.Log($"[ERROR] Couldn't find {directory}. Please correct the file path.");
             return;
         }
@@ -507,21 +443,18 @@ public static class PacUnpacker
         Directory.CreateDirectory(outputDir);
 
         var cpkMakeC = Path.Combine(AppDir, "Dependencies", "CpkMakeC", "cpkmakec.exe");
-        if (!File.Exists(cpkMakeC))
-        {
+        if (!File.Exists(cpkMakeC)) {
             // Fall back to CriFsLib for extraction
             ParallelLogger.Log("[INFO] cpkmakec not found, using CriFsLib for extraction");
             var baseCpk = Path.Combine(directory, "BASE.CPK");
-            if (File.Exists(baseCpk))
-            {
+            if (File.Exists(baseCpk)) {
                 ParallelLogger.Log("[INFO] Extracting BASE.CPK (This will take awhile)");
                 CriFsUnpack(baseCpk, outputDir);
             }
             else
                 ParallelLogger.Log($"[ERROR] Couldn't find BASE.CPK in {directory}.");
 
-            var localCpk = language switch
-            {
+            var localCpk = language switch {
                 "English" => "EN.CPK",
                 "French" => "FR.CPK",
                 "Italian" => "IT.CPK",
@@ -530,26 +463,22 @@ public static class PacUnpacker
                 _ => "EN.CPK"
             };
             var localPath = Path.Combine(directory, localCpk);
-            if (File.Exists(localPath))
-            {
+            if (File.Exists(localPath)) {
                 ParallelLogger.Log($"[INFO] Extracting {localCpk} (This will take awhile)");
                 CriFsUnpack(localPath, outputDir);
             }
             else
                 ParallelLogger.Log($"[ERROR] Couldn't find {localCpk} in {directory}.");
         }
-        else
-        {
+        else {
             // Use cpkmakec (Windows)
             var baseCpk = Path.Combine(directory, "BASE.CPK");
-            if (File.Exists(baseCpk))
-            {
+            if (File.Exists(baseCpk)) {
                 ParallelLogger.Log("[INFO] Extracting BASE.CPK (This will take awhile)");
                 await RunProcess(cpkMakeC, $"\"{baseCpk}\" -extract=\"{outputDir}\"");
             }
 
-            var localCpk = language switch
-            {
+            var localCpk = language switch {
                 "English" => "EN.CPK",
                 "French" => "FR.CPK",
                 "Italian" => "IT.CPK",
@@ -558,8 +487,7 @@ public static class PacUnpacker
                 _ => "EN.CPK"
             };
             var localPath = Path.Combine(directory, localCpk);
-            if (File.Exists(localPath))
-            {
+            if (File.Exists(localPath)) {
                 ParallelLogger.Log($"[INFO] Extracting {localCpk} (This will take awhile)");
                 await RunProcess(cpkMakeC, $"\"{localPath}\" -extract=\"{outputDir}\"");
             }
@@ -571,10 +499,8 @@ public static class PacUnpacker
     }
 
     // P4G Vita
-    public static async Task UnpackP4GCPK(string cpk)
-    {
-        if (!File.Exists(cpk))
-        {
+    public static async Task UnpackP4GCPK(string cpk) {
+        if (!File.Exists(cpk)) {
             ParallelLogger.Log($"[ERROR] Couldn't find {cpk}. Please correct the file path.");
             return;
         }
@@ -583,8 +509,7 @@ public static class PacUnpacker
         Directory.CreateDirectory(outputDir);
 
         var csvPath = Path.Combine(AppDir, "Dependencies", "FilteredCpkCsv", "filtered_p4gdata.csv");
-        if (!File.Exists(csvPath))
-        {
+        if (!File.Exists(csvPath)) {
             ParallelLogger.Log("[ERROR] Couldn't find CSV file used for unpacking in Dependencies/FilteredCpkCsv");
             return;
         }
@@ -598,10 +523,8 @@ public static class PacUnpacker
     }
 
     // PQ
-    public static async Task UnpackPQCPK(string cpk)
-    {
-        if (!File.Exists(cpk))
-        {
+    public static async Task UnpackPQCPK(string cpk) {
+        if (!File.Exists(cpk)) {
             ParallelLogger.Log($"[ERROR] Couldn't find {cpk}. Please correct the file path.");
             return;
         }
@@ -610,8 +533,7 @@ public static class PacUnpacker
         Directory.CreateDirectory(outputDir);
 
         var csvPath = Path.Combine(AppDir, "Dependencies", "FilteredCpkCsv", "filtered_data_pq.csv");
-        if (!File.Exists(csvPath))
-        {
+        if (!File.Exists(csvPath)) {
             ParallelLogger.Log("[ERROR] Couldn't find CSV file used for unpacking in Dependencies/FilteredCpkCsv");
             return;
         }
@@ -625,10 +547,8 @@ public static class PacUnpacker
     }
 
     // PQ2
-    public static async Task UnpackPQ2CPK(string cpk)
-    {
-        if (!File.Exists(cpk))
-        {
+    public static async Task UnpackPQ2CPK(string cpk) {
+        if (!File.Exists(cpk)) {
             ParallelLogger.Log($"[ERROR] Couldn't find {cpk}. Please correct the file path.");
             return;
         }
@@ -637,8 +557,7 @@ public static class PacUnpacker
         Directory.CreateDirectory(outputDir);
 
         var csvPath = Path.Combine(AppDir, "Dependencies", "FilteredCpkCsv", "filtered_data_pq2.csv");
-        if (!File.Exists(csvPath))
-        {
+        if (!File.Exists(csvPath)) {
             ParallelLogger.Log("[ERROR] Couldn't find CSV file used for unpacking in Dependencies/FilteredCpkCsv");
             return;
         }
@@ -651,8 +570,7 @@ public static class PacUnpacker
         ParallelLogger.Log("[INFO] Finished unpacking base files!");
     }
 
-    private static void CriFsUnpack(string cpk, string dir, string[]? fileList = null)
-    {
+    private static void CriFsUnpack(string cpk, string dir, string[]? fileList = null) {
         using var fileStream = new FileStream(cpk, System.IO.FileMode.Open);
         using var reader = CriFsLib.Instance.CreateCpkReader(fileStream, true);
         var files = reader.GetFiles();
@@ -660,14 +578,12 @@ public static class PacUnpacker
 
         bool extractAll = fileList == null;
         using var extractor = CriFsLib.Instance.CreateBatchExtractor<FileToExtract>(cpk, P5RCrypto.DecryptionFunction);
-        for (int x = 0; x < files.Length; x++)
-        {
+        for (int x = 0; x < files.Length; x++) {
             string filePath = string.IsNullOrEmpty(files[x].Directory)
                 ? files[x].FileName
                 : $"{files[x].Directory}/{files[x].FileName}";
 
-            if (extractAll || fileList!.Contains(filePath))
-            {
+            if (extractAll || fileList!.Contains(filePath)) {
                 extractor.QueueItem(new FileToExtract(Path.Combine(dir, filePath), files[x]));
                 ParallelLogger.Log($"[INFO] Extracting {filePath}");
             }
@@ -677,10 +593,8 @@ public static class PacUnpacker
         ArrayRental.Reset();
     }
 
-    private static string? FindPAKPack()
-    {
-        if (!OperatingSystem.IsWindows())
-        {
+    private static string? FindPAKPack() {
+        if (!OperatingSystem.IsWindows()) {
             var pakPack = Path.Combine(AppDir, "Dependencies", "AtlusFileSystemLibrary", "PAKPack");
             if (File.Exists(pakPack)) return pakPack;
         }
@@ -690,18 +604,15 @@ public static class PacUnpacker
         return null;
     }
 
-    private static void PAKPackCMD(string args)
-    {
+    private static void PAKPackCMD(string args) {
         var pakPack = FindPAKPack();
-        if (pakPack == null)
-        {
+        if (pakPack == null) {
             ParallelLogger.Log("[ERROR] PAKPack.exe not found in Dependencies/PAKPack/");
             return;
         }
 
         using var process = new Process();
-        process.StartInfo = new ProcessStartInfo
-        {
+        process.StartInfo = new ProcessStartInfo {
             FileName = pakPack,
             Arguments = args,
             CreateNoWindow = true,
@@ -712,8 +623,7 @@ public static class PacUnpacker
         process.WaitForExit();
     }
 
-    private static List<string> GetFileContents(string path)
-    {
+    private static List<string> GetFileContents(string path) {
         var pakPack = FindPAKPack();
         if (pakPack == null) return new List<string>();
 
@@ -722,8 +632,7 @@ public static class PacUnpacker
 
         var contents = new List<string>();
         using var process = new Process();
-        process.StartInfo = new ProcessStartInfo
-        {
+        process.StartInfo = new ProcessStartInfo {
             FileName = fileName,
             Arguments = finalArgs,
             CreateNoWindow = true,
@@ -732,8 +641,7 @@ public static class PacUnpacker
             WindowStyle = ProcessWindowStyle.Hidden,
         };
         process.Start();
-        while (!process.StandardOutput.EndOfStream)
-        {
+        while (!process.StandardOutput.EndOfStream) {
             var line = process.StandardOutput.ReadLine();
             if (line != null && !line.Contains(' '))
                 contents.Add(line);
@@ -742,13 +650,11 @@ public static class PacUnpacker
         return contents;
     }
 
-    private static void ExtractWantedFiles(string directory)
-    {
+    private static void ExtractWantedFiles(string directory) {
         if (!Directory.Exists(directory))
             return;
 
-        if (FindPAKPack() == null)
-        {
+        if (FindPAKPack() == null) {
             ParallelLogger.Log("[WARNING] PAKPack not found, skipping archive extraction. Some files may be missing.");
             return;
         }
@@ -757,8 +663,7 @@ public static class PacUnpacker
         var files = Directory.EnumerateFiles(directory, "*.*", SearchOption.AllDirectories)
             .Where(s => extensions.Any(ext => s.EndsWith(ext, StringComparison.OrdinalIgnoreCase)));
 
-        foreach (string file in files)
-        {
+        foreach (string file in files) {
             List<string> contents = GetFileContents(file).Select(x => x.ToLower()).ToList();
             bool containersFound = contents.Exists(x =>
                 x.EndsWith(".bin") || x.EndsWith(".pac") || x.EndsWith(".pak") ||
@@ -767,8 +672,7 @@ public static class PacUnpacker
             if (contents.Exists(x =>
                 x.EndsWith(".bf") || x.EndsWith(".bmd") || x.EndsWith(".pm1") ||
                 x.EndsWith(".dat") || x.EndsWith(".ctd") || x.EndsWith(".ftd") ||
-                x.EndsWith(".spd") || x.EndsWith(".acb") || x.EndsWith(".awb") || containersFound))
-            {
+                x.EndsWith(".spd") || x.EndsWith(".acb") || x.EndsWith(".awb") || containersFound)) {
                 ParallelLogger.Log($"[INFO] Unpacking {file}");
                 PAKPackCMD($"unpack \"{file}\"");
 
@@ -780,10 +684,8 @@ public static class PacUnpacker
         }
     }
 
-    private static async Task RunProcess(string fileName, string arguments)
-    {
-        var startInfo = new ProcessStartInfo
-        {
+    private static async Task RunProcess(string fileName, string arguments) {
+        var startInfo = new ProcessStartInfo {
             FileName = fileName,
             Arguments = arguments,
             CreateNoWindow = true,

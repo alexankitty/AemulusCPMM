@@ -11,16 +11,14 @@ namespace AemulusModManager;
 /// Cross-platform wrapper for PAKPack.exe operations.
 /// On Linux/macOS, runs PAKPack via mono.
 /// </summary>
-public static class PAKPackHelper
-{
+public static class PAKPackHelper {
     private static string AppDir => AemulusModManager.Avalonia.Utilities.AppPaths.ExeDir;
 
     private static string? _pakPackPath;
     private static string? _monoPath;
     private static bool _initialized;
 
-    private static void Initialize()
-    {
+    private static void Initialize() {
         if (_initialized) return;
         _initialized = true;
 
@@ -28,20 +26,16 @@ public static class PAKPackHelper
         if (File.Exists(pakPackExe))
             _pakPackPath = pakPackExe;
 
-        if (!OperatingSystem.IsWindows())
-        {
-            try
-            {
-                var proc = Process.Start(new ProcessStartInfo
-                {
+        if (!OperatingSystem.IsWindows()) {
+            try {
+                var proc = Process.Start(new ProcessStartInfo {
                     FileName = "which",
                     Arguments = "mono",
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 });
-                if (proc != null)
-                {
+                if (proc != null) {
                     var path = proc.StandardOutput.ReadToEnd().Trim();
                     proc.WaitForExit();
                     if (proc.ExitCode == 0 && !string.IsNullOrEmpty(path))
@@ -52,44 +46,37 @@ public static class PAKPackHelper
         }
     }
 
-    public static bool IsAvailable()
-    {
+    public static bool IsAvailable() {
         Initialize();
         if (_pakPackPath == null) return false;
         if (!OperatingSystem.IsWindows() && _monoPath == null) return false;
         return true;
     }
 
-    public static void PAKPackCMD(string args)
-    {
+    public static void PAKPackCMD(string args) {
         Initialize();
-        if (_pakPackPath == null)
-        {
+        if (_pakPackPath == null) {
             ParallelLogger.Log("[ERROR] PAKPack.exe not found in Dependencies/PAKPack/");
             return;
         }
 
         string fileName;
         string finalArgs;
-        if (!OperatingSystem.IsWindows())
-        {
-            if (_monoPath == null)
-            {
+        if (!OperatingSystem.IsWindows()) {
+            if (_monoPath == null) {
                 ParallelLogger.Log("[ERROR] mono is required to run PAKPack on Linux. Install mono-runtime.");
                 return;
             }
             fileName = _monoPath;
             finalArgs = $"\"{_pakPackPath}\" {args}";
         }
-        else
-        {
+        else {
             fileName = _pakPackPath;
             finalArgs = args;
         }
 
         using var process = new Process();
-        process.StartInfo = new ProcessStartInfo
-        {
+        process.StartInfo = new ProcessStartInfo {
             FileName = fileName,
             Arguments = finalArgs,
             CreateNoWindow = true,
@@ -106,29 +93,25 @@ public static class PAKPackHelper
             ParallelLogger.Log($"[WARNING] PAKPack exited with code {process.ExitCode} for args: {args}");
     }
 
-    public static List<string> GetFileContents(string path)
-    {
+    public static List<string> GetFileContents(string path) {
         Initialize();
         if (_pakPackPath == null) return new List<string>();
 
         string fileName;
         string finalArgs;
-        if (!OperatingSystem.IsWindows())
-        {
+        if (!OperatingSystem.IsWindows()) {
             if (_monoPath == null) return new List<string>();
             fileName = _monoPath;
             finalArgs = $"\"{_pakPackPath}\" list \"{path}\"";
         }
-        else
-        {
+        else {
             fileName = _pakPackPath;
             finalArgs = $"list \"{path}\"";
         }
 
         var contents = new List<string>();
         using var process = new Process();
-        process.StartInfo = new ProcessStartInfo
-        {
+        process.StartInfo = new ProcessStartInfo {
             FileName = fileName,
             Arguments = finalArgs,
             CreateNoWindow = true,
@@ -137,8 +120,7 @@ public static class PAKPackHelper
             WindowStyle = ProcessWindowStyle.Hidden,
         };
         process.Start();
-        while (!process.StandardOutput.EndOfStream)
-        {
+        while (!process.StandardOutput.EndOfStream) {
             var line = process.StandardOutput.ReadLine();
             if (line != null && !line.Contains(' '))
                 contents.Add(line);

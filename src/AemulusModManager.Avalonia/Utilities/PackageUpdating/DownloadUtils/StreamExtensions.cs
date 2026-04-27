@@ -1,15 +1,12 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AemulusModManager
-{
+namespace AemulusModManager {
     // Taken from https://stackoverflow.com/a/46497896
-    public static class StreamExtensions
-    {
-        public static async Task CopyToAsync(this Stream source, Stream destination, int bufferSize, IProgress<long> progress = null, CancellationToken cancellationToken = default)
-        {
+    public static class StreamExtensions {
+        public static async Task CopyToAsync(this Stream source, Stream destination, int bufferSize, IProgress<long> progress = null, CancellationToken cancellationToken = default) {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
             if (!source.CanRead)
@@ -24,15 +21,13 @@ namespace AemulusModManager
             var buffer = new byte[bufferSize];
             long totalBytesRead = 0;
             int bytesRead;
-            while ((bytesRead = await source.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false)) != 0)
-            {
+            while ((bytesRead = await source.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false)) != 0) {
                 await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
                 totalBytesRead += bytesRead;
                 progress?.Report(totalBytesRead);
             }
         }
-        public static long GetDirectorySize(this DirectoryInfo directoryInfo, bool recursive = true)
-        {
+        public static long GetDirectorySize(this DirectoryInfo directoryInfo, bool recursive = true) {
             var startDirectorySize = default(long);
             if (directoryInfo == null || !directoryInfo.Exists)
                 return startDirectorySize; //Return 0 while Directory does not exist.

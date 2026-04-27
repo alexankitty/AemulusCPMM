@@ -5,8 +5,7 @@ using System;
 
 namespace AemulusModManager.Avalonia.ViewModels;
 
-public partial class DialogWindowViewModel : ObservableObject
-{
+public partial class DialogWindowViewModel : ObservableObject {
     [ObservableProperty] public string _gameTitle = "";
     [ObservableProperty] public SolidColorBrush? _accentButtonBackground;
     [ObservableProperty] public SolidColorBrush? _accentButtonForeground;
@@ -18,20 +17,17 @@ public partial class DialogWindowViewModel : ObservableObject
     [ObservableProperty] public SolidColorBrush? _accentButtonBackgroundDisabled;
     public string[] AccentProps => ["AccentButtonBackground", "AccentButtonForeground", "AccentButtonForegroundPressed", "AccentButtonForegroundPointerOver", "AccentButtonForegroundDisabled", "AccentButtonBackgroundPressed", "AccentButtonBackgroundPointerOver", "AccentButtonBackgroundDisabled"];
 
-    public DialogWindowViewModel(string gameTitle)
-    {
+    public DialogWindowViewModel(string gameTitle) {
         GameTitle = gameTitle;
         UpdateAccentColors();
     }
-    public void UpdateAccentColors(string gameTitle)
-    {
+    public void UpdateAccentColors(string gameTitle) {
         GameTitle = gameTitle;
         UpdateAccentColors();
     }
-    
-    private void UpdateAccentColors()
-    {
-        if(string.IsNullOrWhiteSpace(GameTitle))
+
+    private void UpdateAccentColors() {
+        if (string.IsNullOrWhiteSpace(GameTitle))
             return;
         var hex = Converters.GameColorConverter.GetHex(GameTitle);
         var brush = SolidColorBrush.Parse(hex);

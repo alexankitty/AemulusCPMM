@@ -11,8 +11,7 @@ namespace AemulusModManager.Avalonia.Utilities;
 ///   Windows: %APPDATA%\AemulusPackageManager
 ///   Fallback: ExeDir (if the platform dir can't be determined)
 /// </summary>
-public static class AppPaths
-{
+public static class AppPaths {
     private static string? _exeDir;
     private static string? _dataDir;
 
@@ -26,26 +25,21 @@ public static class AppPaths
     /// <summary>
     /// Directory for user-mutable data: Packages, Original, Config, Logs.
     /// </summary>
-    public static string DataDir
-    {
-        get
-        {
+    public static string DataDir {
+        get {
             if (_dataDir != null) return _dataDir;
 
             string? baseDir = null;
 
-            if (OperatingSystem.IsWindows())
-            {
+            if (OperatingSystem.IsWindows()) {
                 var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                 if (!string.IsNullOrEmpty(appData))
                     baseDir = Path.Combine(appData, "AemulusPackageManager");
             }
-            else
-            {
+            else {
                 // Linux / macOS: prefer XDG_CONFIG_HOME, fallback to ~/.config
                 var xdg = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
-                if (string.IsNullOrEmpty(xdg))
-                {
+                if (string.IsNullOrEmpty(xdg)) {
                     var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                     if (!string.IsNullOrEmpty(home))
                         xdg = Path.Combine(home, ".config");

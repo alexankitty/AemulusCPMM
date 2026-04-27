@@ -1,4 +1,4 @@
-﻿using AemulusModManager.Utilities.PackageUpdating;
+using AemulusModManager.Utilities.PackageUpdating;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,10 +7,8 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
-namespace AemulusModManager
-{
-    public class GameBananaAPIV4
-    {
+namespace AemulusModManager {
+    public class GameBananaAPIV4 {
         [JsonProperty("_sName")]
         public string Title { get; set; }
         [JsonProperty("_aGame")]
@@ -33,8 +31,7 @@ namespace AemulusModManager
         [JsonProperty("_aModManagerIntegrations")]
         public Dictionary<string, List<GameBananaModManagerIntegration>> ModManagerIntegrations { get; set; }
     }
-    public class GameBananaItem
-    {
+    public class GameBananaItem {
         [JsonProperty("name")]
         public string Name { get; set; }
         [JsonProperty("Owner().name")]
@@ -55,8 +52,7 @@ namespace AemulusModManager
         public Uri EmbedImage { get; set; }
 
     }
-    public class GameBananaCategory
-    {
+    public class GameBananaCategory {
         [JsonProperty("_idRow")]
         public int? ID { get; set; }
         [JsonProperty("_idParentCategoryRow")]
@@ -70,8 +66,7 @@ namespace AemulusModManager
         [JsonIgnore]
         public bool HasIcon => Icon.OriginalString.Length > 0;
     }
-    public class GameBananaMember
-    {
+    public class GameBananaMember {
         [JsonProperty("_sName")]
         public string Name { get; set; }
         [JsonProperty("_sAvatarUrl")]
@@ -81,15 +76,13 @@ namespace AemulusModManager
         [JsonIgnore]
         public bool HasUpic => Upic.OriginalString.Length > 0;
     }
-    public class GameBananaGame
-    {
+    public class GameBananaGame {
         [JsonProperty("_idRow")]
         public int ID { get; set; }
         [JsonProperty("_sName")]
         public string Name { get; set; }
     }
-    public class GameBananaModManagerIntegration
-    {
+    public class GameBananaModManagerIntegration {
         [JsonProperty("_sInstallerName")]
         public string Name { get; set; }
         [JsonProperty("_sInstallerUrl")]
@@ -99,8 +92,7 @@ namespace AemulusModManager
         [JsonProperty("_sDownloadUrl")]
         public string DownloadUrl { get; set; }
     }
-    public class GameBananaRecord
-    {
+    public class GameBananaRecord {
         [JsonProperty("_sName")]
         public string Title { get; set; }
         [JsonProperty("_aGame")]
@@ -186,11 +178,9 @@ namespace AemulusModManager
         public bool HasUpdates => DateAdded.CompareTo(DateUpdated) != 0;
         [JsonIgnore]
         public string DateUpdatedAgo => $"Updated {StringConverters.FormatTimeAgo(DateTime.UtcNow - DateUpdated)}";
-        private Uri SoundImage(int game)
-        {
+        private Uri SoundImage(int game) {
             // Get different Sound thumbnail per game
-            switch (game)
-            {
+            switch (game) {
                 case 8502:
                     return new Uri("https://media.discordapp.net/attachments/792245872259235850/842426607712993351/P3FSound.png");
                 case 8263:
@@ -203,8 +193,7 @@ namespace AemulusModManager
                     return new Uri("https://images.gamebanana.com/static/img/DefaultEmbeddables/Sound.jpg");
             }
         }
-        private string ConvertHtmlToText(string html)
-        {
+        private string ConvertHtmlToText(string html) {
             // Newlines
             html = html.Replace("<br>", "\n");
             html = html.Replace(@"</li>", "\n");
@@ -230,22 +219,19 @@ namespace AemulusModManager
             return html.Trim();
         }
     }
-    public class GameBananaAlternateFileSource
-    {
+    public class GameBananaAlternateFileSource {
         [JsonProperty("url")]
         public Uri Url { get; set; }
         [JsonProperty("description")]
         public string Description { get; set; } = "Mirror";
     }
-    public class GameBananaModList
-    {
+    public class GameBananaModList {
         public ObservableCollection<GameBananaRecord> Records { get; set; }
         public int TotalPages { get; set; }
         public DateTime TimeFetched = DateTime.UtcNow;
         public bool IsValid => (DateTime.UtcNow - TimeFetched).TotalMinutes < 30;
     }
-    public class GameBananaMedia
-    {
+    public class GameBananaMedia {
         [JsonProperty("_sType")]
         public string Type { get; set; }
         [JsonProperty("_sUrl")]
@@ -258,25 +244,20 @@ namespace AemulusModManager
         public string Caption { get; set; }
     }
     // Handles both array and object for ModManagerIntegrations
-    public class ModManagerIntegrationsConverter : JsonConverter<Dictionary<string, List<GameBananaModManagerIntegration>>>
-    {
-        public override Dictionary<string, List<GameBananaModManagerIntegration>> ReadJson(JsonReader reader, Type objectType, Dictionary<string, List<GameBananaModManagerIntegration>> existingValue, bool hasExistingValue, JsonSerializer serializer)
-        {
-            if (reader.TokenType == JsonToken.StartArray)
-            {
+    public class ModManagerIntegrationsConverter : JsonConverter<Dictionary<string, List<GameBananaModManagerIntegration>>> {
+        public override Dictionary<string, List<GameBananaModManagerIntegration>> ReadJson(JsonReader reader, Type objectType, Dictionary<string, List<GameBananaModManagerIntegration>> existingValue, bool hasExistingValue, JsonSerializer serializer) {
+            if (reader.TokenType == JsonToken.StartArray) {
                 // Handle [] as empty dictionary
                 reader.Skip();
                 return new Dictionary<string, List<GameBananaModManagerIntegration>>();
             }
-            if (reader.TokenType == JsonToken.StartObject)
-            {
+            if (reader.TokenType == JsonToken.StartObject) {
                 return serializer.Deserialize<Dictionary<string, List<GameBananaModManagerIntegration>>>(reader) ?? new Dictionary<string, List<GameBananaModManagerIntegration>>();
             }
             return new Dictionary<string, List<GameBananaModManagerIntegration>>();
         }
 
-        public override void WriteJson(JsonWriter writer, Dictionary<string, List<GameBananaModManagerIntegration>> value, JsonSerializer serializer)
-        {
+        public override void WriteJson(JsonWriter writer, Dictionary<string, List<GameBananaModManagerIntegration>> value, JsonSerializer serializer) {
             serializer.Serialize(writer, value);
         }
     }

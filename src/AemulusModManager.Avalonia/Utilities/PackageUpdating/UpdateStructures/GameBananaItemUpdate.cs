@@ -1,10 +1,8 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 
-namespace AemulusModManager
-{
-    public class GameBananaItemUpdate
-    {
+namespace AemulusModManager {
+    public class GameBananaItemUpdate {
         private static readonly DateTime Epoch = new DateTime(1970, 1, 1);
 
         [JsonProperty("_sTitle")]

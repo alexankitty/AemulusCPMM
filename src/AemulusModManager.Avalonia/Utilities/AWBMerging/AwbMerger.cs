@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -11,12 +11,9 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using AemulusModManager.Utilities;
 
-namespace AemulusModManager.Utilities.AwbMerging
-{
-    internal class AwbMerger
-    {
-        private static void RunAcbEditor(string args)
-        {
+namespace AemulusModManager.Utilities.AwbMerging {
+    internal class AwbMerger {
+        private static void RunAcbEditor(string args) {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = true;
             startInfo.FileName = OperatingSystem.IsWindows()
@@ -32,8 +29,7 @@ namespace AemulusModManager.Utilities.AwbMerging
                     "SonicAudioTools",
                     "AcbEditor"
                 );
-            if (!File.Exists(startInfo.FileName))
-            {
+            if (!File.Exists(startInfo.FileName)) {
                 Utilities.ParallelLogger.Log(
                     $"[ERROR] Couldn't find {startInfo.FileName}. Please check if it was blocked by your anti-virus."
                 );
@@ -42,20 +38,17 @@ namespace AemulusModManager.Utilities.AwbMerging
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
             startInfo.UseShellExecute = false;
             startInfo.Arguments = args;
-            using (Process process = new Process())
-            {
+            using (Process process = new Process()) {
                 process.StartInfo = startInfo;
                 process.Start();
                 process.WaitForExit();
             }
         }
 
-        private static void RunAwbUnpacker(string args, string extension)
-        {
+        private static void RunAwbUnpacker(string args, string extension) {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = true;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
                 startInfo.FileName = Path.Combine(
                     Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
                     "Dependencies",
@@ -63,8 +56,7 @@ namespace AemulusModManager.Utilities.AwbMerging
                     "AWB_unpacker.exe"
                 );
             }
-            else
-            {
+            else {
                 startInfo.FileName = Path.Combine(
                     Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
                     "Dependencies",
@@ -72,8 +64,7 @@ namespace AemulusModManager.Utilities.AwbMerging
                     "AWB_unpacker"
                 );
             }
-            if (!File.Exists(startInfo.FileName))
-            {
+            if (!File.Exists(startInfo.FileName)) {
                 Utilities.ParallelLogger.Log(
                     $"[ERROR] Couldn't find {startInfo.FileName}. Please check if it was blocked by your anti-virus."
                 );
@@ -82,8 +73,7 @@ namespace AemulusModManager.Utilities.AwbMerging
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
             startInfo.UseShellExecute = false;
             startInfo.Arguments = args;
-            using (Process process = new Process())
-            {
+            using (Process process = new Process()) {
                 process.StartInfo = startInfo;
                 process.Start();
                 process.WaitForExit();
@@ -104,12 +94,10 @@ namespace AemulusModManager.Utilities.AwbMerging
             Directory.Delete($@"{args}_extracted_files", true);
         }
 
-        private static void RunAwbRepacker(string args)
-        {
+        private static void RunAwbRepacker(string args) {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.CreateNoWindow = true;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
                 startInfo.FileName = Path.Combine(
                     Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
                     "Dependencies",
@@ -117,8 +105,7 @@ namespace AemulusModManager.Utilities.AwbMerging
                     "AWB_repacker.exe"
                 );
             }
-            else
-            {
+            else {
                 startInfo.FileName = Path.Combine(
                     Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
                     "Dependencies",
@@ -126,8 +113,7 @@ namespace AemulusModManager.Utilities.AwbMerging
                     "AWB_repacker"
                 );
             }
-            if (!File.Exists(startInfo.FileName))
-            {
+            if (!File.Exists(startInfo.FileName)) {
                 Utilities.ParallelLogger.Log(
                     $"[ERROR] Couldn't find {startInfo.FileName}. Please check if it was blocked by your anti-virus."
                 );
@@ -140,8 +126,7 @@ namespace AemulusModManager.Utilities.AwbMerging
             //files.Sort();
             startInfo.Arguments = $@"{args}\*";
 
-            using (Process process = new Process())
-            {
+            using (Process process = new Process()) {
                 process.StartInfo = startInfo;
                 process.Start();
                 process.WaitForExit();
@@ -157,31 +142,26 @@ namespace AemulusModManager.Utilities.AwbMerging
             );
         }
 
-        public static bool AcbExists(string path)
-        {
+        public static bool AcbExists(string path) {
             return File.Exists(Path.ChangeExtension(path, ".acb"));
         }
 
-        public static bool AwbExists(string path)
-        {
+        public static bool AwbExists(string path) {
             return File.Exists(Path.ChangeExtension(path, ".awb"));
         }
 
-        public static bool SoundArchiveExists(string path)
-        {
+        public static bool SoundArchiveExists(string path) {
             return AcbExists(path) || AwbExists(path);
         }
 
-        private static void CopyAndUnpackArchive(string acbPath, string ogAcbPath, string extension)
-        {
+        private static void CopyAndUnpackArchive(string acbPath, string ogAcbPath, string extension) {
             ogAcbPath = Path.ChangeExtension(ogAcbPath, ".acb");
             acbPath = Path.ChangeExtension(acbPath, ".acb");
             string ogAwbPath = Path.ChangeExtension(ogAcbPath, ".awb");
             string awbPath = Path.ChangeExtension(acbPath, ".awb");
             Directory.CreateDirectory(Path.GetDirectoryName(acbPath));
 
-            if (AwbExists(ogAwbPath))
-            {
+            if (AwbExists(ogAwbPath)) {
                 Utilities.ParallelLogger.Log($"[INFO] Copying over {ogAwbPath} to use as base.");
                 File.Copy(ogAwbPath, awbPath, true);
             }
@@ -192,32 +172,27 @@ namespace AemulusModManager.Utilities.AwbMerging
                         $"{Path.GetFileNameWithoutExtension(ogAwbPath)}_streamfiles.awb"
                     )
                 )
-            )
-            {
+            ) {
                 awbPath = Path.Combine(Path.GetDirectoryName(acbPath), Path.GetFileName(ogAwbPath));
                 Utilities.ParallelLogger.Log($"[INFO] Copying over {ogAwbPath} to use as base.");
                 File.Copy(ogAwbPath, awbPath, true);
             }
 
-            if (AcbExists(ogAcbPath))
-            {
+            if (AcbExists(ogAcbPath)) {
                 Utilities.ParallelLogger.Log($"[INFO] Copying over {ogAcbPath} to use as base.");
                 File.Copy(ogAcbPath, acbPath, true);
                 Utilities.ParallelLogger.Log($"[INFO] Unpacking {acbPath}");
                 RunAcbEditor(acbPath);
             }
-            else
-            {
+            else {
                 Utilities.ParallelLogger.Log($"[INFO] Unpacking {awbPath}");
                 RunAwbUnpacker(awbPath, extension);
             }
         }
 
-        public static void Merge(List<string> ModList, string game, string modDir)
-        {
+        public static void Merge(List<string> ModList, string game, string modDir) {
             List<string> acbs = new List<string>();
-            foreach (string mod in ModList)
-            {
+            foreach (string mod in ModList) {
                 List<string> directories = new List<string>(
                     Directory.EnumerateDirectories(mod, "*", SearchOption.AllDirectories)
                 );
@@ -225,8 +200,7 @@ namespace AemulusModManager.Utilities.AwbMerging
                     ? File.ReadAllLines(Path.Combine(mod, "Ignore.aem"))
                     : null;
 
-                foreach (string dir in directories)
-                {
+                foreach (string dir in directories) {
                     List<string> folders = new List<string>(dir.Split(Path.DirectorySeparatorChar));
                     int idx = folders.IndexOf(Path.GetFileName(mod));
                     folders = folders.Skip(idx + 1).ToList();
@@ -238,16 +212,13 @@ namespace AemulusModManager.Utilities.AwbMerging
                         Path.Combine(folders.ToArray())
                     );
 
-                    if (SoundArchiveExists(ogAcbPath))
-                    {
+                    if (SoundArchiveExists(ogAcbPath)) {
                         List<string> files = new List<string>(Directory.GetFiles(dir));
 
-                        foreach (string file in files)
-                        {
+                        foreach (string file in files) {
                             if (AemIgnore != null && AemIgnore.Any(file.Contains))
                                 continue;
-                            if (!Directory.Exists(acbPath))
-                            {
+                            if (!Directory.Exists(acbPath)) {
                                 CopyAndUnpackArchive(acbPath, ogAcbPath, Path.GetExtension(file));
                                 acbs.Add(acbPath);
                             }
@@ -263,8 +234,7 @@ namespace AemulusModManager.Utilities.AwbMerging
                     }
                 }
             }
-            foreach (string acb in acbs)
-            {
+            foreach (string acb in acbs) {
                 Utilities.ParallelLogger.Log($"[INFO] Repacking {acb}");
                 if (AcbExists(acb))
                     RunAcbEditor(acb);

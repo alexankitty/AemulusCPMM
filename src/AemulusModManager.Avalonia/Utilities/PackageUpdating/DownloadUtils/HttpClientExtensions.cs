@@ -1,29 +1,23 @@
-﻿using AemulusModManager.Utilities.PackageUpdating.DownloadUtils;
+using AemulusModManager.Utilities.PackageUpdating.DownloadUtils;
 using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AemulusModManager
-{
+namespace AemulusModManager {
     // Taken from https://stackoverflow.com/a/46497896 
-    public static class HttpClientExtensions
-    {
-        public static async Task DownloadAsync(this HttpClient client, string requestUri, Stream destination, string fileName, IProgress<DownloadProgress> progress = null, CancellationToken cancellationToken = default)
-        {
+    public static class HttpClientExtensions {
+        public static async Task DownloadAsync(this HttpClient client, string requestUri, Stream destination, string fileName, IProgress<DownloadProgress> progress = null, CancellationToken cancellationToken = default) {
             // Get the http headers first to examine the content length
-            using (var response = await client.GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead))
-            {
+            using (var response = await client.GetAsync(requestUri, HttpCompletionOption.ResponseHeadersRead)) {
                 var contentLength = response.Content.Headers.ContentLength;
 
-                using (var download = await response.Content.ReadAsStreamAsync())
-                {
+                using (var download = await response.Content.ReadAsStreamAsync()) {
 
                     // Ignore progress reporting when no progress reporter was 
                     // passed or when the content length is unknown
-                    if (progress == null || !contentLength.HasValue)
-                    {
+                    if (progress == null || !contentLength.HasValue) {
                         await download.CopyToAsync(destination);
                         return;
                     }

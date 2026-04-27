@@ -14,8 +14,7 @@ namespace AemulusModManager.Avalonia.Utilities.FileMerging;
 /// Cross-platform wrapper for AtlusScriptCompiler.exe and PM1MessageScriptEditor.exe.
 /// On Linux/macOS, runs via mono.
 /// </summary>
-public static class ScriptCompiler
-{
+public static class ScriptCompiler {
     private static readonly string AppDir = AppPaths.ExeDir;
     private static readonly string DataDir = AppPaths.DataDir;
 
@@ -25,32 +24,30 @@ public static class ScriptCompiler
     // Native self-contained linux-x64 binary (no .exe, no mono required)
     private static string PM1Path => Path.Combine(AppDir, "Dependencies", "PM1MessageScriptEditor", "PM1MessageScriptEditor.exe");
 
-    private static readonly Dictionary<string, (string Library, string Encoding, string FlowFormat, string MsgFormat)> GameInfo = new()
-    {
-        ["Persona 4 Golden"]        = ("p4g", "P4", "V1", "V1"),
+    private static readonly Dictionary<string, (string Library, string Encoding, string FlowFormat, string MsgFormat)> GameInfo = new() {
+        ["Persona 4 Golden"] = ("p4g", "P4", "V1", "V1"),
         ["Persona 4 Golden (Vita)"] = ("p4g", "P4", "V1", "V1"),
-        ["Persona 3 FES"]           = ("p3f", "P3", "V1", "V1"),
-        ["Persona 5"]               = ("p5",  "P5", "V3BE", "V1BE"),
-        ["Persona 3 Portable"]      = ("p3p", "P3", "V1", "V1"),
-        ["Persona 5 Royal (PS4)"]   = ("p5r", "P5", "V3BE", "V1BE"),
-        ["Persona 5 Royal (Switch)"]= ("p5r", "P5", "V3BE", "V1BE"),
-        ["Persona Q2"]              = ("pq2", "SJ", "V2", "V1"),
+        ["Persona 3 FES"] = ("p3f", "P3", "V1", "V1"),
+        ["Persona 5"] = ("p5", "P5", "V3BE", "V1BE"),
+        ["Persona 3 Portable"] = ("p3p", "P3", "V1", "V1"),
+        ["Persona 5 Royal (PS4)"] = ("p5r", "P5", "V3BE", "V1BE"),
+        ["Persona 5 Royal (Switch)"] = ("p5r", "P5", "V3BE", "V1BE"),
+        ["Persona Q2"] = ("pq2", "SJ", "V2", "V1"),
     };
 
-    private static string? FindMono()
-    {
+    private static string? FindMono() {
         if (_monoChecked) return _monoPath;
         _monoChecked = true;
         if (OperatingSystem.IsWindows()) return null;
-        try
-        {
-            var proc = Process.Start(new ProcessStartInfo
-            {
-                FileName = "which", Arguments = "mono",
-                RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true
+        try {
+            var proc = Process.Start(new ProcessStartInfo {
+                FileName = "which",
+                Arguments = "mono",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
             });
-            if (proc != null)
-            {
+            if (proc != null) {
                 var path = proc.StandardOutput.ReadToEnd().Trim();
                 proc.WaitForExit();
                 if (proc.ExitCode == 0 && !string.IsNullOrEmpty(path))
@@ -61,25 +58,20 @@ public static class ScriptCompiler
         return _monoPath;
     }
 
-    public static void RunExe(string exePath, string args)
-    {
+    public static void RunExe(string exePath, string args) {
         string fileName;
         string finalArgs;
-        if (!OperatingSystem.IsWindows())
-        {
+        if (!OperatingSystem.IsWindows()) {
             // Prefer native self-contained binary (strip .exe → AtlusScriptCompiler)
             var nativePath = Path.Combine(Path.GetDirectoryName(exePath)!, Path.GetFileNameWithoutExtension(exePath));
-            if (File.Exists(nativePath))
-            {
+            if (File.Exists(nativePath)) {
                 fileName = nativePath;
                 finalArgs = args;
             }
-            else
-            {
+            else {
                 ParallelLogger.Log($"[INFO] Native binary at {nativePath} not found. Attempting to run {exePath} via mono.");
                 var mono = FindMono();
-                if (mono == null)
-                {
+                if (mono == null) {
                     ParallelLogger.Log("[ERROR] Neither a native binary nor mono was found for this tool on Linux.");
                     return;
                 }
@@ -87,14 +79,12 @@ public static class ScriptCompiler
                 finalArgs = $"\"{exePath}\" {args}";
             }
         }
-        else
-        {
+        else {
             fileName = exePath;
             finalArgs = args;
         }
         using var process = new Process();
-        process.StartInfo = new ProcessStartInfo
-        {
+        process.StartInfo = new ProcessStartInfo {
             FileName = fileName,
             Arguments = finalArgs,
             CreateNoWindow = true,
@@ -103,13 +93,13 @@ public static class ScriptCompiler
             RedirectStandardError = true,
             WindowStyle = ProcessWindowStyle.Hidden,
         };
-        
+
         process.Start();
         string stdout = process.StandardOutput.ReadToEnd();
         string stderr = process.StandardError.ReadToEnd();
         process.WaitForExit();
         //if (!string.IsNullOrWhiteSpace(stdout))
-            //ParallelLogger.Log($"[INFO] {Path.GetFileName(exePath)}: {stdout.Trim()}");
+        //ParallelLogger.Log($"[INFO] {Path.GetFileName(exePath)}: {stdout.Trim()}");
         if (!string.IsNullOrWhiteSpace(stderr))
             ParallelLogger.Log($"[ERROR] {Path.GetFileName(exePath)}: {stderr.Trim()}");
         if (process.ExitCode != 0)
@@ -119,20 +109,17 @@ public static class ScriptCompiler
     /// <summary>
     /// Compile a .flow or .msg file to .bf or .bmd using AtlusScriptCompiler CLI.
     /// </summary>
-    public static bool Compile(string inFilePath, string outFile, string game, string language, string modName = "")
-    {
+    public static bool Compile(string inFilePath, string outFile, string game, string language, string modName = "") {
         if (!File.Exists(inFilePath))
             return false;
-        if (!GameInfo.TryGetValue(game, out var info))
-        {
+        if (!GameInfo.TryGetValue(game, out var info)) {
             ParallelLogger.Log($"[ERROR] No compiler info for game {game}");
             return false;
         }
 
         DateTime lastModified;
         try { lastModified = File.GetLastWriteTime(outFile); }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             ParallelLogger.Log($"[ERROR] Error getting last write time for {outFile}: {e.Message}");
             return false;
         }
@@ -140,12 +127,10 @@ public static class ScriptCompiler
         ParallelLogger.Log($"[INFO] Compiling {inFilePath}");
         string extension = Path.GetExtension(outFile).ToLowerInvariant();
 
-        if (extension == ".pm1")
-        {
+        if (extension == ".pm1") {
             RunExe(PM1Path, $"\"{inFilePath}\"");
         }
-        else if (extension == ".bf")
-        {
+        else if (extension == ".bf") {
             var encoding = info.Encoding;
             var outFormat = info.FlowFormat;
 
@@ -164,8 +149,7 @@ public static class ScriptCompiler
             var args = $"\"{inFilePath}\" -Compile -OutFormat {outFormat} -Library {info.Library} -Encoding {encoding} -Out \"{outFile}\" -Hook";
             RunExe(CompilerPath, args);
         }
-        else if (extension == ".bmd")
-        {
+        else if (extension == ".bmd") {
             var encoding = info.Encoding;
             if ((game == "Persona 5 Royal (PS4)" || game == "Persona 5 Royal (Switch)")
                 && language != null && language != "English")
@@ -174,24 +158,20 @@ public static class ScriptCompiler
             var args = $"\"{inFilePath}\" -Compile -OutFormat {info.MsgFormat} -Library {info.Library} -Encoding {encoding} -Out \"{outFile}\"";
             RunExe(CompilerPath, args);
         }
-        else
-        {
+        else {
             ParallelLogger.Log($"[ERROR] {extension} is not a supported file type");
             return false;
         }
 
         // Check if the file was written to (successfully compiled)
-        if (File.Exists(outFile) && File.GetLastWriteTime(outFile) > lastModified)
-        {
+        if (File.Exists(outFile) && File.GetLastWriteTime(outFile) > lastModified) {
             ParallelLogger.Log($"[INFO] Finished compiling {inFilePath}");
             return true;
         }
-        else
-        {
+        else {
             var logFile = Path.Combine(AppDir, "AtlusScriptCompiler.log");
             var newLog = Path.Combine(DataDir, "Logs", $"{modName}{(modName == "" ? "" : " - ")}{Path.GetFileName(inFilePath)}.log");
-            if (File.Exists(logFile))
-            {
+            if (File.Exists(logFile)) {
                 Directory.CreateDirectory(Path.Combine(DataDir, "Logs"));
                 if (File.Exists(newLog)) File.Delete(newLog);
                 File.Move(logFile, newLog);
@@ -204,12 +184,10 @@ public static class ScriptCompiler
     /// <summary>
     /// Decompile a .bf to .flow or .bmd to .msg using AtlusScriptCompiler CLI.
     /// </summary>
-    public static bool Decompile(string inFilePath, string game, string language)
-    {
+    public static bool Decompile(string inFilePath, string game, string language) {
         if (!File.Exists(inFilePath))
             return false;
-        if (!GameInfo.TryGetValue(game, out var info))
-        {
+        if (!GameInfo.TryGetValue(game, out var info)) {
             ParallelLogger.Log($"[ERROR] No compiler info for game {game}");
             return false;
         }
@@ -225,8 +203,7 @@ public static class ScriptCompiler
             outFormat = info.FlowFormat;
         else if (ext == ".bmd")
             outFormat = info.MsgFormat;
-        else
-        {
+        else {
             ParallelLogger.Log($"[ERROR] Cannot decompile {ext} files");
             return false;
         }
@@ -245,8 +222,7 @@ public static class ScriptCompiler
     /// Gets the path for a file relative to the game's file system.
     /// Cross-platform version using Path.DirectorySeparatorChar.
     /// </summary>
-    public static string GetRelativePath(string file, string dir, string game, bool removeData = true)
-    {
+    public static string GetRelativePath(string file, string dir, string game, bool removeData = true) {
         var folders = new List<string>(file.Split(Path.DirectorySeparatorChar));
         int idx = folders.IndexOf(Path.GetFileName(dir)) + 1;
         if (game == "Persona 4 Golden" && removeData) idx++;
@@ -257,10 +233,8 @@ public static class ScriptCompiler
     /// <summary>
     /// Parse messages from a .msg file (decompiled text format).
     /// </summary>
-    public static Dictionary<string, string>? GetMessages(string file, string fileType)
-    {
-        try
-        {
+    public static Dictionary<string, string>? GetMessages(string file, string fileType) {
+        try {
             string messagePattern = @"(\[.+ .+\])\s+((?:\[.*\s+?)+)";
             string text = File.ReadAllText(file).Replace("[x 0x80 0x80]", " ");
             var rg = new Regex(messagePattern);
@@ -270,8 +244,7 @@ public static class ScriptCompiler
                 messages[match.Groups[1].Value] = match.Groups[2].Value;
             return messages;
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             ParallelLogger.Log($"[ERROR] Error reading {file}: {e.Message}. Cancelling {fileType} merging");
         }
         return null;
@@ -282,17 +255,12 @@ public static class ScriptCompiler
     /// Used for BMD and PM1 merging.
     /// </summary>
     public static void MergeFiles(string game, string[] files, Dictionary<string, string>[] messages,
-        Dictionary<string, string> ogMessages, string language)
-    {
+        Dictionary<string, string> ogMessages, string language) {
         var changedMessages = new Dictionary<string, string>();
-        foreach (var ogMessage in ogMessages)
-        {
-            foreach (var messageArr in messages)
-            {
-                if (messageArr.TryGetValue(ogMessage.Key, out string? messageContent))
-                {
-                    if (messageContent != ogMessage.Value)
-                    {
+        foreach (var ogMessage in ogMessages) {
+            foreach (var messageArr in messages) {
+                if (messageArr.TryGetValue(ogMessage.Key, out string? messageContent)) {
+                    if (messageContent != ogMessage.Value) {
                         changedMessages.Remove(ogMessage.Key);
                         changedMessages[ogMessage.Key] = messageContent;
                     }
@@ -301,8 +269,7 @@ public static class ScriptCompiler
         }
 
         // Get any completely new messages from the lower priority file
-        foreach (var m in messages[0])
-        {
+        foreach (var m in messages[0]) {
             if (!ogMessages.ContainsKey(m.Key) && !messages[1].ContainsKey(m.Key))
                 changedMessages[m.Key] = m.Value;
         }
@@ -313,14 +280,12 @@ public static class ScriptCompiler
         string msgFile = Path.ChangeExtension(files[1], "msg");
         string fileContent;
         try { fileContent = File.ReadAllText(msgFile); }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             ParallelLogger.Log($"[ERROR] Error reading {msgFile}: {e.Message}");
             return;
         }
 
-        foreach (var message in changedMessages)
-        {
+        foreach (var message in changedMessages) {
             if (!ogMessages.TryGetValue(message.Key, out string? ogMessage))
                 fileContent += $"{message.Key}\r\n{message.Value}\r\n";
             else
@@ -328,15 +293,13 @@ public static class ScriptCompiler
         }
 
         try { File.Copy(files[1], files[1] + ".back", true); }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             ParallelLogger.Log($"[ERROR] Error backing up {files[1]}: {e.Message}");
             return;
         }
 
         try { File.WriteAllText(msgFile, fileContent); }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             ParallelLogger.Log($"[ERROR] Error writing changes to {msgFile}: {e.Message}");
             return;
         }
@@ -346,13 +309,10 @@ public static class ScriptCompiler
     /// <summary>
     /// Restore .*.back files to their original names after merging.
     /// </summary>
-    public static void RestoreBackups(List<string> modList)
-    {
-        foreach (string modDir in modList)
-        {
+    public static void RestoreBackups(List<string> modList) {
+        foreach (string modDir in modList) {
             string[] bakFiles = Directory.GetFiles(modDir, "*.*.back", SearchOption.AllDirectories);
-            foreach (string file in bakFiles)
-            {
+            foreach (string file in bakFiles) {
                 string newFile = file[..^5]; // Remove ".back"
                 if (File.Exists(newFile))
                     File.Delete(newFile);

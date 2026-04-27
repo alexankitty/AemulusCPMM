@@ -3,8 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AemulusModManager.Avalonia.ViewModels;
 
-public partial class ConfigWindowViewModel : ObservableObject
-{
+public partial class ConfigWindowViewModel : ObservableObject {
     [ObservableProperty] private string _gameTitle = "";
     [ObservableProperty] private string _outputFolder = "";
     [ObservableProperty] private string _exePath = "";

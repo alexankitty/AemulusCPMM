@@ -9,21 +9,17 @@ using AemulusModManager.Utilities.PackageUpdating;
 
 namespace AemulusModManager.Avalonia.Views;
 
-public partial class DownloadWindow : Window
-{
+public partial class DownloadWindow : Window {
     public bool YesNo { get; set; }
 
-    public DownloadWindow()
-    {
+    public DownloadWindow() {
         InitializeComponent();
     }
 
-    public DownloadWindow(DialogWindowViewModel dialogVm, string name, string author, Uri? image = null)
-    {
+    public DownloadWindow(DialogWindowViewModel dialogVm, string name, string author, Uri? image = null) {
         InitializeComponent();
         DataContext = dialogVm;
-        foreach(var prop in dialogVm.AccentProps)
-        {
+        foreach (var prop in dialogVm.AccentProps) {
             this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
         }
         DownloadText.Text = $"{name}\nSubmitted by {author}";
@@ -31,12 +27,10 @@ public partial class DownloadWindow : Window
             _ = LoadImageAsync(image);
     }
 
-    public DownloadWindow(DialogWindowViewModel dialogVm, GameBananaRecord record)
-    {
+    public DownloadWindow(DialogWindowViewModel dialogVm, GameBananaRecord record) {
         InitializeComponent();
         DataContext = dialogVm;
-        foreach(var prop in dialogVm.AccentProps)
-        {
+        foreach (var prop in dialogVm.AccentProps) {
             this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
         }
         DownloadText.Text = $"{record.Title}\nSubmitted by {record.Owner?.Name}";
@@ -44,12 +38,10 @@ public partial class DownloadWindow : Window
             _ = LoadImageAsync(record.Image);
     }
 
-    public DownloadWindow(DialogWindowViewModel dialogVm, GameBananaAPIV4 response)
-    {
+    public DownloadWindow(DialogWindowViewModel dialogVm, GameBananaAPIV4 response) {
         InitializeComponent();
         DataContext = dialogVm;
-        foreach(var prop in dialogVm.AccentProps)
-        {
+        foreach (var prop in dialogVm.AccentProps) {
             this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
         }
         DownloadText.Text = $"{response.Title}\nSubmitted by {response.Owner?.Name}";
@@ -57,29 +49,24 @@ public partial class DownloadWindow : Window
             _ = LoadImageAsync(response.Image);
     }
 
-    private async Task LoadImageAsync(Uri uri)
-    {
-        try
-        {
+    private async Task LoadImageAsync(Uri uri) {
+        try {
             using var client = new HttpClient();
             var data = await client.GetByteArrayAsync(uri);
             using var stream = new System.IO.MemoryStream(data);
             Preview.Source = new Bitmap(stream);
         }
-        catch
-        {
+        catch {
             // Ignore image load failures
         }
     }
 
-    private void Yes_Click(object? sender, RoutedEventArgs e)
-    {
+    private void Yes_Click(object? sender, RoutedEventArgs e) {
         YesNo = true;
         Close();
     }
 
-    private void No_Click(object? sender, RoutedEventArgs e)
-    {
+    private void No_Click(object? sender, RoutedEventArgs e) {
         Close();
     }
 }

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,11 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace AemulusModManager.Utilities
-{
+namespace AemulusModManager.Utilities {
 
-    public enum GameFilter
-    {
+    public enum GameFilter {
         P1PSP,
         P3,
         P3P,
@@ -25,52 +23,44 @@ namespace AemulusModManager.Utilities
         PQ,
         PQ2
     }
-    public enum FeedFilter
-    {
+    public enum FeedFilter {
         Featured,
         Recent,
         Popular,
         None
     }
-    public enum TypeFilter
-    {
+    public enum TypeFilter {
         Mods,
         WiPs,
         Sounds,
         Tools,
         Tutorials
     }
-    public static class FeedGenerator
-    {
+    public static class FeedGenerator {
         private static Dictionary<string, GameBananaModList> feed;
         public static bool error;
         public static Exception exception;
         public static GameBananaModList CurrentFeed = new GameBananaModList();
-        public static double GetHeader(this HttpResponseMessage request, string key)
-        {
+        public static double GetHeader(this HttpResponseMessage request, string key) {
             IEnumerable<string> keys = null;
             if (!request.Headers.TryGetValues(key, out keys))
                 return -1;
             return Double.Parse(keys.First());
         }
-        public static async Task GetFeed(int page, GameFilter game, TypeFilter type, FeedFilter filter, GameBananaCategory category, GameBananaCategory subcategory, int perPage, string search)
-        {
+        public static async Task GetFeed(int page, GameFilter game, TypeFilter type, FeedFilter filter, GameBananaCategory category, GameBananaCategory subcategory, int perPage, string search) {
             error = false;
             if (feed == null)
                 feed = new Dictionary<string, GameBananaModList>();
             // Remove oldest key if more than 15 pages are cached
             if (feed.Count > 15)
                 feed.Remove(feed.Aggregate((l, r) => DateTime.Compare(l.Value.TimeFetched, r.Value.TimeFetched) < 0 ? l : r).Key);
-            using (var httpClient = new HttpClient())
-            {
+            using (var httpClient = new HttpClient()) {
                 var requestUrl = GenerateUrl(page, game, type, filter, category, subcategory, perPage, search);
-                if (feed.ContainsKey(requestUrl) && feed[requestUrl].IsValid)
-                {
+                if (feed.ContainsKey(requestUrl) && feed[requestUrl].IsValid) {
                     CurrentFeed = feed[requestUrl];
                     return;
                 }
-                try
-                {
+                try {
                     var response = await httpClient.GetAsync(requestUrl);
                     var responseString = await response.Content.ReadAsStringAsync();
                     var records = JsonConvert.DeserializeObject<ObservableCollection<GameBananaRecord>>(responseString);
@@ -78,19 +68,17 @@ namespace AemulusModManager.Utilities
                     CurrentFeed.Records = records;
                     // Get record count from header
                     var numRecords = response.GetHeader("X-GbApi-Metadata_nRecordCount");
-                    if (numRecords != -1)
-                    {
+                    if (numRecords != -1) {
                         var totalPages = Convert.ToInt32(Math.Ceiling(numRecords / Convert.ToDouble(perPage)));
                         if (totalPages == 0)
                             totalPages = 1;
                         CurrentFeed.TotalPages = totalPages;
                     }
                 }
-                catch (Exception e)
-                {
+                catch (Exception e) {
                     error = true;
                     exception = e;
-                    return ;
+                    return;
                 }
                 if (!feed.ContainsKey(requestUrl))
                     feed.Add(requestUrl, CurrentFeed);
@@ -98,12 +86,10 @@ namespace AemulusModManager.Utilities
                     feed[requestUrl] = CurrentFeed;
             }
         }
-        private static string GenerateUrl(int page, GameFilter game, TypeFilter type, FeedFilter filter, GameBananaCategory category, GameBananaCategory subcategory, int perPage, string search)
-        {
+        private static string GenerateUrl(int page, GameFilter game, TypeFilter type, FeedFilter filter, GameBananaCategory category, GameBananaCategory subcategory, int perPage, string search) {
             // Base
             var url = "https://gamebanana.com/apiv6/";
-            switch (type)
-            {
+            switch (type) {
                 case TypeFilter.Mods:
                     url += "Mod/";
                     break;
@@ -121,11 +107,9 @@ namespace AemulusModManager.Utilities
                     break;
             }
             // Different starting endpoint if requesting all mods instead of specific category
-            if (search != null)
-            {
+            if (search != null) {
                 url += $"ByName?_sName=*{search}*&_idGameRow=";
-                switch (game)
-                {
+                switch (game) {
                     case GameFilter.P1PSP:
                         url += "12961&";
                         break;
@@ -163,11 +147,9 @@ namespace AemulusModManager.Utilities
             }
             else if (category.ID != null)
                 url += "ByCategory?";
-            else
-            {
+            else {
                 url += $"ByGame?_aGameRowIds[]=";
-                switch (game)
-                {
+                switch (game) {
                     case GameFilter.P1PSP:
                         url += "12961&";
                         break;
@@ -210,8 +192,7 @@ namespace AemulusModManager.Utilities
             url += $"_csvProperties=_sName,_sModelName,_sProfileUrl,_aSubmitter,_tsDateUpdated,_tsDateAdded,_aPreviewMedia,_sText,_sDescription,_aCategory,_aRootCategory,_aGame,_nViewCount," +
                 $"_nLikeCount{extraProps}&_aArgs[]=_sbIsNsfw = false&_nPerpage={perPage}";
             // Sorting filter
-            switch (filter)
-            {
+            switch (filter) {
                 case FeedFilter.Recent:
                     url += "&_sOrderBy=_tsDateUpdated,DESC";
                     break;

@@ -1,13 +1,11 @@
-﻿using AemulusModManager.Utilities.PackageUpdating;
+using AemulusModManager.Utilities.PackageUpdating;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 
-namespace AemulusModManager
-{
-    public class GameBananaItemFile
-    {
+namespace AemulusModManager {
+    public class GameBananaItemFile {
         private static readonly DateTime Epoch = new DateTime(1970, 1, 1);
         [JsonProperty("_idRow")]
         public string ID { get; set; }
@@ -30,7 +28,7 @@ namespace AemulusModManager
         public int Downloads { get; set; }
         [JsonIgnore]
         public string DownloadString => StringConverters.FormatNumber(Downloads);
-        
+
         [JsonProperty("_aMetadata")]
         [JsonExtensionData]
         public IDictionary<string, JToken> FileMetadata { get; set; }
@@ -45,8 +43,7 @@ namespace AemulusModManager
         public string TimeSinceUpload => StringConverters.FormatTimeAgo(DateTime.UtcNow - DateAdded);
     }
 
-    public class GithubFile
-    {
+    public class GithubFile {
         public string FileName { get; set; }
         public string DownloadUrl { get; set; }
         public int Downloads { get; set; }

@@ -3,27 +3,20 @@ using Avalonia.Data.Converters;
 using Avalonia.Media;
 using System.Globalization;
 
-namespace AemulusModManager.Avalonia.Converters
-{
-    public class AccentForegroundConverter : IValueConverter
-    {
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-        {
+namespace AemulusModManager.Avalonia.Converters {
+    public class AccentForegroundConverter : IValueConverter {
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) {
             Color color;
-            if (value is ISolidColorBrush brush)
-            {
+            if (value is ISolidColorBrush brush) {
                 color = brush.Color;
             }
-            else if (value is Color c)
-            {
+            else if (value is Color c) {
                 color = c;
             }
-            else if (value is string s && Color.TryParse(s, out var parsed))
-            {
+            else if (value is string s && Color.TryParse(s, out var parsed)) {
                 color = parsed;
             }
-            else
-            {
+            else {
                 // fallback: white
                 return Brushes.White;
             }

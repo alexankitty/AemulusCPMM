@@ -5,30 +5,24 @@ using Avalonia.Media;
 
 namespace AemulusModManager.Avalonia.Views;
 
-public partial class NotificationBox : Window
-{
+public partial class NotificationBox : Window {
     public bool YesNo { get; set; }
 
-    public NotificationBox()
-    {
+    public NotificationBox() {
         InitializeComponent();
     }
 
-    public NotificationBox(DialogWindowViewModel dialogVm, string message, bool ok = true)
-    {
+    public NotificationBox(DialogWindowViewModel dialogVm, string message, bool ok = true) {
         InitializeComponent();
         DataContext = dialogVm;
-        foreach(var prop in dialogVm.AccentProps)
-        {
+        foreach (var prop in dialogVm.AccentProps) {
             this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
         }
         Notification.Text = message;
-        if (ok)
-        {
+        if (ok) {
             OkButton.IsVisible = true;
         }
-        else
-        {
+        else {
             YesButton.IsVisible = true;
             NoButton.IsVisible = true;
         }
@@ -36,13 +30,11 @@ public partial class NotificationBox : Window
             Notification.TextAlignment = global::Avalonia.Media.TextAlignment.Left;
     }
 
-    private void Button_Click(object? sender, RoutedEventArgs e)
-    {
+    private void Button_Click(object? sender, RoutedEventArgs e) {
         Close();
     }
 
-    private void Yes_Button_Click(object? sender, RoutedEventArgs e)
-    {
+    private void Yes_Button_Click(object? sender, RoutedEventArgs e) {
         YesNo = true;
         Close();
     }

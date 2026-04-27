@@ -6,10 +6,8 @@ using Avalonia.Media;
 
 namespace AemulusModManager.Avalonia.Converters;
 
-public class GameColorConverter : IValueConverter
-{
-    public static readonly Dictionary<string, string> GameColors = new()
-    {
+public class GameColorConverter : IValueConverter {
+    public static readonly Dictionary<string, string> GameColors = new() {
         ["Persona 1 (PSP)"] = "#B683FC",
         ["Persona 3 FES"] = "#6EB0F7",
         ["Persona 3 Portable"] = "#FC83E3",
@@ -23,8 +21,7 @@ public class GameColorConverter : IValueConverter
         ["Persona Q2"] = "#FB846A",
     };
 
-    public static readonly Dictionary<string, string> GameHoverColors = new()
-    {
+    public static readonly Dictionary<string, string> GameHoverColors = new() {
         ["Persona 1 (PSP)"] = "#5B417E",
         ["Persona 3 FES"] = "#37587B",
         ["Persona 3 Portable"] = "#7E4171",
@@ -38,8 +35,7 @@ public class GameColorConverter : IValueConverter
         ["Persona Q2"] = "#7D4235",
     };
 
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) {
         if (value is string gameName && GameColors.TryGetValue(gameName, out var hex))
             return SolidColorBrush.Parse(hex);
         return SolidColorBrush.Parse("#F5E63D");
@@ -48,22 +44,19 @@ public class GameColorConverter : IValueConverter
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => throw new NotImplementedException();
 
-    public static IBrush GetBrush(string gameName)
-    {
+    public static IBrush GetBrush(string gameName) {
         if (GameColors.TryGetValue(gameName, out var hex))
             return SolidColorBrush.Parse(hex);
         return SolidColorBrush.Parse("#F5E63D");
     }
 
-    public static string GetHex(string gameName)
-    {
+    public static string GetHex(string gameName) {
         if (GameColors.TryGetValue(gameName, out var hex))
             return hex;
         return "#F5E63D";
     }
 
-    public static IBrush GetHoverBrush(string gameName)
-    {
+    public static IBrush GetHoverBrush(string gameName) {
         if (GameHoverColors.TryGetValue(gameName, out var hex))
             return SolidColorBrush.Parse(hex);
         return SolidColorBrush.Parse("#7A731E");

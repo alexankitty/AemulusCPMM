@@ -5,14 +5,12 @@ using System.Linq;
 using System.Runtime.InteropServices;
 namespace AemulusModManager.Avalonia.Utilities;
 
-public static class FileManagement
-{
-    public static string ValidatePathCaseInsensitive(string pathAndFileName)
-    {
+public static class FileManagement {
+    public static string ValidatePathCaseInsensitive(string pathAndFileName) {
         string resultFileName = pathAndFileName;
         if (OperatingSystem.IsWindows() && (File.Exists(pathAndFileName) || Directory.Exists(pathAndFileName)))
             return pathAndFileName; // File exists as is, return it
-        if(File.Exists(pathAndFileName) || Directory.Exists(pathAndFileName))
+        if (File.Exists(pathAndFileName) || Directory.Exists(pathAndFileName))
             return pathAndFileName; // File exists as is, return it
 
         string file = Path.GetFileName(pathAndFileName);
@@ -22,50 +20,40 @@ public static class FileManagement
         string finalPath = Path.GetPathRoot(pathAndFileName) ?? "";
         string parentDirectory = Path.GetDirectoryName(pathAndFileName) ?? "";
 
-        foreach (string dir in directories)
-        {
+        foreach (string dir in directories) {
             IEnumerable<string> foundDirs = Directory.EnumerateDirectories(finalPath)
             .Where(s => Path.GetFileName(s).Equals(dir, StringComparison.OrdinalIgnoreCase));
-            if (foundDirs.Any())
-            {
-                if (foundDirs.Count() > 1)
-                {
+            if (foundDirs.Any()) {
+                if (foundDirs.Count() > 1) {
                     // More than two directories with the same name but different case spelling found
                     throw new Exception("Ambiguous Directory reference for " + dir);
                 }
-                else
-                {
+                else {
                     finalPath = foundDirs.First();
                 }
             }
-            else
-            {
+            else {
                 return null; // Directory not found
             }
         }
 
         IEnumerable<string> foundFiles = Directory.EnumerateFiles(finalPath)
             .Where(s => Path.GetFileName(s).Equals(file, StringComparison.OrdinalIgnoreCase));
-        if (!foundFiles.Any())
-        {
+        if (!foundFiles.Any()) {
             foundFiles = Directory.EnumerateDirectories(finalPath)
             .Where(s => Path.GetFileName(s).Equals(file, StringComparison.OrdinalIgnoreCase));//Fall back to directory check
         }
 
-        if (foundFiles.Any())
-        {
-            if (foundFiles.Count() > 1)
-            {
+        if (foundFiles.Any()) {
+            if (foundFiles.Count() > 1) {
                 // More than two files with the same name but different case spelling found
                 throw new Exception("Ambiguous File reference for " + pathAndFileName);
             }
-            else
-            {
+            else {
                 resultFileName = foundFiles.First();
             }
         }
-        else
-        {
+        else {
             return null; // File not found
         }
 

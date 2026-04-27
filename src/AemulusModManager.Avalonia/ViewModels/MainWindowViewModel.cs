@@ -24,8 +24,7 @@ using FileMerging = AemulusModManager.Avalonia.Utilities.FileMerging;
 
 namespace AemulusModManager.Avalonia.ViewModels;
 
-public partial class MainWindowViewModel : ObservableObject
-{
+public partial class MainWindowViewModel : ObservableObject {
     // Serializers
     private readonly XmlSerializer _xsp = new(typeof(Metadata));
     private readonly XmlSerializer _xsm = new(typeof(ModXmlMetadata));
@@ -104,10 +103,8 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private IBrush _themeMuted = SolidColorBrush.Parse("#9c9c9c");
     [ObservableProperty] private IBrush _themeConsoleBg = SolidColorBrush.Parse("#101010");
 
-    private void ApplyThemeColors()
-    {
-        if (DarkMode)
-        {
+    private void ApplyThemeColors() {
+        if (DarkMode) {
             ThemeBg = SolidColorBrush.Parse("#151515");
             ThemeSurface = SolidColorBrush.Parse("#202020");
             ThemeControl = SolidColorBrush.Parse("#303030");
@@ -116,8 +113,7 @@ public partial class MainWindowViewModel : ObservableObject
             ThemeMuted = SolidColorBrush.Parse("#9c9c9c");
             ThemeConsoleBg = SolidColorBrush.Parse("#101010");
         }
-        else
-        {
+        else {
             ThemeBg = SolidColorBrush.Parse("#f0f0f0");
             ThemeSurface = SolidColorBrush.Parse("#ffffff");
             ThemeControl = SolidColorBrush.Parse("#e0e0e0");
@@ -130,13 +126,11 @@ public partial class MainWindowViewModel : ObservableObject
     private static readonly string _appVersion = System.Diagnostics.FileVersionInfo
         .GetVersionInfo(Assembly.GetEntryAssembly()?.Location ?? "").FileVersion ?? "1.0.0.0";
 
-    public void SetDialogService(DialogService dialogService)
-    {
+    public void SetDialogService(DialogService dialogService) {
         _dialogService = dialogService;
     }
 
-    public MainWindowViewModel()
-    {
+    public MainWindowViewModel() {
         _exeDir = Utilities.AppPaths.ExeDir;
         _dataDir = Utilities.AppPaths.DataDir;
         _configPath = Utilities.AppPaths.ConfigDir;
@@ -152,91 +146,74 @@ public partial class MainWindowViewModel : ObservableObject
         UpdateGameAccentColor();
     }
 
-    private void SetupFileSystemWatcher()
-    {
-        try
-        {
-            _fileSystemWatcher = new FileSystemWatcher(_dataDir)
-            {
+    private void SetupFileSystemWatcher() {
+        try {
+            _fileSystemWatcher = new FileSystemWatcher(_dataDir) {
                 Filter = "refresh.aem",
                 EnableRaisingEvents = true,
                 NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime
             };
             _fileSystemWatcher.Created += OnRefreshFileCreated;
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             AppendConsole($"[WARNING] FileSystemWatcher setup failed: {ex.Message}");
         }
     }
 
-    private async void OnRefreshFileCreated(object sender, FileSystemEventArgs e)
-    {
+    private async void OnRefreshFileCreated(object sender, FileSystemEventArgs e) {
         var refreshPath = Path.Combine(_dataDir, "refresh.aem");
         if (!File.Exists(refreshPath)) return;
 
         // Wait for file to be ready
-        for (int i = 0; i < 50; i++)
-        {
-            try
-            {
+        for (int i = 0; i < 50; i++) {
+            try {
                 using var fs = File.Open(refreshPath, FileMode.Open, FileAccess.Read, FileShare.None);
                 if (fs.Length > 0) break;
             }
             catch (IOException) { await Task.Delay(100); }
         }
 
-        try
-        {
+        try {
             var game = File.ReadAllText(refreshPath).Trim();
             File.Delete(refreshPath);
 
             var configTemp = Path.Combine(_configPath, "temp");
-            if (Directory.Exists(configTemp))
-            {
+            if (Directory.Exists(configTemp)) {
                 await Task.Run(() => ReplacePackagesXML(game));
             }
-            else
-            {
-                await global::Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
-                {
+            else {
+                await global::Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() => {
                     RefreshPackageList();
                     SavePackages();
                 });
             }
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             AppendConsole($"[ERROR] FileSystemWatcher handler: {ex.Message}");
         }
     }
 
-    private void ReplacePackagesXML(string? game = null)
-    {
+    private void ReplacePackagesXML(string? game = null) {
         game ??= SelectedGame;
         var configTemp = Path.Combine(_configPath, "temp");
         if (!Directory.Exists(configTemp)) return;
 
-        foreach (var file in Directory.GetFiles(configTemp))
-        {
+        foreach (var file in Directory.GetFiles(configTemp)) {
             var destDir = Path.Combine(_configPath, game);
             Directory.CreateDirectory(destDir);
             var dest = Path.Combine(destDir, Path.GetFileName(file));
-            try
-            {
+            try {
                 if (File.Exists(dest)) File.Delete(dest);
                 File.Move(file, dest);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 AppendConsole($"[ERROR] Failed to move {file}: {ex.Message}");
             }
         }
 
         try { Directory.Delete(configTemp, true); } catch { }
 
-        global::Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-        {
+        global::Avalonia.Threading.Dispatcher.UIThread.Post(() => {
             RefreshPackageList();
             SavePackages();
         });
@@ -244,21 +221,17 @@ public partial class MainWindowViewModel : ObservableObject
 
     #region Config Loading/Saving
 
-    private void LoadAemulusConfig()
-    {
+    private void LoadAemulusConfig() {
         var configFile = Path.Combine(_configPath, "Config.xml");
         Directory.CreateDirectory(_configPath);
 
-        if (File.Exists(configFile))
-        {
-            try
-            {
+        if (File.Exists(configFile)) {
+            try {
                 using var stream = File.OpenRead(configFile);
                 var serializer = new XmlSerializer(typeof(AemulusConfig));
                 Config = (AemulusConfig?)serializer.Deserialize(stream) ?? new AemulusConfig();
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 AppendConsole($"[ERROR] Failed to load config: {ex.Message}");
                 Config = new AemulusConfig();
             }
@@ -277,33 +250,28 @@ public partial class MainWindowViewModel : ObservableObject
         ApplyThemeColors();
     }
 
-    public void UpdateConfig()
-    {
+    public void UpdateConfig() {
         Config.game = SelectedGame;
         Config.bottomUpPriority = BottomUpPriority;
 
         Directory.CreateDirectory(_configPath);
         var configFile = Path.Combine(_configPath, "Config.xml");
-        try
-        {
+        try {
             using var stream = File.Create(configFile);
             new XmlSerializer(typeof(AemulusConfig)).Serialize(stream, Config);
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             AppendConsole($"[ERROR] Failed to save config: {ex.Message}");
         }
     }
 
-    private void LoadGameConfig()
-    {
+    private void LoadGameConfig() {
         // Reset optional fields
         CheatsPath = null; CheatsWSPath = null; TexturesPath = null;
         ElfPath = null; CpkName = null; GameVersion = null;
         EmptySND = false; UseCpk = false; CreateIso = false; AdvancedLaunchOptions = false;
 
-        switch (SelectedGame)
-        {
+        switch (SelectedGame) {
             case "Persona 1 (PSP)":
                 Config.p1pspConfig ??= new ConfigP1PSP();
                 ModPath = Config.p1pspConfig.modDir;
@@ -474,8 +442,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     #region Package Management
 
-    private void LoadPackages()
-    {
+    private void LoadPackages() {
         var packagesDir = Path.Combine(_dataDir, "Packages", SelectedGame);
         Directory.CreateDirectory(packagesDir);
 
@@ -485,31 +452,25 @@ public partial class MainWindowViewModel : ObservableObject
         Directory.CreateDirectory(Path.Combine(_configPath, SelectedGame));
 
         _packageList = new ObservableCollection<Package>();
-        if (File.Exists(loadoutFile))
-        {
-            try
-            {
+        if (File.Exists(loadoutFile)) {
+            try {
                 using var stream = File.OpenRead(loadoutFile);
                 var packages = (Packages?)_xp.Deserialize(stream);
                 if (packages?.packages != null)
                     _packageList = new ObservableCollection<Package>(packages.packages);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 AppendConsole($"[ERROR] Failed to load packages: {ex.Message}");
             }
         }
-        else if (File.Exists(defaultLoadoutFile))
-        {
-            try
-            {
+        else if (File.Exists(defaultLoadoutFile)) {
+            try {
                 using var stream = File.OpenRead(defaultLoadoutFile);
                 var packages = (Packages?)_xp.Deserialize(stream);
                 if (packages?.packages != null)
                     _packageList = new ObservableCollection<Package>(packages.packages);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 AppendConsole($"[ERROR] Failed to load default packages: {ex.Message}");
             }
         }
@@ -530,30 +491,24 @@ public partial class MainWindowViewModel : ObservableObject
         RefreshPackageList();
     }
 
-    public void RefreshPackageList()
-    {
+    public void RefreshPackageList() {
         var packagesDir = Path.Combine(_dataDir, "Packages", SelectedGame);
         Directory.CreateDirectory(packagesDir);
         var tempDisplayed = new List<DisplayedMetadata>();
 
         // Remove deleted packages
-        foreach (var package in _packageList.ToList())
-        {
-            if (!Directory.Exists(Path.Combine(packagesDir, package.path)))
-            {
+        foreach (var package in _packageList.ToList()) {
+            if (!Directory.Exists(Path.Combine(packagesDir, package.path))) {
                 _packageList.Remove(package);
                 continue;
             }
 
             var xmlPath = Path.Combine(packagesDir, package.path, "Package.xml");
-            if (File.Exists(xmlPath))
-            {
-                try
-                {
+            if (File.Exists(xmlPath)) {
+                try {
                     using var stream = File.OpenRead(xmlPath);
                     var metadata = (Metadata?)_xsp.Deserialize(stream);
-                    if (metadata != null)
-                    {
+                    if (metadata != null) {
                         package.id = metadata.id;
                         var dm = InitDisplayedMetadata(metadata);
                         dm.enabled = package.enabled;
@@ -561,55 +516,45 @@ public partial class MainWindowViewModel : ObservableObject
                         tempDisplayed.Add(dm);
                     }
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     AppendConsole($"[ERROR] Invalid Package.xml for {package.path} ({ex.Message})");
                 }
             }
-            else
-            {
+            else {
                 var dm = new DisplayedMetadata { name = package.path, path = package.path, enabled = package.enabled };
                 tempDisplayed.Add(dm);
             }
         }
 
         // Add new packages from directory
-        foreach (var dir in Directory.GetDirectories(packagesDir))
-        {
+        foreach (var dir in Directory.GetDirectories(packagesDir)) {
             var dirName = Path.GetFileName(dir);
             if (_packageList.Any(x => x.path == dirName))
                 continue;
 
             var xmlPath = Path.Combine(dir, "Package.xml");
             Metadata? metadata = null;
-            if (File.Exists(xmlPath))
-            {
-                try
-                {
+            if (File.Exists(xmlPath)) {
+                try {
                     using var stream = File.OpenRead(xmlPath);
                     metadata = (Metadata?)_xsp.Deserialize(stream);
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     AppendConsole($"[ERROR] Invalid Package.xml for {dirName} ({ex.Message})");
                 }
             }
 
-            if (metadata == null)
-            {
+            if (metadata == null) {
                 metadata = new Metadata { name = dirName, id = dirName.Replace(" ", "").ToLower() };
                 // Create Package.xml
-                try
-                {
+                try {
                     // Check for Mod Compendium structure
                     var modXml = Path.Combine(dir, "Mod.xml");
-                    if (File.Exists(modXml) && Directory.Exists(Path.Combine(dir, "Data")))
-                    {
+                    if (File.Exists(modXml) && Directory.Exists(Path.Combine(dir, "Data"))) {
                         AppendConsole($"[INFO] Converting {dirName} from Mod Compendium structure...");
                         using var modStream = File.OpenRead(modXml);
                         var modMeta = (ModXmlMetadata?)_xsm.Deserialize(modStream);
-                        if (modMeta != null)
-                        {
+                        if (modMeta != null) {
                             metadata.id = (modMeta.Author?.ToLower().Replace(" ", "") ?? "") + "."
                                         + (modMeta.Title?.ToLower().Replace(" ", "") ?? "");
                             metadata.author = modMeta.Author ?? "";
@@ -622,14 +567,12 @@ public partial class MainWindowViewModel : ObservableObject
                     using var writeStream = File.Create(Path.Combine(dir, "Package.xml"));
                     _xsp.Serialize(writeStream, metadata);
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     AppendConsole($"[ERROR] Couldn't create Package.xml for {dirName} ({ex.Message})");
                 }
             }
 
-            var newPackage = new Package
-            {
+            var newPackage = new Package {
                 enabled = false,
                 id = metadata.id,
                 path = dirName,
@@ -648,10 +591,8 @@ public partial class MainWindowViewModel : ObservableObject
         SavePackages();
     }
 
-    public DisplayedMetadata InitDisplayedMetadata(Metadata m)
-    {
-        var dm = new DisplayedMetadata
-        {
+    public DisplayedMetadata InitDisplayedMetadata(Metadata m) {
+        var dm = new DisplayedMetadata {
             name = m.name,
             id = m.id,
             author = m.author,
@@ -664,37 +605,31 @@ public partial class MainWindowViewModel : ObservableObject
         return dm;
     }
 
-    private void SavePackages()
-    {
+    private void SavePackages() {
         var loadoutFile = Path.Combine(_configPath, SelectedGame, $"{SelectedLoadout}.xml");
         Directory.CreateDirectory(Path.Combine(_configPath, SelectedGame));
-        try
-        {
+        try {
             var packages = new Packages { packages = new ObservableCollection<Package>(_packageList) };
             using var stream = File.Create(loadoutFile);
             _xp.Serialize(stream, packages);
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             AppendConsole($"[ERROR] Failed to save packages: {ex.Message}");
         }
     }
 
-    public void UpdatePackages()
-    {
+    public void UpdatePackages() {
         SavePackages();
     }
 
-    public void TogglePackageEnabled(DisplayedMetadata package, bool enabled)
-    {
+    public void TogglePackageEnabled(DisplayedMetadata package, bool enabled) {
         package.enabled = enabled;
         foreach (var p in _packageList.Where(p => p.path == package.path))
             p.enabled = enabled;
         UpdatePackages();
     }
 
-    public void MovePackage(int oldIndex, int newIndex)
-    {
+    public void MovePackage(int oldIndex, int newIndex) {
         if (oldIndex < 0 || newIndex < 0 ||
             oldIndex >= DisplayedPackages.Count || newIndex >= DisplayedPackages.Count)
             return;
@@ -707,8 +642,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         // Rebuild package list order
         var newOrder = new ObservableCollection<Package>();
-        foreach (var displayed in DisplayedPackages)
-        {
+        foreach (var displayed in DisplayedPackages) {
             var pkg = _packageList.FirstOrDefault(p => p.path == displayed.path);
             if (pkg != null) newOrder.Add(pkg);
         }
@@ -721,8 +655,7 @@ public partial class MainWindowViewModel : ObservableObject
     #region Commands
 
     [RelayCommand]
-    private void SwapPriority()
-    {
+    private void SwapPriority() {
         BottomUpPriority = !BottomUpPriority;
         PriorityLabel = BottomUpPriority ? "higher priority ▲" : "higher priority ▼";
         UpdateConfig();
@@ -730,8 +663,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ChangeGame()
-    {
+    private void ChangeGame() {
         Config.game = SelectedGame;
         UpdateConfig();
         LoadGameConfig();
@@ -741,24 +673,20 @@ public partial class MainWindowViewModel : ObservableObject
         AppendConsole($"[INFO] Switched to {SelectedGame}");
     }
 
-    partial void OnSelectedGameChanged(string value)
-    {
+    partial void OnSelectedGameChanged(string value) {
         ChangeGame();
     }
 
-    partial void OnSelectedLoadoutChanged(string value)
-    {
+    partial void OnSelectedLoadoutChanged(string value) {
         if (_loadoutChanging) return;
-        if (value == "Add new loadout")
-        {
+        if (value == "Add new loadout") {
             AppendConsole("[INFO] Creating new loadout...");
             _loadoutChanging = true;
             _ = HandleNewLoadoutAsync();
 
             return;
         }
-        if (!string.IsNullOrEmpty(value))
-        {
+        if (!string.IsNullOrEmpty(value)) {
             _lastLoadout = value;
             ApplyLastLoadoutConfig();
             UpdateConfig();
@@ -767,36 +695,30 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    private async Task HandleNewLoadoutAsync()
-    {
+    private async Task HandleNewLoadoutAsync() {
         // _loadoutChanging is already true from OnSelectedLoadoutChanged
-        try
-        {
-            if (_dialogService == null)
-            {
+        try {
+            if (_dialogService == null) {
                 SelectedLoadout = _lastLoadout;
                 return;
             }
             var window = new Views.CreateEditLoadoutWindow(_dialogService.DialogWindow, SelectedGame, _lastLoadout, false);
             await window.ShowDialog(_dialogService?.OwnerWindow);
             var name = window.LoadoutName?.Trim() ?? "";
-            if (string.IsNullOrEmpty(name))
-            {
+            if (string.IsNullOrEmpty(name)) {
                 SelectedLoadout = _lastLoadout;
                 return;
             }
             var loadoutFile = Path.Combine(_configPath, SelectedGame, $"{name}.xml");
             // If we got a name but the file doesn't exist, create a clean loadout.
-            if (!File.Exists(loadoutFile))
-            {
+            if (!File.Exists(loadoutFile)) {
                 Directory.CreateDirectory(Path.GetDirectoryName(loadoutFile)!);
                 var empty = new Packages { packages = new ObservableCollection<Package>() };
                 using var stream = File.Create(loadoutFile);
                 _xp.Serialize(stream, empty);
             }
-            // Set the backing field directly so LoadPackages picks up the right name
-            // without triggering OnSelectedLoadoutChanged again.
-            _selectedLoadout = name;
+
+            SelectedLoadout = name;
             _lastLoadout = name;
             ApplyLastLoadoutConfig();
             UpdateConfig();
@@ -804,22 +726,18 @@ public partial class MainWindowViewModel : ObservableObject
             LoadPackages();
             AppendConsole($"[INFO] Created loadout {name}");
         }
-        finally
-        {
+        finally {
             _loadoutChanging = false;
         }
     }
 
     [RelayCommand]
-    private async Task Build()
-    {
+    private async Task Build() {
         AppendConsole($"[INFO] Building for {SelectedGame}...");
         IsBuildEnabled = false;
         IsUiEnabled = false;
-        try
-        {
-            if (string.IsNullOrEmpty(ModPath) || !Directory.Exists(ModPath))
-            {
+        try {
+            if (string.IsNullOrEmpty(ModPath) || !Directory.Exists(ModPath)) {
                 AppendConsole("[ERROR] Output folder not set or doesn't exist. Please configure it first.");
                 return;
             }
@@ -832,20 +750,16 @@ public partial class MainWindowViewModel : ObservableObject
             var packages = new List<string>();
             var game = SelectedGame;
             var assemblyLocation = _dataDir;
-            foreach (var m in _packageList.ToList())
-            {
-                if (m.enabled)
-                {
+            foreach (var m in _packageList.ToList()) {
+                if (m.enabled) {
                     packages.Add(Path.Combine(assemblyLocation, "Packages", game, m.path ?? ""));
                     ParallelLogger.Log($"[INFO] Using {m.path} in loadout");
                     // P4G auto-detect CPK structure
-                    if (game == "Persona 4 Golden" && !UseCpk)
-                    {
+                    if (game == "Persona 4 Golden" && !UseCpk) {
                         var pkgDir = Path.Combine(assemblyLocation, "Packages", game, m.path ?? "");
                         if ((CpkLang != null && Directory.Exists(Path.Combine(pkgDir, Path.GetFileNameWithoutExtension(CpkLang))))
                             || Directory.Exists(Path.Combine(pkgDir, "movie"))
-                            || Directory.Exists(Path.Combine(pkgDir, "preappfile")))
-                        {
+                            || Directory.Exists(Path.Combine(pkgDir, "preappfile"))) {
                             ParallelLogger.Log($"[WARNING] {m.path} is using CPK folder paths, setting Use CPK Structure to true");
                             UseCpk = true;
                         }
@@ -855,20 +769,16 @@ public partial class MainWindowViewModel : ObservableObject
             if (!BottomUpPriority)
                 packages.Reverse();
 
-            if (packages.Count == 0)
-            {
+            if (packages.Count == 0) {
                 AppendConsole("[WARNING] No packages enabled in loadout, emptying output folder...");
                 var emptyPath = GetOutputPath(game);
 
                 // BuildWarning confirmation
-                if (BuildWarning && Directory.Exists(emptyPath) && Directory.EnumerateFileSystemEntries(emptyPath).Any())
-                {
-                    if (_dialogService != null)
-                    {
+                if (BuildWarning && Directory.Exists(emptyPath) && Directory.EnumerateFileSystemEntries(emptyPath).Any()) {
+                    if (_dialogService != null) {
                         var yes = await _dialogService.ShowNotification(
                             $"Confirm DELETING THE ENTIRE CONTENTS of {emptyPath} before building?", false);
-                        if (!yes)
-                        {
+                        if (!yes) {
                             ParallelLogger.Log("[INFO] Cancelled build");
                             return;
                         }
@@ -893,14 +803,11 @@ public partial class MainWindowViewModel : ObservableObject
 
             // BuildWarning confirmation for full build
             var buildPath = GetOutputPath(game);
-            if (BuildWarning && Directory.Exists(buildPath) && Directory.EnumerateFileSystemEntries(buildPath).Any())
-            {
-                if (_dialogService != null)
-                {
+            if (BuildWarning && Directory.Exists(buildPath) && Directory.EnumerateFileSystemEntries(buildPath).Any()) {
+                if (_dialogService != null) {
                     var yes = await _dialogService.ShowNotification(
                         $"Confirm DELETING THE ENTIRE CONTENTS of {buildPath} before building?", false);
-                    if (!yes)
-                    {
+                    if (!yes) {
                         ParallelLogger.Log("[INFO] Cancelled build");
                         return;
                     }
@@ -911,33 +818,27 @@ public partial class MainWindowViewModel : ObservableObject
 
             var buildTimer = System.Diagnostics.Stopwatch.StartNew();
 
-            if (game == "Persona 5 Strikers")
-            {
+            if (game == "Persona 5 Strikers") {
                 // P5S uses KT Merger
-                await Task.Run(() =>
-                {
+                await Task.Run(() => {
                     var path = ModPath;
                     global::AemulusModManager.Utilities.KT.Merger.Restart(path);
                     global::AemulusModManager.Utilities.KT.Merger.Merge(packages, path);
                     global::AemulusModManager.Utilities.KT.Merger.Patch(path);
                 });
             }
-            else if (game == "Persona 1 (PSP)")
-            {
+            else if (game == "Persona 1 (PSP)") {
                 // P1PSP: simpler path
-                await Task.Run(() =>
-                {
+                await Task.Run(() => {
                     var path = Path.Combine(ModPath, "Persona 1 (PSP)", "PSP_GAME");
                     Directory.CreateDirectory(path);
                     binMerge.Restart(path, EmptySND, game, CpkLang ?? "", null, null);
                     binMerge.Unpack(packages, path, UseCpk, CpkLang ?? "", game);
                     // Copy unchanged files from Original
                     var origDir = Path.Combine(assemblyLocation, "Original", "Persona 1 (PSP)");
-                    if (Directory.Exists(origDir))
-                    {
+                    if (Directory.Exists(origDir)) {
                         ParallelLogger.Log("[INFO] Adding unchanged files...");
-                        foreach (var file in Directory.GetFiles(origDir, "*.*", SearchOption.AllDirectories))
-                        {
+                        foreach (var file in Directory.GetFiles(origDir, "*.*", SearchOption.AllDirectories)) {
                             var relPath = Path.GetRelativePath(origDir, file);
                             var binPath = Path.Combine(ModPath, "Persona 1 (PSP)", relPath);
                             Directory.CreateDirectory(Path.GetDirectoryName(binPath)!);
@@ -949,15 +850,12 @@ public partial class MainWindowViewModel : ObservableObject
                         BinaryPatcher.Patch(packages, Path.Combine(ModPath, "Persona 1 (PSP)"), UseCpk, CpkLang ?? "", game);
                 });
                 // P1PSP cheats
-                if (packages.Exists(x => Directory.Exists(Path.Combine(x, "cheats"))))
-                {
+                if (packages.Exists(x => Directory.Exists(Path.Combine(x, "cheats")))) {
                     if (Config.p1pspConfig?.cheatsPath != null)
                         binMerge.LoadP1PSPCheats(packages, Config.p1pspConfig.cheatsPath);
-                    else
-                    {
+                    else {
                         // Auto-detect
-                        if (Config.p1pspConfig?.modDir != null)
-                        {
+                        if (Config.p1pspConfig?.modDir != null) {
                             var modDir = new DirectoryInfo(Config.p1pspConfig.modDir);
                             var cheatsDir = modDir.Parent?.EnumerateDirectories("Cheats").FirstOrDefault();
                             var cheatIni = cheatsDir?.EnumerateFiles("*.ini").FirstOrDefault(f => f.Name == "ULUS10432.ini");
@@ -968,20 +866,17 @@ public partial class MainWindowViewModel : ObservableObject
                         }
                     }
                 }
-                if (packages.Exists(x => Directory.Exists(Path.Combine(x, "texture_override"))))
-                {
+                if (packages.Exists(x => Directory.Exists(Path.Combine(x, "texture_override")))) {
                     if (Config.p1pspConfig?.texturesPath != null && Directory.Exists(Config.p1pspConfig.texturesPath))
                         binMerge.LoadTextures(packages, Config.p1pspConfig.texturesPath);
                     else
                         ParallelLogger.Log("[ERROR] Please set up Textures Path in config to copy over textures");
                 }
-                if (CreateIso)
-                {
+                if (CreateIso) {
                     ParallelLogger.Log("[INFO] ISO creation is not yet supported on this platform.");
                 }
             }
-            else
-            {
+            else {
                 // Standard build pipeline for all other games
                 var path = GetOutputPath(game);
                 Directory.CreateDirectory(path);
@@ -991,15 +886,13 @@ public partial class MainWindowViewModel : ObservableObject
                     ? (game == "Persona 5 Royal (Switch)" ? Config.p5rSwitchConfig?.language : Config.p5rConfig?.language)
                     : null;
 
-                await Task.Run(() =>
-                {
+                await Task.Run(() => {
                     FileMerging.FlowMerger.Merge(packages, game, scriptLang);
                     FileMerging.BmdMerger.Merge(packages, game, scriptLang);
                     FileMerging.PM1Merger.Merge(packages, game, scriptLang);
                 });
 
-                await Task.Run(() =>
-                {
+                await Task.Run(() => {
                     binMerge.Restart(path, EmptySND, game, CpkLang ?? "", CheatsPath, CheatsWSPath);
                     AwbMerger.Merge(packages, game, path);
                     binMerge.Unpack(packages, path, UseCpk, CpkLang ?? "", game);
@@ -1013,13 +906,10 @@ public partial class MainWindowViewModel : ObservableObject
                 });
 
                 // TBL patching
-                if (packages.Exists(x => Directory.Exists(Path.Combine(x, "tblpatches"))))
-                {
+                if (packages.Exists(x => Directory.Exists(Path.Combine(x, "tblpatches")))) {
                     var tblLang = CpkLang ?? "";
-                    if (game == "Persona 5 Royal (Switch)")
-                    {
-                        tblLang = (Config.p5rSwitchConfig?.language ?? "English") switch
-                        {
+                    if (game == "Persona 5 Royal (Switch)") {
+                        tblLang = (Config.p5rSwitchConfig?.language ?? "English") switch {
                             "English" => "EN",
                             "Spanish" => "ES",
                             "French" => "FR",
@@ -1032,24 +922,20 @@ public partial class MainWindowViewModel : ObservableObject
                 }
 
                 // Game-specific post-processing
-                if (game == "Persona 3 FES")
-                {
-                    if (packages.Exists(x => Directory.Exists(Path.Combine(x, "cheats"))))
-                    {
+                if (game == "Persona 3 FES") {
+                    if (packages.Exists(x => Directory.Exists(Path.Combine(x, "cheats")))) {
                         if (CheatsPath != null && Directory.Exists(CheatsPath))
                             binMerge.LoadCheats(packages, CheatsPath);
                         else
                             ParallelLogger.Log("[ERROR] Please set up Cheats Path in config to copy over cheats");
                     }
-                    if (packages.Exists(x => Directory.Exists(Path.Combine(x, "cheats_ws"))))
-                    {
+                    if (packages.Exists(x => Directory.Exists(Path.Combine(x, "cheats_ws")))) {
                         if (CheatsWSPath != null && Directory.Exists(CheatsWSPath))
                             binMerge.LoadCheatsWS(packages, CheatsWSPath);
                         else
                             ParallelLogger.Log("[ERROR] Please set up Cheats WS Path in config to copy over cheats_ws");
                     }
-                    if (packages.Exists(x => Directory.Exists(Path.Combine(x, "texture_override"))))
-                    {
+                    if (packages.Exists(x => Directory.Exists(Path.Combine(x, "texture_override")))) {
                         if (TexturesPath != null && Directory.Exists(TexturesPath))
                             binMerge.LoadTextures(packages, TexturesPath);
                         else
@@ -1057,22 +943,18 @@ public partial class MainWindowViewModel : ObservableObject
                     }
                 }
 
-                if (game == "Persona 3 Portable")
-                {
-                    if (packages.Exists(x => Directory.Exists(Path.Combine(x, "texture_override"))))
-                    {
+                if (game == "Persona 3 Portable") {
+                    if (packages.Exists(x => Directory.Exists(Path.Combine(x, "texture_override")))) {
                         if (Config.p3pConfig?.texturesPath != null && Directory.Exists(Config.p3pConfig.texturesPath))
                             binMerge.LoadTextures(packages, Config.p3pConfig.texturesPath);
                         else
                             ParallelLogger.Log("[ERROR] Please set up Textures Path in config to copy over textures");
                     }
                     binMerge.LoadFMVs(packages, Config.p3pConfig?.modDir ?? ModPath);
-                    if (packages.Exists(x => Directory.Exists(Path.Combine(x, "cheats"))))
-                    {
+                    if (packages.Exists(x => Directory.Exists(Path.Combine(x, "cheats")))) {
                         if (Config.p3pConfig?.cheatsPath != null)
                             binMerge.LoadP3PCheats(packages, Config.p3pConfig.cheatsPath);
-                        else
-                        {
+                        else {
                             var modDir = new DirectoryInfo(Config.p3pConfig?.modDir ?? ModPath);
                             var cheatsDir = modDir.Parent?.EnumerateDirectories("Cheats").FirstOrDefault();
                             var cheatIni = cheatsDir?.EnumerateFiles("*.ini")
@@ -1085,8 +967,7 @@ public partial class MainWindowViewModel : ObservableObject
                     }
                 }
 
-                if (game == "Persona 4 Golden" && packages.Exists(x => Directory.Exists(Path.Combine(x, "preappfile"))))
-                {
+                if (game == "Persona 4 Golden" && packages.Exists(x => Directory.Exists(Path.Combine(x, "preappfile")))) {
                     PreappfileAppend.Append(Path.GetDirectoryName(path)!, CpkLang ?? "");
                     PreappfileAppend.Validate(Path.GetDirectoryName(path)!, CpkLang ?? "");
                 }
@@ -1097,8 +978,7 @@ public partial class MainWindowViewModel : ObservableObject
                     || game == "Persona 5 Royal (Switch)"
                     || (game == "Persona 3 Portable" && Config.p3pConfig?.cpkName != "bind")
                     || game == "Persona 4 Golden (Vita)"
-                    || game == "Persona Q2" || game == "Persona Q")
-                {
+                    || game == "Persona Q2" || game == "Persona Q") {
                     binMerge.MakeCpk(path, true);
                     if (!File.Exists($"{path}.cpk"))
                         ParallelLogger.Log($"[ERROR] Failed to build {path}.cpk!");
@@ -1122,23 +1002,19 @@ public partial class MainWindowViewModel : ObservableObject
             if (BuildFinished && _dialogService != null)
                 await _dialogService.ShowNotification("Finished Building!");
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             AppendConsole($"[ERROR] Build failed: {ex}");
             ParallelLogger.Log($"[ERROR] {ex.StackTrace}");
         }
-        finally
-        {
+        finally {
             IsBuildEnabled = true;
             IsUiEnabled = true;
         }
     }
 
-    private string GetOutputPath(string game)
-    {
+    private string GetOutputPath(string game) {
         var modPath = ModPath!;
-        return game switch
-        {
+        return game switch {
             "Persona 5" => Path.Combine(modPath, Config.p5Config?.CpkName ?? "mod"),
             "Persona 3 Portable" => Path.Combine(modPath, (Config.p3pConfig?.cpkName ?? "data.cpk").Replace(".cpk", "")),
             "Persona 4 Golden (Vita)" => Path.Combine(modPath, (Config.p4gVitaConfig?.cpkName ?? "data.cpk").Replace(".cpk", "")),
@@ -1149,10 +1025,8 @@ public partial class MainWindowViewModel : ObservableObject
         };
     }
 
-    private string GetP5RLanguageSuffix()
-    {
-        return (Config.p5rConfig?.language ?? "English") switch
-        {
+    private string GetP5RLanguageSuffix() {
+        return (Config.p5rConfig?.language ?? "English") switch {
             "French" => "_F",
             "Italian" => "_I",
             "German" => "_G",
@@ -1161,8 +1035,7 @@ public partial class MainWindowViewModel : ObservableObject
         };
     }
 
-    private async Task<bool> EnsureBaseFilesExist()
-    {
+    private async Task<bool> EnsureBaseFilesExist() {
         var game = SelectedGame;
         var originalDir = Path.Combine(_dataDir, "Original", game);
 
@@ -1176,15 +1049,12 @@ public partial class MainWindowViewModel : ObservableObject
             needsUnpack = !Directory.Exists(originalDir)
                 || !Directory.EnumerateFiles(originalDir, "*.bf", SearchOption.AllDirectories).Any();
 
-        if (needsUnpack)
-        {
+        if (needsUnpack) {
             ParallelLogger.Log($"[WARNING] Base files not found for {game}. Attempting to unpack...");
-            try
-            {
+            try {
                 await UnpackBaseFiles();
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 AppendConsole($"[ERROR] Failed to unpack base files: {ex.Message}");
                 return false;
             }
@@ -1199,8 +1069,7 @@ public partial class MainWindowViewModel : ObservableObject
                 needsUnpack = !Directory.Exists(originalDir)
                     || !Directory.EnumerateFiles(originalDir, "*.bf", SearchOption.AllDirectories).Any();
 
-            if (needsUnpack)
-            {
+            if (needsUnpack) {
                 AppendConsole("[ERROR] Base files still missing after unpack. Please set up game paths in config.");
                 return false;
             }
@@ -1208,21 +1077,16 @@ public partial class MainWindowViewModel : ObservableObject
         return true;
     }
 
-    private void DeleteOldBuildOutputs(string game)
-    {
-        try
-        {
+    private void DeleteOldBuildOutputs(string game) {
+        try {
             var modPath = ModPath!;
-            switch (game)
-            {
-                case "Persona 5":
-                    {
+            switch (game) {
+                case "Persona 5": {
                         var cpk = Path.Combine(modPath, (Config.p5Config?.CpkName ?? "mod.cpk") + ".cpk");
                         if (File.Exists(cpk)) File.Delete(cpk);
                         break;
                     }
-                case "Persona 3 Portable":
-                    {
+                case "Persona 3 Portable": {
                         var cpkName = Config.p3pConfig?.cpkName ?? "data.cpk";
                         var cpk = Path.Combine(modPath, cpkName);
                         if (!cpkName.EndsWith(".cpk")) cpk += ".cpk";
@@ -1231,94 +1095,78 @@ public partial class MainWindowViewModel : ObservableObject
                         if (Directory.Exists(fmvDir)) Directory.Delete(fmvDir, true);
                         break;
                     }
-                case "Persona 1 (PSP)":
-                    {
+                case "Persona 1 (PSP)": {
                         var iso = Path.Combine(modPath, "P1PSP.iso");
                         if (File.Exists(iso)) File.Delete(iso);
                         break;
                     }
-                case "Persona 4 Golden (Vita)":
-                    {
+                case "Persona 4 Golden (Vita)": {
                         var cpkName = Config.p4gVitaConfig?.cpkName ?? "data.cpk";
                         var cpk = Path.Combine(modPath, cpkName);
                         if (!cpkName.EndsWith(".cpk")) cpk += ".cpk";
                         if (File.Exists(cpk)) File.Delete(cpk);
                         break;
                     }
-                case "Persona Q2" or "Persona Q":
-                    {
+                case "Persona Q2" or "Persona Q": {
                         var cpk = Path.Combine(modPath, "mod.cpk");
                         if (File.Exists(cpk)) File.Delete(cpk);
                         break;
                     }
-                case "Persona 5 Royal (PS4)":
-                    {
+                case "Persona 5 Royal (PS4)": {
                         var cpkBase = (Config.p5rConfig?.cpkName ?? "bind").Replace(".cpk", "");
                         var cpk = Path.Combine(modPath, cpkBase + GetP5RLanguageSuffix() + ".cpk");
                         if (File.Exists(cpk)) File.Delete(cpk);
                         break;
                     }
-                case "Persona 5 Royal (Switch)":
-                    {
+                case "Persona 5 Royal (Switch)": {
                         var cpk = Path.Combine(modPath, "mods", "romfs", "CPK", "PATCH1.CPK");
                         if (File.Exists(cpk)) File.Delete(cpk);
                         break;
                     }
             }
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             ParallelLogger.Log($"[WARNING] Failed to clean old build outputs: {ex.Message}");
         }
     }
 
     [RelayCommand]
-    private void LaunchGame()
-    {
+    private void LaunchGame() {
         var game = SelectedGame;
 
-        if (game == "Persona 5 Strikers")
-        {
+        if (game == "Persona 5 Strikers") {
             // P5S launches via Steam
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
+            try {
+                Process.Start(new ProcessStartInfo {
                     FileName = "steam://rungameid/1382330/option0",
                     UseShellExecute = true
                 });
                 ParallelLogger.Log("[INFO] Launched Persona 5 Strikers via Steam");
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 AppendConsole($"[ERROR] Failed to launch: {ex.Message}");
             }
             return;
         }
 
-        if (string.IsNullOrEmpty(LauncherPath) || !File.Exists(LauncherPath))
-        {
+        if (string.IsNullOrEmpty(LauncherPath) || !File.Exists(LauncherPath)) {
             AppendConsole("[ERROR] Launcher path not set or doesn't exist. Please configure it in Config.");
             return;
         }
 
-        try
-        {
-            var psi = new ProcessStartInfo
-            {
+        try {
+            var psi = new ProcessStartInfo {
                 FileName = LauncherPath,
                 UseShellExecute = true
             };
 
-            switch (game)
-            {
+            switch (game) {
                 case "Persona 4 Golden":
                     if (!string.IsNullOrEmpty(GamePath) && File.Exists(GamePath))
                         psi.Arguments = $"--launch \"{GamePath}\"";
                     break;
                 case "Persona 3 FES":
-                    if (!string.IsNullOrEmpty(GamePath))
-                    {
+                    if (!string.IsNullOrEmpty(GamePath)) {
                         var elf = !string.IsNullOrEmpty(ElfPath) ? ElfPath : null;
                         // PCSX2 version detection was removed, upgrade already or else.
                         var launcherName = Path.GetFileNameWithoutExtension(LauncherPath).ToLowerInvariant();
@@ -1334,14 +1182,12 @@ public partial class MainWindowViewModel : ObservableObject
                         psi.Arguments = $"--no-gui \"{GamePath}\"";
                     break;
                 case "Persona 1 (PSP)":
-                    if (CreateIso)
-                    {
+                    if (CreateIso) {
                         var iso = Path.Combine(ModPath ?? "", "P1PSP.iso");
                         if (File.Exists(iso))
                             psi.Arguments = $"\"{iso}\"";
                     }
-                    else if (!string.IsNullOrEmpty(ModPath))
-                    {
+                    else if (!string.IsNullOrEmpty(ModPath)) {
                         var p1Dir = Path.Combine(ModPath, "Persona 1 (PSP)");
                         if (Directory.Exists(p1Dir))
                             psi.Arguments = $"\"{p1Dir}\"";
@@ -1359,55 +1205,44 @@ public partial class MainWindowViewModel : ObservableObject
             Process.Start(psi);
             ParallelLogger.Log($"[INFO] Launched {game}");
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             AppendConsole($"[ERROR] Failed to launch: {ex.Message}");
         }
     }
 
     [RelayCommand]
-    private void Refresh()
-    {
+    private void Refresh() {
         AppendConsole("[INFO] Refreshing package list...");
         RefreshPackageList();
         AppendConsole("[INFO] Package list refreshed");
     }
 
     [RelayCommand]
-    private void OpenModDir()
-    {
-        if (!string.IsNullOrEmpty(ModPath) && Directory.Exists(ModPath))
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
+    private void OpenModDir() {
+        if (!string.IsNullOrEmpty(ModPath) && Directory.Exists(ModPath)) {
+            try {
+                Process.Start(new ProcessStartInfo {
                     FileName = ModPath,
                     UseShellExecute = true
                 });
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 AppendConsole($"[ERROR] Failed to open directory: {ex.Message}");
             }
         }
-        else
-        {
+        else {
             AppendConsole("[WARNING] No output folder configured");
         }
     }
 
     [RelayCommand]
-    private void OpenConfig()
-    {
+    private void OpenConfig() {
         // This will be called from the view which can show the ConfigWindow dialog
         AppendConsole("[INFO] Config opened");
     }
 
-    public ConfigWindowViewModel CreateConfigViewModel()
-    {
-        var vm = new ConfigWindowViewModel
-        {
+    public ConfigWindowViewModel CreateConfigViewModel() {
+        var vm = new ConfigWindowViewModel {
             GameTitle = SelectedGame,
             OutputFolder = ModPath ?? "",
             ExePath = GamePath ?? "",
@@ -1430,8 +1265,7 @@ public partial class MainWindowViewModel : ObservableObject
             ShowUnpack = SelectedGame != "Persona 5 Strikers",
         };
 
-        switch (SelectedGame)
-        {
+        switch (SelectedGame) {
             case "Persona 1 (PSP)":
                 vm.ShowExePath = true;
                 vm.ExeLabel = "P1PSP ISO Path";
@@ -1481,8 +1315,7 @@ public partial class MainWindowViewModel : ObservableObject
                 vm.ShowUseCpk = true;
                 vm.ShowLanguage = true;
                 vm.Languages = new() { "English", "Japanese", "Chinese", "Korean" };
-                vm.LanguageIndex = CpkLang switch
-                {
+                vm.LanguageIndex = CpkLang switch {
                     "data.cpk" => 1,
                     "data_c.cpk" => 2,
                     "data_k.cpk" => 3,
@@ -1510,8 +1343,7 @@ public partial class MainWindowViewModel : ObservableObject
                 if (vm.CpkFormatIndex < 0) vm.CpkFormatIndex = 1;
                 vm.ShowLanguage = true;
                 vm.Languages = new() { "English", "French", "Italian", "German", "Spanish" };
-                vm.LanguageIndex = (CpkLang ?? "English") switch
-                {
+                vm.LanguageIndex = (CpkLang ?? "English") switch {
                     "French" => 1,
                     "Italian" => 2,
                     "German" => 3,
@@ -1529,8 +1361,7 @@ public partial class MainWindowViewModel : ObservableObject
                 vm.LauncherLabel = "Emulator Path";
                 vm.ShowLanguage = true;
                 vm.Languages = new() { "English", "French", "Italian", "German", "Spanish" };
-                vm.LanguageIndex = (CpkLang ?? "English") switch
-                {
+                vm.LanguageIndex = (CpkLang ?? "English") switch {
                     "French" => 1,
                     "Italian" => 2,
                     "German" => 3,
@@ -1558,10 +1389,8 @@ public partial class MainWindowViewModel : ObservableObject
         return vm;
     }
 
-    public void ApplyLastLoadoutConfig()
-    {
-        switch (SelectedGame)
-        {
+    public void ApplyLastLoadoutConfig() {
+        switch (SelectedGame) {
             case "Persona 1 (PSP)":
                 if (Config.p1pspConfig != null)
                     Config.p1pspConfig.lastLoadout = SelectedLoadout;
@@ -1589,8 +1418,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    public void ApplyConfigChanges(ConfigWindowViewModel configVm)
-    {
+    public void ApplyConfigChanges(ConfigWindowViewModel configVm) {
         ModPath = configVm.OutputFolder;
         GamePath = configVm.ExePath;
         LauncherPath = configVm.LauncherPath;
@@ -1610,8 +1438,7 @@ public partial class MainWindowViewModel : ObservableObject
         UpdateAll = configVm.UpdateAll;
         IsBuildEnabled = !string.IsNullOrEmpty(ModPath);
 
-        switch (SelectedGame)
-        {
+        switch (SelectedGame) {
             case "Persona 1 (PSP)":
                 Config.p1pspConfig ??= new ConfigP1PSP();
                 Config.p1pspConfig.modDir = ModPath;
@@ -1658,8 +1485,7 @@ public partial class MainWindowViewModel : ObservableObject
                 Config.p4gConfig.reloadedPath = LauncherPath;
                 Config.p4gConfig.emptySND = EmptySND;
                 Config.p4gConfig.useCpk = UseCpk;
-                Config.p4gConfig.cpkLang = configVm.LanguageIndex switch
-                {
+                Config.p4gConfig.cpkLang = configVm.LanguageIndex switch {
                     1 => "data.cpk",
                     2 => "data_c.cpk",
                     3 => "data_k.cpk",
@@ -1729,8 +1555,7 @@ public partial class MainWindowViewModel : ObservableObject
         AppendConsole("[INFO] Config saved");
     }
 
-    private void SaveCommonConfig(dynamic config)
-    {
+    private void SaveCommonConfig(dynamic config) {
         config.buildFinished = BuildFinished;
         config.buildWarning = BuildWarning;
         config.updateChangelog = UpdateChangelog;
@@ -1739,82 +1564,65 @@ public partial class MainWindowViewModel : ObservableObject
         config.updateAll = UpdateAll;
     }
 
-    public async Task UnpackBaseFiles()
-    {
+    public async Task UnpackBaseFiles() {
         AppendConsole($"[INFO] Unpacking base files for {SelectedGame}...");
         IsBuildEnabled = false;
-        try
-        {
-            await Task.Run(async () =>
-            {
-                switch (SelectedGame)
-                {
+        try {
+            await Task.Run(async () => {
+                switch (SelectedGame) {
                     case "Persona 1 (PSP)":
-                        if (string.IsNullOrEmpty(GamePath))
-                        { AppendConsole("[ERROR] ISO path not set."); return; }
+                        if (string.IsNullOrEmpty(GamePath)) { AppendConsole("[ERROR] ISO path not set."); return; }
                         await PacUnpacker.UnzipAndUnBin(GamePath);
                         break;
                     case "Persona 3 FES":
-                        if (string.IsNullOrEmpty(GamePath))
-                        { AppendConsole("[ERROR] ISO path not set."); return; }
+                        if (string.IsNullOrEmpty(GamePath)) { AppendConsole("[ERROR] ISO path not set."); return; }
                         await PacUnpacker.Unzip(GamePath);
                         break;
                     case "Persona 3 Portable":
-                        if (string.IsNullOrEmpty(GamePath))
-                        { AppendConsole("[ERROR] ISO path not set."); return; }
+                        if (string.IsNullOrEmpty(GamePath)) { AppendConsole("[ERROR] ISO path not set."); return; }
                         await PacUnpacker.UnzipAndUnpackCPK(GamePath);
                         break;
                     case "Persona 4 Golden":
-                        if (string.IsNullOrEmpty(GamePath))
-                        { AppendConsole("[ERROR] Game path not set."); return; }
+                        if (string.IsNullOrEmpty(GamePath)) { AppendConsole("[ERROR] Game path not set."); return; }
                         PacUnpacker.Unpack(GamePath, CpkLang ?? "data_e.cpk");
                         break;
                     case "Persona 4 Golden (Vita)":
-                        if (string.IsNullOrEmpty(ModPath))
-                        { AppendConsole("[ERROR] Output path not set."); return; }
+                        if (string.IsNullOrEmpty(ModPath)) { AppendConsole("[ERROR] Output path not set."); return; }
                         await PacUnpacker.UnpackP4GCPK(ModPath);
                         break;
                     case "Persona 5":
-                        if (string.IsNullOrEmpty(GamePath))
-                        { AppendConsole("[ERROR] Game path not set."); return; }
+                        if (string.IsNullOrEmpty(GamePath)) { AppendConsole("[ERROR] Game path not set."); return; }
                         await PacUnpacker.UnpackP5CPK(GamePath);
                         break;
                     case "Persona 5 Royal (PS4)":
-                        if (string.IsNullOrEmpty(ModPath))
-                        { AppendConsole("[ERROR] Output path not set."); return; }
+                        if (string.IsNullOrEmpty(ModPath)) { AppendConsole("[ERROR] Output path not set."); return; }
                         await PacUnpacker.UnpackP5RCPKs(ModPath, CpkLang ?? "English", GameVersion ?? ">= 1.02");
                         break;
                     case "Persona 5 Royal (Switch)":
-                        if (string.IsNullOrEmpty(GamePath))
-                        { AppendConsole("[ERROR] ROM path not set."); return; }
+                        if (string.IsNullOrEmpty(GamePath)) { AppendConsole("[ERROR] ROM path not set."); return; }
                         await PacUnpacker.UnpackP5RSwitchCPKs(GamePath, CpkLang ?? "English");
                         break;
                     case "Persona 5 Strikers":
-                        if (string.IsNullOrEmpty(ModPath))
-                        { AppendConsole("[ERROR] Output path not set."); return; }
+                        if (string.IsNullOrEmpty(ModPath)) { AppendConsole("[ERROR] Output path not set."); return; }
                         // Strikers just backs up
                         global::AemulusModManager.Utilities.KT.Merger.Backup(ModPath);
                         break;
                     case "Persona Q":
-                        if (string.IsNullOrEmpty(GamePath))
-                        { AppendConsole("[ERROR] ROM path not set."); return; }
+                        if (string.IsNullOrEmpty(GamePath)) { AppendConsole("[ERROR] ROM path not set."); return; }
                         await PacUnpacker.UnpackPQCPK(GamePath);
                         break;
                     case "Persona Q2":
-                        if (string.IsNullOrEmpty(GamePath))
-                        { AppendConsole("[ERROR] ROM path not set."); return; }
+                        if (string.IsNullOrEmpty(GamePath)) { AppendConsole("[ERROR] ROM path not set."); return; }
                         await PacUnpacker.UnpackPQ2CPK(GamePath);
                         break;
                 }
             });
             AppendConsole("[INFO] Unpack finished!");
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             AppendConsole($"[ERROR] Unpack failed: {ex.Message}");
         }
-        finally
-        {
+        finally {
             IsBuildEnabled = true;
         }
     }
@@ -1827,12 +1635,10 @@ public partial class MainWindowViewModel : ObservableObject
     /// Opens a file/folder picker to add packages. Used as the primary install method
     /// (drag-drop doesn't work on Wayland).
     /// </summary>
-    public async Task AddPackagesFromPicker(Window owner)
-    {
+    public async Task AddPackagesFromPicker(Window owner) {
         var sp = owner.StorageProvider;
 
-        var files = await sp.OpenFilePickerAsync(new FilePickerOpenOptions
-        {
+        var files = await sp.OpenFilePickerAsync(new FilePickerOpenOptions {
             Title = "Select package archives to install",
             AllowMultiple = true,
             FileTypeFilter = new[]
@@ -1852,25 +1658,20 @@ public partial class MainWindowViewModel : ObservableObject
         if (paths.Length == 0) return;
 
         IsUiEnabled = false;
-        try
-        {
+        try {
             await ExtractPackages(paths!);
         }
-        finally
-        {
+        finally {
             IsUiEnabled = true;
         }
     }
 
-    public async Task CreateNewPackage(Window owner)
-    {
+    public async Task CreateNewPackage(Window owner) {
         var window = new Views.CreatePackageWindow();
         await window.ShowDialog(owner);
 
-        if (window.ResultMetadata != null)
-        {
-            try
-            {
+        if (window.ResultMetadata != null) {
+            try {
                 string dirName = !string.IsNullOrEmpty(window.ResultMetadata.version)
                     ? $"{window.ResultMetadata.name} {window.ResultMetadata.version}"
                     : window.ResultMetadata.name;
@@ -1883,16 +1684,14 @@ public partial class MainWindowViewModel : ObservableObject
                 using (var stream = File.Create(xmlPath))
                     _xsp.Serialize(stream, window.ResultMetadata);
 
-                if (!string.IsNullOrEmpty(window.ThumbnailPath) && File.Exists(window.ThumbnailPath))
-                {
+                if (!string.IsNullOrEmpty(window.ThumbnailPath) && File.Exists(window.ThumbnailPath)) {
                     var ext = Path.GetExtension(window.ThumbnailPath).ToLower();
                     File.Copy(window.ThumbnailPath, Path.Combine(pkgDir, $"Preview{ext}"), true);
                 }
 
                 AppendConsole($"[INFO] Created new package: {dirName}");
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 AppendConsole($"[ERROR] Failed to create package: {ex.Message}");
             }
 
@@ -1902,37 +1701,31 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void OpenPackageFolder()
-    {
+    private void OpenPackageFolder() {
         if (SelectedPackage == null || string.IsNullOrEmpty(SelectedPackage.path)) return;
         var path = Path.Combine(_dataDir, "Packages", SelectedGame, SelectedPackage.path);
         if (!Directory.Exists(path)) return;
-        try
-        {
+        try {
             Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
             AppendConsole($"[INFO] Opened Packages/{SelectedGame}/{SelectedPackage.path}");
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             AppendConsole($"[ERROR] Couldn't open folder: {ex.Message}");
         }
     }
 
     [RelayCommand]
-    private async Task EditPackageMetadata()
-    {
+    private async Task EditPackageMetadata() {
         if (SelectedPackage == null || string.IsNullOrEmpty(SelectedPackage.path)) return;
         if (_dialogService == null) return;
 
         var xmlPath = Path.Combine(_dataDir, "Packages", SelectedGame, SelectedPackage.path, "Package.xml");
-        if (!File.Exists(xmlPath))
-        {
+        if (!File.Exists(xmlPath)) {
             AppendConsole($"[WARNING] No Package.xml found for {SelectedPackage.path}");
             return;
         }
 
-        Metadata m = new()
-        {
+        Metadata m = new() {
             name = SelectedPackage.name,
             author = SelectedPackage.author,
             id = SelectedPackage.id,
@@ -1945,15 +1738,12 @@ public partial class MainWindowViewModel : ObservableObject
         var window = new Views.CreatePackageWindow(_dialogService.DialogWindow, m);
         await window.ShowDialog(_dialogService.OwnerWindow);
 
-        if (window.ResultMetadata != null)
-        {
-            try
-            {
+        if (window.ResultMetadata != null) {
+            try {
                 using var stream = File.Create(xmlPath);
                 _xsp.Serialize(stream, window.ResultMetadata);
 
-                if (!string.IsNullOrEmpty(window.ThumbnailPath) && File.Exists(window.ThumbnailPath))
-                {
+                if (!string.IsNullOrEmpty(window.ThumbnailPath) && File.Exists(window.ThumbnailPath)) {
                     var pkgDir = Path.Combine(_dataDir, "Packages", SelectedGame, SelectedPackage.path);
                     foreach (var old in new DirectoryInfo(pkgDir).GetFiles("Preview.*"))
                         old.Delete();
@@ -1961,8 +1751,7 @@ public partial class MainWindowViewModel : ObservableObject
                     File.Copy(window.ThumbnailPath, Path.Combine(pkgDir, $"Preview{ext}"), true);
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 AppendConsole($"[ERROR] Failed to save metadata: {ex.Message}");
             }
         }
@@ -1972,8 +1761,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task DeletePackage()
-    {
+    private async Task DeletePackage() {
         if (SelectedPackage == null || string.IsNullOrEmpty(SelectedPackage.path)) return;
         if (_dialogService == null) return;
 
@@ -1982,15 +1770,12 @@ public partial class MainWindowViewModel : ObservableObject
         if (!confirmed) return;
 
         var path = Path.Combine(_dataDir, "Packages", SelectedGame, SelectedPackage.path);
-        if (Directory.Exists(path))
-        {
-            try
-            {
+        if (Directory.Exists(path)) {
+            try {
                 Directory.Delete(path, true);
                 AppendConsole($"[INFO] Deleted Packages/{SelectedGame}/{SelectedPackage.path}");
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 AppendConsole($"[ERROR] Couldn't delete package: {ex.Message}");
             }
         }
@@ -2003,8 +1788,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task ZipPackage()
-    {
+    private async Task ZipPackage() {
         if (SelectedPackage == null || string.IsNullOrEmpty(SelectedPackage.path)) return;
         if (_dialogService == null) return;
 
@@ -2015,19 +1799,16 @@ public partial class MainWindowViewModel : ObservableObject
             $"{SelectedPackage.path}.7z", "7zip", "*.7z");
         if (string.IsNullOrEmpty(savePath)) return;
 
-        await Task.Run(() =>
-        {
+        await Task.Run(() => {
             var sevenZip = Find7Zip();
-            if (sevenZip == null)
-            {
+            if (sevenZip == null) {
                 AppendConsole("[ERROR] 7z not found");
                 return;
             }
 
             if (File.Exists(savePath)) File.Delete(savePath);
 
-            var psi = new ProcessStartInfo
-            {
+            var psi = new ProcessStartInfo {
                 FileName = sevenZip,
                 Arguments = $"a \"{savePath}\" \"{Path.GetFileName(SelectedPackage.path)}/*\"",
                 WorkingDirectory = Path.Combine(_dataDir, "Packages", SelectedGame),
@@ -2037,8 +1818,7 @@ public partial class MainWindowViewModel : ObservableObject
             };
 
             // On non-Windows, use mono if it's a .exe
-            if (!OperatingSystem.IsWindows() && sevenZip.EndsWith(".exe"))
-            {
+            if (!OperatingSystem.IsWindows() && sevenZip.EndsWith(".exe")) {
                 psi.Arguments = $"\"{sevenZip}\" {psi.Arguments}";
                 psi.FileName = "mono";
             }
@@ -2051,8 +1831,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ConvertCPK()
-    {
+    private void ConvertCPK() {
         if (SelectedPackage == null || string.IsNullOrEmpty(SelectedPackage.path)) return;
         if (SelectedGame != "Persona 4 Golden") return;
 
@@ -2061,17 +1840,14 @@ public partial class MainWindowViewModel : ObservableObject
 
         var cpkBase = CpkLang != null ? Path.GetFileNameWithoutExtension(CpkLang) : "data_e";
 
-        foreach (var folder in Directory.GetDirectories(pkgDir))
-        {
+        foreach (var folder in Directory.GetDirectories(pkgDir)) {
             var name = Path.GetFileName(folder);
-            if (name.StartsWith("data0"))
-            {
+            if (name.StartsWith("data0")) {
                 var dest = Path.Combine(pkgDir, cpkBase);
                 if (!Directory.Exists(dest))
                     Directory.Move(folder, dest);
             }
-            else if (name.StartsWith("movie0"))
-            {
+            else if (name.StartsWith("movie0")) {
                 var dest = Path.Combine(pkgDir, "movie");
                 if (!Directory.Exists(dest))
                     Directory.Move(folder, dest);
@@ -2079,8 +1855,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
 
         var modsAem = Path.Combine(pkgDir, "mods.aem");
-        if (File.Exists(modsAem))
-        {
+        if (File.Exists(modsAem)) {
             var text = File.ReadAllText(modsAem);
             text = Regex.Replace(text, "data0000[0-6]", cpkBase);
             File.WriteAllText(modsAem, text);
@@ -2090,8 +1865,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void HidePackage()
-    {
+    private void HidePackage() {
         if (SelectedPackage == null) return;
         SelectedPackage.hidden = true;
         foreach (var p in _packageList.Where(p => p.path == SelectedPackage.path))
@@ -2101,8 +1875,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void UnhidePackage()
-    {
+    private void UnhidePackage() {
         if (SelectedPackage == null) return;
         SelectedPackage.hidden = false;
         foreach (var p in _packageList.Where(p => p.path == SelectedPackage.path))
@@ -2112,13 +1885,11 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task UpdateSelectedPackage()
-    {
+    private async Task UpdateSelectedPackage() {
         if (SelectedPackage == null || !UpdatesEnabled || _dialogService == null) return;
 
         IsUiEnabled = false;
-        try
-        {
+        try {
             _cancellationToken = new CancellationTokenSource();
             _updating = true;
             AppendConsole($"[INFO] Checking for updates for {SelectedPackage.name}...");
@@ -2134,21 +1905,18 @@ public partial class MainWindowViewModel : ObservableObject
             SavePackages();
             AppendConsole("[INFO] Finished checking for updates!");
         }
-        finally
-        {
+        finally {
             _updating = false;
             IsUiEnabled = true;
         }
     }
 
     [RelayCommand]
-    private async Task UpdateAllPackages()
-    {
+    private async Task UpdateAllPackages() {
         if (_updating || !UpdatesEnabled || _dialogService == null) return;
 
         IsUiEnabled = false;
-        try
-        {
+        try {
             _updating = true;
             _cancellationToken = new CancellationTokenSource();
             AppendConsole("[INFO] Checking for updates for all applicable packages...");
@@ -2158,8 +1926,7 @@ public partial class MainWindowViewModel : ObservableObject
                 .ToArray();
 
             var updater = new PackageUpdater(_dialogService);
-            if (await updater.CheckForUpdate(updatableRows, SelectedGame, _cancellationToken))
-            {
+            if (await updater.CheckForUpdate(updatableRows, SelectedGame, _cancellationToken)) {
                 var configTemp = Path.Combine(_configPath, "temp");
                 if (Directory.Exists(configTemp))
                     ReplacePackagesXML();
@@ -2169,31 +1936,27 @@ public partial class MainWindowViewModel : ObservableObject
             _updating = false;
             AppendConsole("[INFO] Finished checking for updates!");
         }
-        finally
-        {
+        finally {
             _updating = false;
             IsUiEnabled = true;
         }
     }
 
-    public void CheckVersioning()
-    {
+    public void CheckVersioning() {
         var game = SelectedGame;
         var packagesDir = Path.Combine(_dataDir, "Packages", game);
 
         var latestVersions = DisplayedPackages
             .GroupBy(t => t.id)
             .Select(g => g.OrderByDescending(t => Version.TryParse(t.version, out var v) ? v : null)
-                          .ThenByDescending(t =>
-                          {
+                          .ThenByDescending(t => {
                               var dir = Path.Combine(packagesDir, t.path ?? "");
                               return Directory.Exists(dir) ? new DirectoryInfo(dir).LastWriteTime : DateTime.MinValue;
                           }).First())
             .ToList();
 
         // Preserve enabled state
-        foreach (var package in latestVersions)
-        {
+        foreach (var package in latestVersions) {
             if (DisplayedPackages.Where(x => x.id == package.id).Any(y => y.enabled))
                 package.enabled = true;
         }
@@ -2206,19 +1969,14 @@ public partial class MainWindowViewModel : ObservableObject
         _packageList = new ObservableCollection<Package>(temp);
 
         // Delete old versions if configured
-        if (DeleteOldVersions && Directory.Exists(packagesDir))
-        {
-            foreach (var package in Directory.GetDirectories(packagesDir))
-            {
-                if (!_packageList.Select(t => t.path).Contains(Path.GetFileName(package)))
-                {
-                    try
-                    {
+        if (DeleteOldVersions && Directory.Exists(packagesDir)) {
+            foreach (var package in Directory.GetDirectories(packagesDir)) {
+                if (!_packageList.Select(t => t.path).Contains(Path.GetFileName(package))) {
+                    try {
                         AppendConsole($"[INFO] Deleting old version: {Path.GetFileName(package)}...");
                         Directory.Delete(package, true);
                     }
-                    catch (Exception ex)
-                    {
+                    catch (Exception ex) {
                         AppendConsole($"[ERROR] Couldn't delete {package}: {ex.Message}");
                     }
                 }
@@ -2226,64 +1984,54 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    public async Task ExtractPackages(string[] fileList)
-    {
+    public async Task ExtractPackages(string[] fileList) {
         string? loadout = null;
         bool dropped = false;
         var game = SelectedGame;
         var packagesDir = Path.Combine(_dataDir, "Packages", game);
         Directory.CreateDirectory(packagesDir);
 
-        foreach (var file in fileList)
-        {
-            if (Directory.Exists(file))
-            {
+        foreach (var file in fileList) {
+            if (Directory.Exists(file)) {
                 // Move directory directly into Packages
                 AppendConsole($"[INFO] Moving {Path.GetFileName(file)} into Packages/{game}");
                 var dest = Path.Combine(packagesDir, Path.GetFileName(file));
                 int index = 2;
-                while (Directory.Exists(dest))
-                {
+                while (Directory.Exists(dest)) {
                     dest = Path.Combine(packagesDir, $"{Path.GetFileName(file)} ({index})");
                     index++;
                 }
                 Directory.Move(file, dest);
                 dropped = true;
             }
-            else if (IsArchive(file))
-            {
+            else if (IsArchive(file)) {
                 await ExtractArchive(file, packagesDir, game);
                 dropped = true;
             }
-            else if (Path.GetExtension(file).Equals(".xml", StringComparison.OrdinalIgnoreCase))
-            {
+            else if (Path.GetExtension(file).Equals(".xml", StringComparison.OrdinalIgnoreCase)) {
                 // Import loadout XML
                 loadout = await ImportLoadoutXml(file, game);
                 if (loadout != null) dropped = true;
             }
-            else
-            {
+            else {
                 AppendConsole($"[WARNING] {file} isn't a folder, .zip, .7z, .rar, or loadout xml, skipping...");
             }
         }
 
         // Clean temp
         var tempPath = Path.Combine(_dataDir, "temp");
-        if (Directory.Exists(tempPath))
-        {
+        if (Directory.Exists(tempPath)) {
             try { Directory.Delete(tempPath, true); } catch { }
         }
 
-        if (dropped)
-        {
+        if (dropped) {
             RefreshPackageList();
             SavePackages();
-            if (loadout != null)
-            {
+            if (loadout != null) {
                 var loadouts = new Loadouts(game);
                 _loadoutChanging = true;
                 LoadoutItems = loadouts.LoadoutItems;
-                _selectedLoadout = loadout;
+                SelectedLoadout = loadout;
                 _lastLoadout = loadout;
                 _loadoutChanging = false;
                 OnPropertyChanged(nameof(SelectedLoadout));
@@ -2294,24 +2042,20 @@ public partial class MainWindowViewModel : ObservableObject
     private static bool IsArchive(string file) =>
         Path.GetExtension(file).ToLower() is ".7z" or ".rar" or ".zip";
 
-    private async Task ExtractArchive(string file, string packagesDir, string game)
-    {
+    private async Task ExtractArchive(string file, string packagesDir, string game) {
         var tempDir = Path.Combine(_dataDir, "temp");
         Directory.CreateDirectory(tempDir);
 
         var sevenZip = Find7Zip();
-        if (sevenZip == null)
-        {
+        if (sevenZip == null) {
             AppendConsole("[ERROR] 7z not found");
             return;
         }
 
         AppendConsole($"[INFO] Extracting {Path.GetFileName(file)} into Packages/{game}");
 
-        await Task.Run(() =>
-        {
-            var psi = new ProcessStartInfo
-            {
+        await Task.Run(() => {
+            var psi = new ProcessStartInfo {
                 FileName = sevenZip,
                 Arguments = $"x -y \"{file}\" -o\"{tempDir}\"",
                 CreateNoWindow = true,
@@ -2319,8 +2063,7 @@ public partial class MainWindowViewModel : ObservableObject
                 RedirectStandardOutput = true
             };
 
-            if (!OperatingSystem.IsWindows() && sevenZip.EndsWith(".exe"))
-            {
+            if (!OperatingSystem.IsWindows() && sevenZip.EndsWith(".exe")) {
                 psi.Arguments = $"\"{sevenZip}\" {psi.Arguments}";
                 psi.FileName = "mono";
             }
@@ -2331,25 +2074,21 @@ public partial class MainWindowViewModel : ObservableObject
 
         // Determine destination
         var entries = Directory.GetFileSystemEntries(tempDir);
-        if (entries.Length > 1)
-        {
+        if (entries.Length > 1) {
             // Multiple items: use archive name as folder
             var dest = Path.Combine(packagesDir, Path.GetFileNameWithoutExtension(file));
             int index = 2;
-            while (Directory.Exists(dest))
-            {
+            while (Directory.Exists(dest)) {
                 dest = Path.Combine(packagesDir, $"{Path.GetFileNameWithoutExtension(file)} ({index})");
                 index++;
             }
             Directory.Move(tempDir, dest);
         }
-        else if (entries.Length == 1 && Directory.Exists(entries[0]))
-        {
+        else if (entries.Length == 1 && Directory.Exists(entries[0])) {
             // Single folder: move it
             var dest = Path.Combine(packagesDir, Path.GetFileName(entries[0]));
             int index = 2;
-            while (Directory.Exists(dest))
-            {
+            while (Directory.Exists(dest)) {
                 dest = Path.Combine(packagesDir, $"{Path.GetFileName(entries[0])} ({index})");
                 index++;
             }
@@ -2358,11 +2097,9 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    private async Task<string?> ImportLoadoutXml(string file, string game)
-    {
+    private async Task<string?> ImportLoadoutXml(string file, string game) {
         AppendConsole($"[INFO] Trying to import {Path.GetFileName(file)} as a loadout xml");
-        try
-        {
+        try {
             using var stream = File.OpenRead(file);
             var packages = (Packages?)_xp.Deserialize(stream);
             if (packages?.packages == null) return null;
@@ -2370,10 +2107,8 @@ public partial class MainWindowViewModel : ObservableObject
             var loadoutName = Path.GetFileNameWithoutExtension(file);
             var loadoutFile = Path.Combine(_configPath, game, $"{loadoutName}.xml");
 
-            if (File.Exists(loadoutFile))
-            {
-                if (_dialogService != null)
-                {
+            if (File.Exists(loadoutFile)) {
+                if (_dialogService != null) {
                     await _dialogService.ShowNotification($"A loadout named \"{loadoutName}\" already exists.");
                     var (newName, _) = await _dialogService.ShowInputDialog("Enter a new name for the loadout:");
                     if (string.IsNullOrWhiteSpace(newName)) return null;
@@ -2387,16 +2122,14 @@ public partial class MainWindowViewModel : ObservableObject
             File.Copy(file, loadoutFile, true);
             return loadoutName;
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             AppendConsole($"[ERROR] Invalid loadout xml: {ex.Message}");
             return null;
         }
     }
 
     [RelayCommand]
-    private async Task EditLoadout()
-    {
+    private async Task EditLoadout() {
         if (SelectedLoadout == null || _loadoutChanging) return;
 
         var window = new Views.CreateEditLoadoutWindow(_dialogService.DialogWindow, SelectedGame, SelectedLoadout, true);
@@ -2405,15 +2138,13 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ToggleShowHidden()
-    {
+    private void ToggleShowHidden() {
         Config.showHiddenPackages = !Config.showHiddenPackages;
         UpdateConfig();
         ShowHiddenPackages = !ShowHiddenPackages;
     }
 
-    private string? Find7Zip()
-    {
+    private string? Find7Zip() {
         // Check for native 7z first
         var native7z = Path.Combine(_exeDir, "Dependencies", "7z", "7z");
         if (File.Exists(native7z)) return native7z;
@@ -2421,10 +2152,8 @@ public partial class MainWindowViewModel : ObservableObject
         if (File.Exists(exe7z)) return exe7z;
 
         // Try system PATH
-        try
-        {
-            var psi = new ProcessStartInfo("7z", "--help")
-            {
+        try {
+            var psi = new ProcessStartInfo("7z", "--help") {
                 CreateNoWindow = true,
                 UseShellExecute = false,
                 RedirectStandardOutput = true
@@ -2439,8 +2168,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ToggleDarkMode()
-    {
+    private void ToggleDarkMode() {
         DarkMode = !DarkMode;
         Config.darkMode = DarkMode;
         LoadPreviewImage(SelectedPackage);
@@ -2453,8 +2181,7 @@ public partial class MainWindowViewModel : ObservableObject
         AppendConsole(DarkMode ? "[INFO] Switched to dark mode." : "[INFO] Switched to light mode.");
     }
 
-    public void ToggleSelectedPackageEnabled()
-    {
+    public void ToggleSelectedPackageEnabled() {
         if (SelectedPackage == null) return;
         var newState = !SelectedPackage.enabled;
         TogglePackageEnabled(SelectedPackage, newState);
@@ -2464,16 +2191,13 @@ public partial class MainWindowViewModel : ObservableObject
 
     #region Selection Changes
 
-    partial void OnSelectedPackageChanged(DisplayedMetadata? value)
-    {
+    partial void OnSelectedPackageChanged(DisplayedMetadata? value) {
         Description = value?.description ?? "";
         LoadPreviewImage(value);
     }
 
-    private static readonly Lazy<Bitmap?> _placeholderImage_dark = new(() =>
-    {
-        try
-        {
+    private static readonly Lazy<Bitmap?> _placeholderImage_dark = new(() => {
+        try {
             var uri = new Uri("avares://AemulusPackageManager/Assets/Preview-dark.png");
             using var stream = global::Avalonia.Platform.AssetLoader.Open(uri);
             return new Bitmap(stream);
@@ -2481,10 +2205,8 @@ public partial class MainWindowViewModel : ObservableObject
         catch { return null; }
     });
 
-    private static readonly Lazy<Bitmap?> _placeholderImage_light = new(() =>
-    {
-        try
-        {
+    private static readonly Lazy<Bitmap?> _placeholderImage_light = new(() => {
+        try {
             var uri = new Uri("avares://AemulusPackageManager/Assets/Preview-light.png");
             using var stream = global::Avalonia.Platform.AssetLoader.Open(uri);
             return new Bitmap(stream);
@@ -2492,46 +2214,38 @@ public partial class MainWindowViewModel : ObservableObject
         catch { return null; }
     });
 
-    private void LoadPreviewImage(DisplayedMetadata? package)
-    {
+    private void LoadPreviewImage(DisplayedMetadata? package) {
 
-        if (package == null || string.IsNullOrEmpty(package.path))
-        {
+        if (package == null || string.IsNullOrEmpty(package.path)) {
             PreviewImage = DarkMode ? _placeholderImage_dark.Value : _placeholderImage_light.Value;
             return;
         }
 
         var packageDir = Path.Combine(_dataDir, "Packages", SelectedGame, package.path);
 
-        if (!Directory.Exists(packageDir))
-        {
+        if (!Directory.Exists(packageDir)) {
             PreviewImage = DarkMode ? _placeholderImage_dark.Value : _placeholderImage_light.Value;
             return;
         }
 
-        try
-        {
+        try {
             var previewFiles = new DirectoryInfo(packageDir).GetFiles("Preview.*");
-            if (previewFiles.Length > 0)
-            {
+            if (previewFiles.Length > 0) {
                 var bytes = File.ReadAllBytes(previewFiles[0].FullName);
                 using var ms = new MemoryStream(bytes);
                 PreviewImage = new Bitmap(ms);
                 return;
             }
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             Console.WriteLine($"[ERROR] Failed to load preview image: {ex.Message}");
         }
 
         PreviewImage = DarkMode ? _placeholderImage_dark.Value : _placeholderImage_light.Value;
     }
 
-    partial void OnSearchTextChanged(string value)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
+    partial void OnSearchTextChanged(string value) {
+        if (string.IsNullOrEmpty(value)) {
             RefreshPackageList();
             return;
         }
@@ -2550,30 +2264,26 @@ public partial class MainWindowViewModel : ObservableObject
 
     #endregion
 
-    private static IBrush BrushForLine(string line)
-    {
+    private static IBrush BrushForLine(string line) {
         if (line.Contains("[ERROR]")) return SolidColorBrush.Parse("#FF6060");
         if (line.Contains("[WARNING]")) return SolidColorBrush.Parse("#FFD060");
         if (line.Contains("[DEBUG]")) return SolidColorBrush.Parse("#60A0FF");
         return SolidColorBrush.Parse("#90EE90");
     }
 
-    public void AppendConsole(string message)
-    {
+    public void AppendConsole(string message) {
         if (message.Contains("[DEBUG]") && Environment.GetEnvironmentVariable("DEBUG_LOGGING") != "1")
             return;
         ConsoleOutput += message + Environment.NewLine;
         ConsoleEntries.Add(new LogEntry(message, BrushForLine(message)));
     }
 
-    public void AppendConsoleRaw(string text)
-    {
+    public void AppendConsoleRaw(string text) {
         if (text.Contains("[DEBUG]") && Environment.GetEnvironmentVariable("DEBUG_LOGGING") != "1")
             return;
         ConsoleOutput += text;
         // Raw text may contain multiple newline-terminated lines from ParallelLogger
-        foreach (var line in text.Split('\n'))
-        {
+        foreach (var line in text.Split('\n')) {
             var trimmed = line.TrimEnd('\r');
             if (trimmed.Length > 0)
                 ConsoleEntries.Add(new LogEntry(trimmed, BrushForLine(trimmed)));
@@ -2581,23 +2291,19 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ClearConsole()
-    {
+    private void ClearConsole() {
         ConsoleOutput = "";
         ConsoleEntries.Clear();
     }
 
-    public void UpdateGameAccentColor()
-    {
+    public void UpdateGameAccentColor() {
         _dialogService?.DialogWindow.UpdateAccentColors(SelectedGame);
         GameAccentColor = SolidColorBrush.Parse(Converters.GameColorConverter.GetHex(SelectedGame));
     }
 
-    public async void UpdateStats()
-    {
+    public async void UpdateStats() {
         var version = _appVersion;
-        if (version.Length > 0 && version.Contains('.'))
-        {
+        if (version.Length > 0 && version.Contains('.')) {
             var lastDot = version.LastIndexOf('.');
             if (lastDot > 0) version = version[..lastDot];
         }
@@ -2605,8 +2311,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         var game = SelectedGame;
         var packagesDir = Path.Combine(_dataDir, "Packages", game);
-        if (!Directory.Exists(packagesDir))
-        {
+        if (!Directory.Exists(packagesDir)) {
             PackageStats = $"0 packages \u2022 0 enabled \u2022 0 files \u2022 0 Bytes \u2022 v{version}";
             return;
         }
@@ -2614,17 +2319,14 @@ public partial class MainWindowViewModel : ObservableObject
         var packageCount = _packageList.Count;
         var enabledCount = _packageList.Count(x => x.enabled);
 
-        await Task.Run(() =>
-        {
-            try
-            {
+        await Task.Run(() => {
+            try {
                 var numFiles = Directory.GetFiles(packagesDir, "*", SearchOption.AllDirectories).Length;
                 var dirSize = AemulusModManager.Utilities.PackageUpdating.StringConverters.FormatSize(
                     new DirectoryInfo(packagesDir).GetDirectorySize());
                 PackageStats = $"{packageCount} packages \u2022 {enabledCount} enabled \u2022 {numFiles:N0} files \u2022 {dirSize} \u2022 v{version}";
             }
-            catch
-            {
+            catch {
                 PackageStats = $"{packageCount} packages \u2022 {enabledCount} enabled \u2022 v{version}";
             }
         });

@@ -5,8 +5,7 @@ using System.Xml.Serialization;
 namespace AemulusModManager;
 
 // Old config
-public class Config
-{
+public class Config {
     // Keep to transfer data to new config
     public ObservableCollection<Package> package { get; set; } = new();
     public string modDir { get; set; } = "";
@@ -17,8 +16,7 @@ public class Config
     public string cpkLang { get; set; } = "";
 }
 
-public class AemulusConfig
-{
+public class AemulusConfig {
     public string game { get; set; } = "";
     public bool bottomUpPriority { get; set; }
     public bool updateAemulus { get; set; } = true;
@@ -46,8 +44,7 @@ public class AemulusConfig
     public bool Maximized { get; set; }
 }
 
-public class ConfigP4G
-{
+public class ConfigP4G {
     public string modDir { get; set; } = "";
     public string exePath { get; set; } = "";
     public string reloadedPath { get; set; } = "";
@@ -66,8 +63,7 @@ public class ConfigP4G
     public string lastLoadout { get; set; } = "";
 }
 
-public class ConfigP4GVita
-{
+public class ConfigP4GVita {
     public string modDir { get; set; } = "";
     public string cpkName { get; set; } = "m0.cpk";
     public bool deleteOldVersions { get; set; }
@@ -83,8 +79,7 @@ public class ConfigP4GVita
 }
 
 
-public class ConfigP1PSP
-{
+public class ConfigP1PSP {
     public string modDir { get; set; } = "";
     public string texturesPath { get; set; } = "";
     public string cheatsPath { get; set; } = "";
@@ -104,8 +99,7 @@ public class ConfigP1PSP
 
 }
 
-public class ConfigP3F
-{
+public class ConfigP3F {
     public string modDir { get; set; } = "";
     public string isoPath { get; set; } = "";
     public string elfPath { get; set; } = "";
@@ -127,8 +121,7 @@ public class ConfigP3F
 
 }
 
-public class ConfigP3P
-{
+public class ConfigP3P {
     public string modDir { get; set; } = "";
     public string texturesPath { get; set; } = "";
     public string cheatsPath { get; set; } = "";
@@ -148,8 +141,7 @@ public class ConfigP3P
 
 }
 
-public class ConfigP5
-{
+public class ConfigP5 {
     public string modDir { get; set; } = "";
     public string gamePath { get; set; } = "";
     public string launcherPath { get; set; } = "";
@@ -167,8 +159,7 @@ public class ConfigP5
 
 }
 
-public class ConfigP5R
-{
+public class ConfigP5R {
     public string modDir { get; set; } = "";
     public string cpkName { get; set; } = "mod.cpk";
     public string language { get; set; } = "English";
@@ -186,8 +177,7 @@ public class ConfigP5R
 
 }
 
-public class ConfigP5RSwitch
-{
+public class ConfigP5RSwitch {
     public string modDir { get; set; } = "";
     public string gamePath { get; set; } = "";
     public string launcherPath { get; set; } = "";
@@ -205,8 +195,7 @@ public class ConfigP5RSwitch
 
 }
 
-public class ConfigPQ2
-{
+public class ConfigPQ2 {
     public string modDir { get; set; } = "";
     public string ROMPath { get; set; } = "";
     public string launcherPath { get; set; } = "";
@@ -223,8 +212,7 @@ public class ConfigPQ2
 
 }
 
-public class ConfigPQ
-{
+public class ConfigPQ {
     public string modDir { get; set; } = "";
     public string ROMPath { get; set; } = "";
     public string launcherPath { get; set; } = "";
@@ -241,8 +229,7 @@ public class ConfigPQ
 
 }
 
-public class ConfigP5S
-{
+public class ConfigP5S {
     public string modDir { get; set; } = "";
     public bool buildWarning { get; set; } = true;
     public bool buildFinished { get; set; } = true;
@@ -256,14 +243,12 @@ public class ConfigP5S
 
 }
 
-public class Packages
-{
+public class Packages {
     public ObservableCollection<Package> packages { get; set; } = new();
     public bool showHiddenPackages { get; set; } = true;
 }
 
-public class Package
-{
+public class Package {
     public string name { get; set; } = "";
     public string path { get; set; } = "";
     public bool enabled { get; set; }
@@ -272,8 +257,7 @@ public class Package
     public string link { get; set; } = "";
 }
 
-public class Metadata
-{
+public class Metadata {
     public string name { get; set; } = "";
     public string id { get; set; } = "";
     public string author { get; set; } = "";
@@ -284,8 +268,7 @@ public class Metadata
 }
 
 [Serializable, XmlRoot("Mod")]
-public class ModXmlMetadata
-{
+public class ModXmlMetadata {
     public string Id { get; set; } = "";
     public string Game { get; set; } = "";
     public string Title { get; set; } = "";
@@ -297,8 +280,7 @@ public class ModXmlMetadata
     public string UpdateUrl { get; set; } = "";
 }
 
-public class DisplayedMetadata
-{
+public class DisplayedMetadata {
     public string name { get; set; } = "";
     public string id { get; set; } = "";
     public string author { get; set; } = "";

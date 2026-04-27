@@ -15,35 +15,29 @@ namespace AemulusModManager;
 /// Cross-platform port of TblPatch. Handles .tblpatch and .tbp (JSON) patching
 /// for game TBL files, using PAKPackHelper for archive operations.
 /// </summary>
-public static class tblPatch
-{
+public static class tblPatch {
     private static string AppDir => AemulusModManager.Avalonia.Utilities.AppPaths.ExeDir;
     private static string DataDir => AemulusModManager.Avalonia.Utilities.AppPaths.DataDir;
     private static string? tblDir;
 
-    private static byte[] SliceArray(byte[] source, int start, int end)
-    {
+    private static byte[] SliceArray(byte[] source, int start, int end) {
         int length = end - start;
         byte[] dest = new byte[length];
         Array.Copy(source, start, dest, 0, length);
         return dest;
     }
 
-    private static void unpackTbls(string archive, string game)
-    {
+    private static void unpackTbls(string archive, string game) {
         if (game == "Persona 3 FES" || game == "Persona 5 Royal (Switch)")
             return;
         PAKPackHelper.PAKPackCMD($"unpack \"{archive}\" \"{tblDir}\"");
     }
 
-    private static void repackTbls(string tbl, string archive, string game)
-    {
+    private static void repackTbls(string tbl, string archive, string game) {
         string? parent = null;
-        if (game == "Persona 4 Golden" || game == "Persona 4 Golden (Vita)" || game == "Persona 3 Portable")
-        {
+        if (game == "Persona 4 Golden" || game == "Persona 4 Golden (Vita)" || game == "Persona 3 Portable") {
             parent = "battle";
-            if (Path.GetFileName(tbl).Equals("ITEMTBL.TBL"))
-            {
+            if (Path.GetFileName(tbl).Equals("ITEMTBL.TBL")) {
                 parent = "init";
                 tbl = tbl.Replace(Path.Combine("battle", "ITEMTBL.TBL"), Path.Combine("init", "itemtbl.bin"));
             }
@@ -61,10 +55,8 @@ public static class tblPatch
     private static readonly string[] p5Tables = { "AICALC", "ELSAI", "ENCOUNT", "EXIST", "ITEM", "NAME", "PERSONA", "PLAYER", "SKILL", "TALKINFO", "UNIT", "VISUAL" };
     private static readonly string[] pqNameTbls = { "battle/table/personanametable.tbl", "battle/table/enemynametable.tbl", "battle/table/skillnametable.tbl" };
 
-    public static void Patch(List<string> ModList, string modDir, bool useCpk, string cpkLang, string game)
-    {
-        if (!PAKPackHelper.IsAvailable())
-        {
+    public static void Patch(List<string> ModList, string modDir, bool useCpk, string cpkLang, string game) {
+        if (!PAKPackHelper.IsAvailable()) {
             ParallelLogger.Log("[ERROR] PAKPack not available. TBL patching requires PAKPack + mono on Linux.");
             return;
         }
@@ -72,14 +64,11 @@ public static class tblPatch
 
         // Determine archive path
         string? archive = null;
-        if (game == "Persona 4 Golden")
-        {
+        if (game == "Persona 4 Golden") {
             if (useCpk)
                 archive = Path.Combine(Path.GetFileNameWithoutExtension(cpkLang), "init_free.bin");
-            else
-            {
-                archive = cpkLang switch
-                {
+            else {
+                archive = cpkLang switch {
                     "data_e.cpk" => Path.Combine("data00004", "init_free.bin"),
                     "data.cpk" => Path.Combine("data00001", "init_free.bin"),
                     "data_c.cpk" => Path.Combine("data00006", "init_free.bin"),
@@ -95,20 +84,16 @@ public static class tblPatch
         else if (game == "Persona 5" || game == "Persona 5 Royal (PS4)")
             archive = Path.Combine("battle", "table.pac");
 
-        if (game != "Persona 3 FES" && game != "Persona 5 Royal (Switch)" && game != "Persona Q" && game != "Persona Q2")
-        {
+        if (game != "Persona 3 FES" && game != "Persona 5 Royal (Switch)" && game != "Persona Q" && game != "Persona Q2") {
             var archiveFull = Path.Combine(modDir, archive!);
-            if (!File.Exists(archiveFull))
-            {
+            if (!File.Exists(archiveFull)) {
                 var origArchive = Path.Combine(DataDir, "Original", game, archive!);
-                if (File.Exists(origArchive))
-                {
+                if (File.Exists(origArchive)) {
                     Directory.CreateDirectory(Path.GetDirectoryName(archiveFull)!);
                     File.Copy(origArchive, archiveFull, true);
                     ParallelLogger.Log($"[INFO] Copied over {archive} from Original directory.");
                 }
-                else
-                {
+                else {
                     ParallelLogger.Log($"[WARNING] {archive} not found in output directory or Original directory.");
                     return;
                 }
@@ -122,24 +107,20 @@ public static class tblPatch
         var editedTables = new List<string>();
         List<NameSection>? sections = null;
 
-        foreach (string dir in ModList)
-        {
+        foreach (string dir in ModList) {
             ParallelLogger.Log($"[INFO] Searching for/applying tblpatches in {dir}...");
             var tblpatchesDir = Path.Combine(dir, "tblpatches");
-            if (!Directory.Exists(tblpatchesDir))
-            {
+            if (!Directory.Exists(tblpatchesDir)) {
                 ParallelLogger.Log($"[INFO] No tblpatches folder found in {dir}");
                 continue;
             }
 
             // Apply .tblpatch files
-            foreach (var t in Directory.GetFiles(tblpatchesDir, "*.tblpatch", SearchOption.AllDirectories))
-            {
+            foreach (var t in Directory.GetFiles(tblpatchesDir, "*.tblpatch", SearchOption.AllDirectories)) {
                 byte[] file = File.ReadAllBytes(t);
                 string fileName = Path.GetFileName(t);
                 ParallelLogger.Log($"[INFO] Loading {fileName}");
-                if (file.Length < 3)
-                {
+                if (file.Length < 3) {
                     ParallelLogger.Log("[ERROR] Improper .tblpatch format.");
                     continue;
                 }
@@ -151,10 +132,8 @@ public static class tblPatch
                 if (!editedTables.Contains(tblName))
                     editedTables.Add(tblName);
 
-                if (tblName != "NAME.TBL")
-                {
-                    if (file.Length < 12)
-                    {
+                if (tblName != "NAME.TBL") {
+                    if (file.Length < 12) {
                         ParallelLogger.Log("[ERROR] Improper .tblpatch format.");
                         continue;
                     }
@@ -170,18 +149,15 @@ public static class tblPatch
                     fileContents.CopyTo(tblBytes, offset);
                     File.WriteAllBytes(tblPath, tblBytes);
                 }
-                else
-                {
+                else {
                     var nameTblPath = Path.Combine(tblDir!, "table", tblName);
                     sections = GetNameSections(nameTblPath);
-                    if (file.Length < 6)
-                    {
+                    if (file.Length < 6) {
                         ParallelLogger.Log("[ERROR] Improper .tblpatch format.");
                         continue;
                     }
                     var temp = ReplaceName(sections, file, null, game);
-                    if (temp != null)
-                    {
+                    if (temp != null) {
                         sections = temp;
                         WriteNameTbl(sections, nameTblPath);
                     }
@@ -190,33 +166,25 @@ public static class tblPatch
 
             // Apply .tbp (JSON) patches
             var tables = new List<Table>();
-            foreach (var t in Directory.GetFiles(tblpatchesDir, "*.tbp", SearchOption.AllDirectories))
-            {
+            foreach (var t in Directory.GetFiles(tblpatchesDir, "*.tbp", SearchOption.AllDirectories)) {
                 TablePatches? tablePatches = null;
-                try
-                {
+                try {
                     tablePatches = JsonConvert.DeserializeObject<TablePatches>(File.ReadAllText(t));
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     ParallelLogger.Log($"[ERROR] Couldn't deserialize {t} ({ex.Message}), skipping...");
                     continue;
                 }
-                if (tablePatches?.Version != 1)
-                {
+                if (tablePatches?.Version != 1) {
                     ParallelLogger.Log($"[ERROR] Invalid version for {t}, skipping...");
                     continue;
                 }
-                if (tablePatches.Patches != null)
-                {
-                    foreach (var patch in tablePatches.Patches)
-                    {
+                if (tablePatches.Patches != null) {
+                    foreach (var patch in tablePatches.Patches) {
                         ParallelLogger.Log($"[INFO] Current patch: tbl={patch.tbl}, section={patch.section}, offset={patch.offset}, index={patch.index}");
 
-                        if (!tables.Exists(x => x.tableName == patch.tbl))
-                        {
-                            if (!IsTableValid(patch.tbl, game))
-                            {
+                        if (!tables.Exists(x => x.tableName == patch.tbl)) {
+                            if (!IsTableValid(patch.tbl, game)) {
                                 ParallelLogger.Log($"[ERROR] {patch.tbl} doesn't exist in {game}, skipping...");
                                 continue;
                             }
@@ -244,8 +212,7 @@ public static class tblPatch
             }
 
             // Write modified tables
-            foreach (var table in tables)
-            {
+            foreach (var table in tables) {
                 if (!editedTables.Contains($"{table.tableName}.TBL"))
                     editedTables.Add($"{table.tableName}.TBL");
                 else if ((game == "Persona Q" || game == "Persona Q2") && !editedTables.Contains(table.tableName))
@@ -265,10 +232,8 @@ public static class tblPatch
             ParallelLogger.Log($"[INFO] Applied patches from {dir}");
         }
 
-        if (game != "Persona 3 FES" && game != "Persona 5 Royal (Switch)" && game != "Persona Q" && game != "Persona Q2")
-        {
-            foreach (string u in editedTables)
-            {
+        if (game != "Persona 3 FES" && game != "Persona 5 Royal (Switch)" && game != "Persona Q" && game != "Persona Q2") {
+            foreach (string u in editedTables) {
                 if (u == "ITEMTBL.TBL")
                     ParallelLogger.Log($"[INFO] Replacing itemtbl.bin in {archive}");
                 else
@@ -286,13 +251,11 @@ public static class tblPatch
         ParallelLogger.Log("[INFO] Finished patching TBLs!");
     }
 
-    private static string? ResolveTblName(string code, string game)
-    {
+    private static string? ResolveTblName(string code, string game) {
         bool isP5 = game == "Persona 5" || game == "Persona 5 Royal (PS4)" || game == "Persona 5 Royal (Switch)";
         bool isP3F = game == "Persona 3 FES";
 
-        switch (code)
-        {
+        switch (code) {
             case "SKL": return "SKILL.TBL";
             case "UNT": return "UNIT.TBL";
             case "MSG":
@@ -349,50 +312,40 @@ public static class tblPatch
         }
     }
 
-    private static string? GetTblPath(string tblName, string modDir, string game)
-    {
-        if (game == "Persona 3 FES")
-        {
+    private static string? GetTblPath(string tblName, string modDir, string game) {
+        if (game == "Persona 3 FES") {
             var p = Path.Combine(modDir, "BTL", "BATTLE", tblName);
-            if (!File.Exists(p))
-            {
+            if (!File.Exists(p)) {
                 var orig = Path.Combine(DataDir, "Original", game, "BTL", "BATTLE", tblName);
-                if (File.Exists(orig))
-                {
+                if (File.Exists(orig)) {
                     Directory.CreateDirectory(Path.GetDirectoryName(p)!);
                     File.Copy(orig, p, true);
                     ParallelLogger.Log($"[INFO] Copied over {tblName} from Original directory.");
                 }
-                else
-                {
+                else {
                     ParallelLogger.Log($"[WARNING] {tblName} not found in output directory or Original directory.");
                     return null;
                 }
             }
             return p;
         }
-        else if (game == "Persona 5 Royal (Switch)")
-        {
+        else if (game == "Persona 5 Royal (Switch)") {
             var p = Path.Combine(modDir, "BASE", "BATTLE", "TABLE", tblName);
-            if (!File.Exists(p))
-            {
+            if (!File.Exists(p)) {
                 var orig = Path.Combine(DataDir, "Original", game, "BASE", "BATTLE", "TABLE", tblName);
-                if (File.Exists(orig))
-                {
+                if (File.Exists(orig)) {
                     Directory.CreateDirectory(Path.GetDirectoryName(p)!);
                     File.Copy(orig, p, true);
                     ParallelLogger.Log($"[INFO] Copied over {tblName} from Original directory.");
                 }
-                else
-                {
+                else {
                     ParallelLogger.Log($"[WARNING] {tblName} not found in output directory or Original directory.");
                     return null;
                 }
             }
             return p;
         }
-        else
-        {
+        else {
             if (game == "Persona 4 Golden" || game == "Persona 4 Golden (Vita)")
                 return Path.Combine(tblDir!, "battle", tblName);
             else
@@ -400,8 +353,7 @@ public static class tblPatch
         }
     }
 
-    private static bool IsTableValid(string tblName, string game)
-    {
+    private static bool IsTableValid(string tblName, string game) {
         if ((game == "Persona 4 Golden" || game == "Persona 4 Golden (Vita)") && !p4gTables.Contains(tblName)) return false;
         if (game == "Persona 3 FES" && !p3fTables.Contains(tblName)) return false;
         if ((game == "Persona 5" || game == "Persona 5 Royal (PS4)" || game == "Persona 5 Royal (Switch)") && !p5Tables.Contains(tblName)) return false;
@@ -410,66 +362,53 @@ public static class tblPatch
         return true;
     }
 
-    private static string? GetTablePathForTbp(string tblName, string modDir, string game, string cpkLang)
-    {
-        if (game == "Persona 3 FES")
-        {
+    private static string? GetTablePathForTbp(string tblName, string modDir, string game, string cpkLang) {
+        if (game == "Persona 3 FES") {
             var p = Path.Combine(modDir, "BTL", "BATTLE", $"{tblName}.TBL");
-            if (!File.Exists(p))
-            {
+            if (!File.Exists(p)) {
                 var orig = Path.Combine(DataDir, "Original", game, "BTL", "BATTLE", $"{tblName}.TBL");
-                if (File.Exists(orig))
-                {
+                if (File.Exists(orig)) {
                     Directory.CreateDirectory(Path.GetDirectoryName(p)!);
                     File.Copy(orig, p, true);
                     ParallelLogger.Log($"[INFO] Copied over {tblName}.TBL from Original directory.");
                 }
-                else
-                {
+                else {
                     ParallelLogger.Log($"[WARNING] {tblName}.TBL not found in output directory or Original directory.");
                     return null;
                 }
             }
             return p;
         }
-        else if (game == "Persona 5 Royal (Switch)")
-        {
+        else if (game == "Persona 5 Royal (Switch)") {
             var p = tblName.Equals("NAME", StringComparison.InvariantCultureIgnoreCase)
                 ? Path.Combine(modDir, cpkLang, "BATTLE", "TABLE", $"{tblName}.TBL")
                 : Path.Combine(modDir, "BASE", "BATTLE", "TABLE", $"{tblName}.TBL");
             var origP = tblName.Equals("NAME", StringComparison.InvariantCultureIgnoreCase)
                 ? Path.Combine(DataDir, "Original", game, cpkLang, "BATTLE", "TABLE", $"{tblName}.TBL")
                 : Path.Combine(DataDir, "Original", game, "BASE", "BATTLE", "TABLE", $"{tblName}.TBL");
-            if (!File.Exists(p))
-            {
-                if (File.Exists(origP))
-                {
+            if (!File.Exists(p)) {
+                if (File.Exists(origP)) {
                     Directory.CreateDirectory(Path.GetDirectoryName(p)!);
                     File.Copy(origP, p, true);
                     ParallelLogger.Log($"[INFO] Copied over {tblName}.TBL from Original directory.");
                 }
-                else
-                {
+                else {
                     ParallelLogger.Log($"[WARNING] {tblName}.TBL not found in output directory or Original directory.");
                     return null;
                 }
             }
             return p;
         }
-        else if (game == "Persona Q" || game == "Persona Q2")
-        {
+        else if (game == "Persona Q" || game == "Persona Q2") {
             var p = Path.Combine(modDir, tblName);
             var origP = Path.Combine(DataDir, "Original", game, tblName);
-            if (!File.Exists(p))
-            {
-                if (File.Exists(origP))
-                {
+            if (!File.Exists(p)) {
+                if (File.Exists(origP)) {
                     Directory.CreateDirectory(Path.GetDirectoryName(p)!);
                     File.Copy(origP, p, true);
                     ParallelLogger.Log($"[INFO] Copied over {tblName} from Original directory.");
                 }
-                else
-                {
+                else {
                     ParallelLogger.Log($"[WARNING] {tblName} not found in output directory or Original directory.");
                     return null;
                 }
@@ -483,8 +422,7 @@ public static class tblPatch
         return null;
     }
 
-    private static string? GetTableWritePath(string tblName, string modDir, string game, string cpkLang)
-    {
+    private static string? GetTableWritePath(string tblName, string modDir, string game, string cpkLang) {
         if (game == "Persona 3 FES")
             return Path.Combine(modDir, "BTL", "BATTLE", $"{tblName}.TBL");
         else if (game == "Persona 5 Royal (Switch)")
@@ -500,11 +438,9 @@ public static class tblPatch
         return null;
     }
 
-    private static List<Section> GetSections(string tbl, string game)
-    {
+    private static List<Section> GetSections(string tbl, string game) {
         var sections = new List<Section>();
-        if (Path.GetFileName(tbl) == "itemtbl.bin")
-        {
+        if (Path.GetFileName(tbl) == "itemtbl.bin") {
             var file = File.ReadAllBytes(tbl);
             sections.Add(new Section { size = file.Length, data = file });
             return sections;
@@ -512,11 +448,9 @@ public static class tblPatch
         bool bigEndian = game == "Persona 5" || game == "Persona 5 Royal (PS4)" || game == "Persona 5 Royal (Switch)";
         using var fs = new FileStream(tbl, FileMode.Open);
         using var br = new BinaryReader(fs);
-        while (br.BaseStream.Position < fs.Length)
-        {
+        while (br.BaseStream.Position < fs.Length) {
             var section = new Section();
-            if (bigEndian)
-            {
+            if (bigEndian) {
                 var data = br.ReadBytes(4);
                 Array.Reverse(data);
                 section.size = BitConverter.ToInt32(data, 0);
@@ -533,13 +467,11 @@ public static class tblPatch
         return sections;
     }
 
-    private static List<NameSection> GetNameSections(string tbl)
-    {
+    private static List<NameSection> GetNameSections(string tbl) {
         var sections = new List<NameSection>();
         byte[] tblBytes = File.ReadAllBytes(tbl);
         int pos = 0;
-        while (pos < tblBytes.Length)
-        {
+        while (pos < tblBytes.Length) {
             var section = new NameSection();
             section.pointersSize = BitConverter.ToInt32(SliceArray(tblBytes, pos, pos + 4).AsEnumerable().Reverse().ToArray(), 0);
             byte[] segment = SliceArray(tblBytes, pos + 4, pos + 4 + section.pointersSize);
@@ -555,10 +487,8 @@ public static class tblPatch
             segment = SliceArray(tblBytes, pos + 4, pos + 4 + section.namesSize);
             section.names = new List<byte[]>();
             var name = new List<byte>();
-            foreach (var b in segment)
-            {
-                if (b == 0)
-                {
+            foreach (var b in segment) {
+                if (b == 0) {
                     section.names.Add(name.ToArray());
                     name = new List<byte>();
                 }
@@ -574,8 +504,7 @@ public static class tblPatch
         return sections;
     }
 
-    private static List<NameSection> GetNameSectionQ(string tbl)
-    {
+    private static List<NameSection> GetNameSectionQ(string tbl) {
         var sections = new List<NameSection>();
         byte[] tblBytes = File.ReadAllBytes(tbl);
         int pos = 0;
@@ -591,10 +520,8 @@ public static class tblPatch
         segment = SliceArray(tblBytes, pos, pos + section.namesSize);
         section.names = new List<byte[]>();
         var name = new List<byte>();
-        foreach (var b in segment)
-        {
-            if (b == 0)
-            {
+        foreach (var b in segment) {
+            if (b == 0) {
                 section.names.Add(name.ToArray());
                 name = new List<byte>();
             }
@@ -607,22 +534,18 @@ public static class tblPatch
         return sections;
     }
 
-    private static List<NameSection>? ReplaceName(List<NameSection> sections, byte[]? patch, TablePatch? namePatch, string game)
-    {
+    private static List<NameSection>? ReplaceName(List<NameSection> sections, byte[]? patch, TablePatch? namePatch, string game) {
         int section = 0;
         int index = 0;
         byte[]? fileContents = null;
 
-        if (patch != null)
-        {
+        if (patch != null) {
             section = Convert.ToInt32(patch[3]);
             index = BitConverter.ToInt16(SliceArray(patch, 4, 6).AsEnumerable().Reverse().ToArray(), 0);
             fileContents = SliceArray(patch, 6, patch.Length);
         }
-        else if (namePatch != null)
-        {
-            if (namePatch.section == null || namePatch.index == null || namePatch.name == null)
-            {
+        else if (namePatch != null) {
+            if (namePatch.section == null || namePatch.index == null || namePatch.name == null) {
                 ParallelLogger.Log("[ERROR] Incomplete patch, skipping...");
                 return sections;
             }
@@ -631,28 +554,23 @@ public static class tblPatch
             fileContents = ConvertName(namePatch.name);
             if (fileContents == null) return sections;
         }
-        else
-        {
+        else {
             ParallelLogger.Log("[ERROR] No patch passed to replace function, skipping...");
             return sections;
         }
 
-        if (section >= sections.Count)
-        {
+        if (section >= sections.Count) {
             ParallelLogger.Log("[ERROR] Section chosen is out of bounds, skipping...");
             return sections;
         }
-        if (index < 0)
-        {
+        if (index < 0) {
             ParallelLogger.Log("[ERROR] Index cannot be negative, skipping...");
             return sections;
         }
 
-        if (index >= sections[section].names.Count)
-        {
+        if (index >= sections[section].names.Count) {
             byte[] dummy = Encoding.ASCII.GetBytes("RESERVE");
-            while (sections[section].names.Count < index)
-            {
+            while (sections[section].names.Count < index) {
                 sections[section].pointers.Add((ushort)(sections[section].pointers.Last() + sections[section].names.Last().Length + 1));
                 sections[section].names.Add(dummy);
                 sections[section].pointersSize += 2;
@@ -663,8 +581,7 @@ public static class tblPatch
             sections[section].pointersSize += 2;
             sections[section].namesSize += fileContents.Length + 1;
         }
-        else
-        {
+        else {
             int delta = fileContents.Length - sections[section].names[index].Length;
             sections[section].names[index] = fileContents;
             sections[section].namesSize += delta;
@@ -674,32 +591,24 @@ public static class tblPatch
         return sections;
     }
 
-    private static byte[]? ConvertName(string name)
-    {
+    private static byte[]? ConvertName(string name) {
         string[] stringData = Regex.Split(name, @"(\[.*?\])");
         var byteName = new List<byte>();
-        foreach (var part in stringData)
-        {
-            if (!part.Contains('['))
-            {
+        foreach (var part in stringData) {
+            if (!part.Contains('[')) {
                 foreach (byte b in Encoding.ASCII.GetBytes(part))
                     byteName.Add(b);
             }
-            else
-            {
-                foreach (var hex in part.Substring(1, part.Length - 2).Split(' '))
-                {
-                    if (hex.Length != 2)
-                    {
+            else {
+                foreach (var hex in part.Substring(1, part.Length - 2).Split(' ')) {
+                    if (hex.Length != 2) {
                         ParallelLogger.Log("[ERROR] Couldn't parse hex string, skipping...");
                         return null;
                     }
-                    try
-                    {
+                    try {
                         byteName.Add(Convert.ToByte(hex, 16));
                     }
-                    catch (Exception ex)
-                    {
+                    catch (Exception ex) {
                         ParallelLogger.Log($"[ERROR] Couldn't parse hex string ({ex.Message}), skipping...");
                         return null;
                     }
@@ -709,10 +618,8 @@ public static class tblPatch
         return byteName.ToArray();
     }
 
-    private static List<Section> ReplaceSection(List<Section> sections, TablePatch patch)
-    {
-        if (patch.offset == null || patch.section == null || patch.data == null)
-        {
+    private static List<Section> ReplaceSection(List<Section> sections, TablePatch patch) {
+        if (patch.offset == null || patch.section == null || patch.data == null) {
             ParallelLogger.Log("[ERROR] Incomplete patch, skipping...");
             return sections;
         }
@@ -720,30 +627,24 @@ public static class tblPatch
         int offset = (int)patch.offset;
         string[] stringData = patch.data.Split(' ');
         byte[] data = new byte[stringData.Length];
-        for (int i = 0; i < data.Length; i++)
-        {
-            try
-            {
+        for (int i = 0; i < data.Length; i++) {
+            try {
                 data[i] = Convert.ToByte(stringData[i], 16);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 ParallelLogger.Log($"[ERROR] Couldn't parse hex string {stringData[i]} ({ex.Message}), skipping...");
                 return sections;
             }
         }
-        if (offset < 0)
-        {
+        if (offset < 0) {
             ParallelLogger.Log("[ERROR] Offset cannot be negative, skipping...");
             return sections;
         }
-        if (section >= sections.Count)
-        {
+        if (section >= sections.Count) {
             ParallelLogger.Log("[ERROR] Section chosen is out of bounds, skipping...");
             return sections;
         }
-        if (offset + data.Length >= sections[section].data.Length)
-        {
+        if (offset + data.Length >= sections[section].data.Length) {
             using var ms = new MemoryStream();
             using var bw = new BinaryWriter(ms);
             bw.Write(sections[section].data);
@@ -753,12 +654,10 @@ public static class tblPatch
             sections[section].data = ms.ToArray();
             sections[section].size = sections[section].data.Length;
         }
-        else
-        {
+        else {
             using var ms = new MemoryStream(sections[section].data);
             using var bw = new BinaryWriter(ms);
-            if (offset >= ms.Length)
-            {
+            if (offset >= ms.Length) {
                 bw.BaseStream.Position = ms.Length - 1;
                 while (offset >= ms.Length) bw.Write((byte)0);
             }
@@ -768,19 +667,16 @@ public static class tblPatch
         return sections;
     }
 
-    private static void WriteNameTbl(List<NameSection> sections, string path)
-    {
+    private static void WriteNameTbl(List<NameSection> sections, string path) {
         using var fs = new FileStream(path, FileMode.Create);
         using var bw = new BinaryWriter(fs);
-        foreach (var section in sections)
-        {
+        foreach (var section in sections) {
             bw.Write(BitConverter.GetBytes(section.pointersSize).AsEnumerable().Reverse().ToArray());
             foreach (var pointer in section.pointers)
                 bw.Write(BitConverter.GetBytes(pointer).AsEnumerable().Reverse().ToArray());
             while (bw.BaseStream.Position % 16 != 0) bw.Write((byte)0);
             bw.Write(BitConverter.GetBytes(section.namesSize).AsEnumerable().Reverse().ToArray());
-            foreach (var name in section.names)
-            {
+            foreach (var name in section.names) {
                 bw.Write(name);
                 bw.Write((byte)0);
             }
@@ -788,31 +684,26 @@ public static class tblPatch
         }
     }
 
-    private static void WriteNameTblQ(List<NameSection> sections, string path)
-    {
+    private static void WriteNameTblQ(List<NameSection> sections, string path) {
         using var fs = new FileStream(path, FileMode.Create);
         using var bw = new BinaryWriter(fs);
         bw.Write(BitConverter.GetBytes((short)sections[0].pointersSize));
         foreach (var pointer in sections[0].pointers) bw.Write(BitConverter.GetBytes(pointer));
-        foreach (var name in sections[0].names)
-        {
+        foreach (var name in sections[0].names) {
             bw.Write(name);
             bw.Write((byte)0);
         }
     }
 
-    private static void WriteTbl(List<Section> sections, string path, string game)
-    {
+    private static void WriteTbl(List<Section> sections, string path, string game) {
         bool bigEndian = game == "Persona 5" || game == "Persona 5 Royal (PS4)" || game == "Persona 5 Royal (Switch)";
         using var fs = new FileStream(path, FileMode.Create);
         using var bw = new BinaryWriter(fs);
         if (((game == "Persona 4 Golden" || game == "Persona 4 Golden (Vita)") && Path.GetFileName(path).Equals("itemtbl.bin", StringComparison.InvariantCultureIgnoreCase))
             || game == "Persona Q" || game == "Persona Q2")
             bw.Write(sections[0].data);
-        else
-        {
-            foreach (var section in sections)
-            {
+        else {
+            foreach (var section in sections) {
                 if (bigEndian)
                     bw.Write(BitConverter.GetBytes(section.size).AsEnumerable().Reverse().ToArray());
                 else
@@ -823,12 +714,10 @@ public static class tblPatch
         }
     }
 
-    private static bool QTblExists(string game, string tblPath)
-    {
+    private static bool QTblExists(string game, string tblPath) {
         if (game != "Persona Q" && game != "Persona Q2") return false;
         var csv = Path.Combine(AppDir, "Dependencies", "FilteredCpkCsv", $"filtered_data_pq{(game == "Persona Q2" ? "2" : "")}.csv");
-        if (!File.Exists(csv))
-        {
+        if (!File.Exists(csv)) {
             ParallelLogger.Log("[ERROR] Couldn't find CSV file in Dependencies/FilteredCpkCsv");
             return false;
         }
@@ -838,8 +727,7 @@ public static class tblPatch
 }
 
 // Helper class for TBP deserialization
-internal class Table
-{
+internal class Table {
     public string tableName { get; set; } = "";
     public List<Section>? sections { get; set; }
     public List<NameSection>? nameSections { get; set; }

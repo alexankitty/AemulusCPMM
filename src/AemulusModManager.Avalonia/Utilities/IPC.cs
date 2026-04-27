@@ -7,38 +7,31 @@ using Avalonia.Markup.Xaml;
 
 namespace AemulusModManager.Avalonia.Utilities;
 
-public class IPC
-{
+public class IPC {
     private readonly IPCService _ipcService;
     private readonly List<Func<string, Task>> _handlers = new();
 
-    public IPC()
-    {
+    public IPC() {
         _ipcService = new IPCService();
         _ipcService.MessageReceived += HandleMessageReceived;
         IPCService.Register(_ipcService);
     }
 
-    public int RegisterMessageHandler(Func<string, Task> handler)
-    {
+    public int RegisterMessageHandler(Func<string, Task> handler) {
         _handlers.Add(handler);
         return _handlers.Count - 1;
     }
 
-    public int UnregisterMessageHandler(int handlerId)
-    {
-        if (handlerId >= 0 && handlerId < _handlers.Count)
-        {
+    public int UnregisterMessageHandler(int handlerId) {
+        if (handlerId >= 0 && handlerId < _handlers.Count) {
             _handlers.RemoveAt(handlerId);
             return handlerId;
         }
         return -1;
     }
 
-    private void HandleMessageReceived(object? sender, MessageReceivedEventArgs e)
-    {
-        foreach (var handler in _handlers)
-        {
+    private void HandleMessageReceived(object? sender, MessageReceivedEventArgs e) {
+        foreach (var handler in _handlers) {
             // Fire and forget
             _ = handler(e.Message);
         }
@@ -47,16 +40,12 @@ public class IPC
     public void SendMessage(string message) => _ipcService.SendMessage(message);
 }
 
-public class IPCService
-{
+public class IPCService {
     public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
 
-    public static void Register(IPCService service)
-    {
-        Task.Run(async () =>
-        {
-            while (true)
-            {
+    public static void Register(IPCService service) {
+        Task.Run(async () => {
+            while (true) {
                 using var pipeServer = new NamedPipeServerStream($"{Info.Name}", PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
                 await pipeServer.WaitForConnectionAsync();
                 using var reader = new StreamReader(pipeServer);
@@ -68,24 +57,20 @@ public class IPCService
         });
     }
 
-    public void SendMessage(string message)
-    {
+    public void SendMessage(string message) {
         using var pipeClient = new NamedPipeClientStream(".", $"{Info.Name}", PipeDirection.Out);
         pipeClient.Connect();
-        if(pipeClient.IsConnected)
-        {
+        if (pipeClient.IsConnected) {
             using var writer = new StreamWriter(pipeClient) { AutoFlush = true };
             writer.WriteLine(message);
         }
     }
 }
 
-public class MessageReceivedEventArgs : EventArgs
-{
+public class MessageReceivedEventArgs : EventArgs {
     public string Message { get; }
 
-    public MessageReceivedEventArgs(string message)
-    {
+    public MessageReceivedEventArgs(string message) {
         Message = message;
     }
 }

@@ -1,9 +1,6 @@
-﻿namespace AemulusModManager.Utilities.PackageUpdating.DownloadUtils
-{
-    public class DownloadProgress
-    {
-        public DownloadProgress(float percentage, long downloadedBytes, long totalBytes, string fileName)
-        {
+namespace AemulusModManager.Utilities.PackageUpdating.DownloadUtils {
+    public class DownloadProgress {
+        public DownloadProgress(float percentage, long downloadedBytes, long totalBytes, string fileName) {
             DownloadedBytes = downloadedBytes;
             TotalBytes = totalBytes;
             Percentage = percentage;

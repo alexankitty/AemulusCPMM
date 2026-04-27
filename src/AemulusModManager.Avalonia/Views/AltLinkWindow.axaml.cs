@@ -5,21 +5,17 @@ using Avalonia.Interactivity;
 
 namespace AemulusModManager.Avalonia.Views;
 
-public partial class AltLinkWindow : Window
-{
+public partial class AltLinkWindow : Window {
     public GameBananaAlternateFileSource? ChosenSource { get; set; }
 
-    public AltLinkWindow()
-    {
+    public AltLinkWindow() {
         InitializeComponent();
     }
 
-    public AltLinkWindow(DialogWindowViewModel dialogVm, List<GameBananaAlternateFileSource> sources)
-    {
+    public AltLinkWindow(DialogWindowViewModel dialogVm, List<GameBananaAlternateFileSource> sources) {
         InitializeComponent();
         DataContext = dialogVm;
-        foreach(var prop in dialogVm.AccentProps)
-        {
+        foreach (var prop in dialogVm.AccentProps) {
             this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
         }
         LinkList.ItemsSource = sources;
@@ -27,14 +23,12 @@ public partial class AltLinkWindow : Window
             LinkList.SelectedIndex = 0;
     }
 
-    private void SelectButton_Click(object? sender, RoutedEventArgs e)
-    {
+    private void SelectButton_Click(object? sender, RoutedEventArgs e) {
         ChosenSource = LinkList.SelectedItem as GameBananaAlternateFileSource;
         Close();
     }
 
-    private void CancelButton_Click(object? sender, RoutedEventArgs e)
-    {
+    private void CancelButton_Click(object? sender, RoutedEventArgs e) {
         Close();
     }
 }

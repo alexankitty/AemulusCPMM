@@ -17,8 +17,7 @@ using Newtonsoft.Json;
 
 namespace AemulusModManager.Avalonia;
 
-public class PackageDownloader
-{
+public class PackageDownloader {
     private string? URL_TO_ARCHIVE;
     private string? URL;
     private string? DL_ID;
@@ -33,47 +32,38 @@ public class PackageDownloader
     private readonly DialogService _dialogService;
 
 
-    public PackageDownloader(DialogService dialogService)
-    {
+    public PackageDownloader(DialogService dialogService) {
         _dialogService = dialogService;
         App.Ipc?.RegisterMessageHandler(DownloadTaskIPC);
     }
 
-    public async Task DownloadTaskIPC(string line)
-    {
+    public async Task DownloadTaskIPC(string line) {
         Dispatcher.UIThread.Post(async () => await Download(line, true));
     }
 
-    public async Task BrowserDownload(GameBananaRecord record, string gameName)
-    {
+    public async Task BrowserDownload(GameBananaRecord record, string gameName) {
         var yes = await _dialogService.ShowDownloadConfirm(record);
-        if (yes)
-        {
+        if (yes) {
             string? downloadUrl = null;
             string? downloadFileName = null;
-            if(record.Files.Count == 0)
-            {
+            if (record.Files.Count == 0) {
                 await _dialogService.ShowNotification("No Aemulus compatible files found for this mod.", true);
                 return;
             }
-            else if (record.Files.Count == 1)
-            {
+            else if (record.Files.Count == 1) {
                 downloadUrl = record.Files[0].DownloadUrl;
                 downloadFileName = record.Files[0].FileName;
             }
-            else if (record.Files.Count > 1)
-            {
+            else if (record.Files.Count > 1) {
                 var (url, name) = await _dialogService.ShowFileSelector(
                     record.Files.Cast<GameBananaItemFile>().ToList(), record.Title);
                 downloadUrl = url;
                 downloadFileName = name;
             }
-            if (downloadUrl != null && downloadFileName != null)
-            {
+            if (downloadUrl != null && downloadFileName != null) {
                 await DownloadFile(downloadUrl, downloadFileName, new Progress<DownloadProgress>(ReportUpdateProgress),
                     CancellationTokenSource.CreateLinkedTokenSource(cancellationToken.Token));
-                if (!cancelled)
-                {
+                if (!cancelled) {
                     await ExtractFile(Path.Combine(dataLocation, "Downloads", downloadFileName), gameName);
                     var refreshPath = Path.Combine(dataLocation, "refresh.aem");
                     if (File.Exists(refreshPath)) File.Delete(refreshPath);
@@ -83,21 +73,16 @@ public class PackageDownloader
         }
     }
 
-    public async Task Download(string line, bool running)
-    {
-        if (ParseProtocol(line))
-        {
-            if (await GetData())
-            {
+    public async Task Download(string line, bool running) {
+        if (ParseProtocol(line)) {
+            if (await GetData()) {
                 var yes = await _dialogService.ShowDownloadConfirm(
                     response.Title ?? "Unknown", response.Owner?.Name, response.Image);
-                if (yes)
-                {
+                if (yes) {
                     await DownloadFile(URL_TO_ARCHIVE!, fileName!, new Progress<DownloadProgress>(ReportUpdateProgress),
                         CancellationTokenSource.CreateLinkedTokenSource(cancellationToken.Token));
                     var gameName = response.Game?.Name ?? "";
-                    gameName = gameName switch
-                    {
+                    gameName = gameName switch {
                         "Persona 4 Golden PC (32 Bit)" => "Persona 4 Golden",
                         "Persona 3 Portable (PSP)" => "Persona 3 Portable",
                         "Shin Megami Tensei: Persona (PSP)" => "Persona 1 (PSP)",
@@ -114,24 +99,20 @@ public class PackageDownloader
         }
     }
 
-    private async Task<bool> GetData()
-    {
-        try
-        {
+    private async Task<bool> GetData() {
+        try {
             string responseString = await client.GetStringAsync(URL);
             response = JsonConvert.DeserializeObject<GameBananaAPIV4>(responseString) ?? new GameBananaAPIV4();
             fileName = response.Files.Where(x => x.ID == DL_ID).ToArray()[0].FileName;
             return true;
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             await _dialogService.ShowNotification($"Error while fetching data: {e.Message}", true);
             return false;
         }
     }
 
-    private void ReportUpdateProgress(DownloadProgress progress)
-    {
+    private void ReportUpdateProgress(DownloadProgress progress) {
         if (_progressBox == null) return;
         _ = _dialogService.UpdateProgress(_progressBox, progress.Percentage,
             $"Downloading {progress.FileName}...",
@@ -139,10 +120,8 @@ public class PackageDownloader
             $"({AemulusModManager.Utilities.PackageUpdating.StringConverters.FormatSize(progress.DownloadedBytes)} of {AemulusModManager.Utilities.PackageUpdating.StringConverters.FormatSize(progress.TotalBytes)})");
     }
 
-    private bool ParseProtocol(string line)
-    {
-        try
-        {
+    private bool ParseProtocol(string line) {
+        try {
             line = line.Replace("aemulus:", "");
             string[] data = line.Split(',');
             URL_TO_ARCHIVE = data[0];
@@ -153,25 +132,20 @@ public class PackageDownloader
             URL = $"https://gamebanana.com/apiv6/{MOD_TYPE}/{MOD_ID}?_csvProperties=_sName,_aGame,_sProfileUrl,_aPreviewMedia,_sDescription,_aSubmitter,_aCategory,_aSuperCategory,_aFiles,_tsDateUpdated,_aAlternateFileSources,_bHasUpdates,_aLatestUpdates";
             return true;
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             _ = _dialogService.ShowNotification($"Error while parsing {line}: {e.Message}", true);
             return false;
         }
     }
 
-    private async Task DownloadFile(string uri, string downloadFileName, Progress<DownloadProgress> progress, CancellationTokenSource cts)
-    {
-        try
-        {
+    private async Task DownloadFile(string uri, string downloadFileName, Progress<DownloadProgress> progress, CancellationTokenSource cts) {
+        try {
             var downloadsDir = Path.Combine(dataLocation, "Downloads");
             Directory.CreateDirectory(downloadsDir);
             var filePath = Path.Combine(downloadsDir, downloadFileName);
-            if (File.Exists(filePath))
-            {
+            if (File.Exists(filePath)) {
                 try { File.Delete(filePath); }
-                catch (Exception e)
-                {
+                catch (Exception e) {
                     await _dialogService.ShowNotification($"Couldn't delete existing {filePath} ({e.Message})", true);
                     return;
                 }
@@ -180,26 +154,21 @@ public class PackageDownloader
             await _dialogService.UpdateProgress(_progressBox, 0, "", $"Downloading {downloadFileName}");
             _progressBox.Title = "Update Progress";
             await _dialogService.ShowProgressBox(_progressBox);
-            using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
+            using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None)) {
                 await client.DownloadAsync(uri, fs, downloadFileName, progress, cts.Token);
             }
             await _dialogService.CloseProgressBox(_progressBox);
         }
-        catch (OperationCanceledException)
-        {
+        catch (OperationCanceledException) {
             var filePath = Path.Combine(dataLocation, "Downloads", downloadFileName);
             if (File.Exists(filePath)) File.Delete(filePath);
-            if (_progressBox != null)
-            {
+            if (_progressBox != null) {
                 await _dialogService.CloseProgressBox(_progressBox);
                 cancelled = true;
             }
         }
-        catch (Exception e)
-        {
-            if (_progressBox != null)
-            {
+        catch (Exception e) {
+            if (_progressBox != null) {
                 await _dialogService.CloseProgressBox(_progressBox);
                 cancelled = true;
             }
@@ -207,44 +176,36 @@ public class PackageDownloader
         }
     }
 
-    private async Task ExtractFile(string file, string game)
-    {
-        await Task.Run(() =>
-        {
+    private async Task ExtractFile(string file, string game) {
+        await Task.Run(() => {
             var ext = Path.GetExtension(file).ToLower();
-            if (ext == ".7z" || ext == ".rar" || ext == ".zip")
-            {
+            if (ext == ".7z" || ext == ".rar" || ext == ".zip") {
                 var tempDir = Path.Combine(dataLocation, "temp", Path.GetFileNameWithoutExtension(file));
                 Directory.CreateDirectory(tempDir);
 
                 var sevenZipPath = FindSevenZip();
-                if (sevenZipPath == null)
-                {
+                if (sevenZipPath == null) {
                     AemulusModManager.Utilities.ParallelLogger.Log("[ERROR] Couldn't find 7z. Please install p7zip or 7zip.");
                     return;
                 }
 
-                var startInfo = new ProcessStartInfo
-                {
+                var startInfo = new ProcessStartInfo {
                     CreateNoWindow = true,
                     FileName = sevenZipPath,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     UseShellExecute = false,
                     Arguments = $"x -y \"{file}\" -o\"{tempDir}\""
                 };
-                using (var process = Process.Start(startInfo))
-                {
+                using (var process = Process.Start(startInfo)) {
                     process?.WaitForExit();
                 }
 
                 var tempBase = Path.Combine(dataLocation, "temp");
                 foreach (var folder in Directory.GetDirectories(tempBase, "*", SearchOption.AllDirectories)
-                    .Where(x => File.Exists(Path.Combine(x, "Package.xml")) || File.Exists(Path.Combine(x, "Mod.xml"))))
-                {
+                    .Where(x => File.Exists(Path.Combine(x, "Package.xml")) || File.Exists(Path.Combine(x, "Mod.xml")))) {
                     string path = Path.Combine(dataLocation, "Packages", game, Path.GetFileName(folder));
                     int index = 2;
-                    while (Directory.Exists(path))
-                    {
+                    while (Directory.Exists(path)) {
                         path = Path.Combine(dataLocation, "Packages", game, $"{Path.GetFileName(folder)} ({index})");
                         index++;
                     }
@@ -253,19 +214,16 @@ public class PackageDownloader
                 var packageSetup = Directory.GetFiles(tempBase, "*.xml", SearchOption.AllDirectories)
                     .Where(xml => !Path.GetFileName(xml).Equals("Package.xml", StringComparison.InvariantCultureIgnoreCase) &&
                                   !Path.GetFileName(xml).Equals("Mod.xml", StringComparison.InvariantCultureIgnoreCase)).ToList();
-                if (packageSetup.Count > 0)
-                {
+                if (packageSetup.Count > 0) {
                     var configTemp = Path.Combine(dataLocation, "Config", "temp");
                     Directory.CreateDirectory(configTemp);
-                    foreach (var xml in packageSetup)
-                    {
+                    foreach (var xml in packageSetup) {
                         File.Copy(xml, Path.Combine(configTemp, Path.GetFileName(xml)), true);
                     }
                 }
                 File.Delete(file);
             }
-            else
-            {
+            else {
                 AemulusModManager.Utilities.ParallelLogger.Log($"[ERROR] {file} isn't a .zip, .7z, or .rar, couldn't extract...");
             }
             var tempPath = Path.Combine(dataLocation, "temp");
@@ -274,22 +232,19 @@ public class PackageDownloader
         });
     }
 
-    private string? FindSevenZip()
-    {
+    private string? FindSevenZip() {
         var bundled = Path.Combine(assemblyLocation, "Dependencies", "7z", "7z");
         if (File.Exists(bundled)) return bundled;
         bundled += ".exe";
         if (File.Exists(bundled)) return bundled;
-        try
-        {
+        try {
             var psi = new ProcessStartInfo("7z", "--help") { RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true };
             using var p = Process.Start(psi);
             p?.WaitForExit();
             if (p?.ExitCode == 0) return "7z";
         }
         catch { }
-        try
-        {
+        try {
             var psi = new ProcessStartInfo("7za", "--help") { RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true };
             using var p = Process.Start(psi);
             p?.WaitForExit();
@@ -299,18 +254,15 @@ public class PackageDownloader
         return null;
     }
 
-    private void MoveDirectory(string source, string target)
-    {
+    private void MoveDirectory(string source, string target) {
         var sourcePath = source.TrimEnd(Path.DirectorySeparatorChar, ' ');
         var targetPath = target.TrimEnd(Path.DirectorySeparatorChar, ' ');
         var files = Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories)
                              .GroupBy(s => Path.GetDirectoryName(s));
-        foreach (var folder in files)
-        {
+        foreach (var folder in files) {
             var targetFolder = folder.Key!.Replace(sourcePath, targetPath);
             Directory.CreateDirectory(targetFolder);
-            foreach (var file in folder)
-            {
+            foreach (var file in folder) {
                 var targetFile = Path.Combine(targetFolder, Path.GetFileName(file));
                 if (File.Exists(targetFile)) File.Delete(targetFile);
                 File.Move(file, targetFile);

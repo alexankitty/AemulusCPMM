@@ -23,8 +23,7 @@ using System.Text.RegularExpressions;
 
 namespace AemulusModManager.Avalonia.Views;
 
-public partial class MainWindow : Window
-{
+public partial class MainWindow : Window {
     private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext!;
     private DialogService? _dialogService;
     private PackageDownloader? _packageDownloader;
@@ -47,30 +46,25 @@ public partial class MainWindow : Window
     private bool _dragCaptured;
     public string[]? Args;
 
-    public MainWindow(string[]? args)
-    {
+    public MainWindow(string[]? args) {
         Args = args;
         InitializeComponent();
         DataContext = new MainWindowViewModel();
         SetupConsoleRedirect();
         SetupDragDrop();
         SetupPackageGridDragDrop();
-        ViewModel.PropertyChanged += (_, e) =>
-        {
+        ViewModel.PropertyChanged += (_, e) => {
             if (e.PropertyName == nameof(ViewModel.GameAccentColor))
                 Resources["GameAccentIndicator"] = ViewModel.GameAccentColor;
         };
         Resources["GameAccentIndicator"] = ViewModel.GameAccentColor;
-        ViewModel.ConsoleEntries.CollectionChanged += (_, e) =>
-        {
+        ViewModel.ConsoleEntries.CollectionChanged += (_, e) => {
             var tb = this.FindControl<SelectableTextBlock>("ConsoleText");
             if (tb == null) return;
-            if (e.Action == NotifyCollectionChangedAction.Reset)
-            {
+            if (e.Action == NotifyCollectionChangedAction.Reset) {
                 tb.Inlines?.Clear();
             }
-            else if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems != null)
-            {
+            else if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems != null) {
                 foreach (LogEntry entry in e.NewItems)
                     tb.Inlines?.Add(new Run(entry.Text + "\n") { Foreground = entry.Foreground });
                 this.FindControl<ScrollViewer>("ConsoleScroll")?.ScrollToEnd();
@@ -78,8 +72,7 @@ public partial class MainWindow : Window
         };
     }
 
-    private void SetupPackageGridDragDrop()
-    {
+    private void SetupPackageGridDragDrop() {
         // Attach per-row pointer handlers the same way ContextDragBehavior does:
         // use LoadingRow so each DataGridRow gets the handlers directly.
         PackageGrid.LoadingRow += OnPackageGridRowLoading;
@@ -91,41 +84,36 @@ public partial class MainWindow : Window
     private static readonly RoutingStrategies AllRoutes =
         RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble;
 
-    private void OnPackageGridRowLoading(object? sender, DataGridRowEventArgs e)
-    {
-        e.Row.AddHandler(PointerPressedEvent,     OnRowPointerPressed,     AllRoutes, handledEventsToo: true);
-        e.Row.AddHandler(PointerMovedEvent,       OnRowPointerMoved,       AllRoutes, handledEventsToo: true);
-        e.Row.AddHandler(PointerReleasedEvent,    OnRowPointerReleased,    AllRoutes, handledEventsToo: true);
+    private void OnPackageGridRowLoading(object? sender, DataGridRowEventArgs e) {
+        e.Row.AddHandler(PointerPressedEvent, OnRowPointerPressed, AllRoutes, handledEventsToo: true);
+        e.Row.AddHandler(PointerMovedEvent, OnRowPointerMoved, AllRoutes, handledEventsToo: true);
+        e.Row.AddHandler(PointerReleasedEvent, OnRowPointerReleased, AllRoutes, handledEventsToo: true);
         e.Row.AddHandler(PointerCaptureLostEvent, OnRowPointerCaptureLost, AllRoutes, handledEventsToo: true);
-        e.Row.AddHandler(DragDrop.DragEnterEvent, OnRowDragOver,           AllRoutes, handledEventsToo: true);
-        e.Row.AddHandler(DragDrop.DragOverEvent,  OnRowDragOver,           AllRoutes, handledEventsToo: true);
-        e.Row.AddHandler(DragDrop.DragLeaveEvent, OnRowDragLeave,          AllRoutes, handledEventsToo: true);
-        e.Row.AddHandler(DragDrop.DropEvent,      OnRowDrop,               AllRoutes, handledEventsToo: true);
+        e.Row.AddHandler(DragDrop.DragEnterEvent, OnRowDragOver, AllRoutes, handledEventsToo: true);
+        e.Row.AddHandler(DragDrop.DragOverEvent, OnRowDragOver, AllRoutes, handledEventsToo: true);
+        e.Row.AddHandler(DragDrop.DragLeaveEvent, OnRowDragLeave, AllRoutes, handledEventsToo: true);
+        e.Row.AddHandler(DragDrop.DropEvent, OnRowDrop, AllRoutes, handledEventsToo: true);
     }
 
-    private void OnPackageGridRowUnloading(object? sender, DataGridRowEventArgs e)
-    {
-        e.Row.RemoveHandler(PointerPressedEvent,     OnRowPointerPressed);
-        e.Row.RemoveHandler(PointerMovedEvent,       OnRowPointerMoved);
-        e.Row.RemoveHandler(PointerReleasedEvent,    OnRowPointerReleased);
+    private void OnPackageGridRowUnloading(object? sender, DataGridRowEventArgs e) {
+        e.Row.RemoveHandler(PointerPressedEvent, OnRowPointerPressed);
+        e.Row.RemoveHandler(PointerMovedEvent, OnRowPointerMoved);
+        e.Row.RemoveHandler(PointerReleasedEvent, OnRowPointerReleased);
         e.Row.RemoveHandler(PointerCaptureLostEvent, OnRowPointerCaptureLost);
         e.Row.RemoveHandler(DragDrop.DragEnterEvent, OnRowDragOver);
-        e.Row.RemoveHandler(DragDrop.DragOverEvent,  OnRowDragOver);
+        e.Row.RemoveHandler(DragDrop.DragOverEvent, OnRowDragOver);
         e.Row.RemoveHandler(DragDrop.DragLeaveEvent, OnRowDragLeave);
-        e.Row.RemoveHandler(DragDrop.DropEvent,      OnRowDrop);
+        e.Row.RemoveHandler(DragDrop.DropEvent, OnRowDrop);
     }
 
-    private void OnRowPointerPressed(object? sender, PointerPressedEventArgs e)
-    {
+    private void OnRowPointerPressed(object? sender, PointerPressedEventArgs e) {
         if (sender is not DataGridRow row) return;
         if (!e.GetCurrentPoint(row).Properties.IsLeftButtonPressed) return;
 
         var list = ViewModel.DisplayedPackages;
         _dragRowIndex = -1;
-        for (int i = 0; i < list.Count; i++)
-        {
-            if (ReferenceEquals(list[i], row.DataContext))
-            {
+        for (int i = 0; i < list.Count; i++) {
+            if (ReferenceEquals(list[i], row.DataContext)) {
                 _dragRowIndex = i;
                 break;
             }
@@ -134,13 +122,12 @@ public partial class MainWindow : Window
 
         // Use root-relative coords (same as ContextDragBehavior: GetPosition(null))
         _dragStartPoint = e.GetPosition(null);
-        _triggerEvent   = e;
-        _dragLock       = true;
-        _dragCaptured   = true;
+        _triggerEvent = e;
+        _dragLock = true;
+        _dragCaptured = true;
     }
 
-    private async void OnRowPointerMoved(object? sender, PointerEventArgs e)
-    {
+    private async void OnRowPointerMoved(object? sender, PointerEventArgs e) {
         if (!_dragCaptured || _triggerEvent == null) return;
         if (!e.GetCurrentPoint(null).Properties.IsLeftButtonPressed) return;
 
@@ -153,8 +140,8 @@ public partial class MainWindow : Window
             return;
 
         var triggerEvent = _triggerEvent;
-        _triggerEvent    = null;
-        _dropFromIndex   = _dragRowIndex;
+        _triggerEvent = null;
+        _dropFromIndex = _dragRowIndex;
 
         var data = new DataObject();
         data.Set("aemulus/row", "1");
@@ -163,40 +150,34 @@ public partial class MainWindow : Window
         _dropFromIndex = -1;
     }
 
-    private void OnRowPointerReleased(object? sender, PointerReleasedEventArgs e)
-    {
+    private void OnRowPointerReleased(object? sender, PointerReleasedEventArgs e) {
         if (!_dragCaptured) return;
-        _triggerEvent  = null;
-        _dragLock      = false;
-        _dragRowIndex  = -1;
-        _dragCaptured  = false;
+        _triggerEvent = null;
+        _dragLock = false;
+        _dragRowIndex = -1;
+        _dragCaptured = false;
     }
 
-    private void OnRowPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
-    {
-        _triggerEvent  = null;
-        _dragLock      = false;
-        _dragCaptured  = false;
-        _dragRowIndex  = -1;
+    private void OnRowPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e) {
+        _triggerEvent = null;
+        _dragLock = false;
+        _dragCaptured = false;
+        _dragRowIndex = -1;
     }
 
-    private void OnRowDragOver(object? sender, DragEventArgs e)
-    {
-        if (_dropFromIndex >= 0)
-        {
+    private void OnRowDragOver(object? sender, DragEventArgs e) {
+        if (_dropFromIndex >= 0) {
             e.DragEffects = DragDropEffects.Move;
             e.Handled = true;
         }
-        else if (HasFiles(e.Data))
-        {
+        else if (HasFiles(e.Data)) {
             e.DragEffects = DragDropEffects.Copy;
             DropOverlay.IsVisible = true;
             e.Handled = true;
         }
     }
 
-    private void OnRowDragLeave(object? sender, RoutedEventArgs e)
-    {
+    private void OnRowDragLeave(object? sender, RoutedEventArgs e) {
         // Only hide the overlay when the cursor leaves a row during a file drag
         // (not during a row reorder). The window-level OnDragLeave handles the
         // case of leaving the window entirely.
@@ -204,16 +185,15 @@ public partial class MainWindow : Window
             DropOverlay.IsVisible = false;
     }
 
-    private void OnRowDrop(object? sender, DragEventArgs e)
-    {
-        var fromIndex  = _dropFromIndex;
+    private void OnRowDrop(object? sender, DragEventArgs e) {
+        var fromIndex = _dropFromIndex;
         _dropFromIndex = -1;
         if (fromIndex < 0) return;
         e.Handled = true;
 
         var row = sender as DataGridRow;
         if (row?.DataContext is not DisplayedMetadata destItem) return;
-        var list    = ViewModel.DisplayedPackages;
+        var list = ViewModel.DisplayedPackages;
         var toIndex = -1;
         for (int i = 0; i < list.Count; i++)
             if (ReferenceEquals(list[i], destItem)) { toIndex = i; break; }
@@ -221,38 +201,33 @@ public partial class MainWindow : Window
             ViewModel.MovePackage(fromIndex, toIndex);
     }
 
-    private void OnPackageGridDragOver(object? sender, DragEventArgs e)
-    {
+    private void OnPackageGridDragOver(object? sender, DragEventArgs e) {
         if (_dropFromIndex < 0) return;
         e.DragEffects = DragDropEffects.Move;
         e.Handled = true;
     }
 
-    private void OnPackageGridDrop(object? sender, DragEventArgs e)
-    {
+    private void OnPackageGridDrop(object? sender, DragEventArgs e) {
         // Fallback: catches drops on the DataGrid background (not on a row).
-        var fromIndex  = _dropFromIndex;
+        var fromIndex = _dropFromIndex;
         _dropFromIndex = -1;
         if (fromIndex < 0) return;
         e.Handled = true;
 
-        var pos     = e.GetPosition(PackageGrid);
+        var pos = e.GetPosition(PackageGrid);
         var toIndex = GetRowIndexAtY(pos.Y);
         if (toIndex >= 0 && fromIndex != toIndex)
             ViewModel.MovePackage(fromIndex, toIndex);
     }
 
-    private int GetRowIndexAtY(double yInGrid)
-    {
+    private int GetRowIndexAtY(double yInGrid) {
         var list = ViewModel.DisplayedPackages;
-        foreach (var row in PackageGrid.GetVisualDescendants().OfType<DataGridRow>())
-        {
+        foreach (var row in PackageGrid.GetVisualDescendants().OfType<DataGridRow>()) {
             var origin = row.TranslatePoint(new Point(0, 0), PackageGrid);
             if (origin == null) continue;
-            double top    = origin.Value.Y;
+            double top = origin.Value.Y;
             double bottom = top + row.Bounds.Height;
-            if (yInGrid >= top && yInGrid < bottom)
-            {
+            if (yInGrid >= top && yInGrid < bottom) {
                 for (int i = 0; i < list.Count; i++)
                     if (ReferenceEquals(list[i], row.DataContext))
                         return i;
@@ -261,8 +236,7 @@ public partial class MainWindow : Window
         return -1;
     }
 
-    private void SetupDragDrop()
-    {
+    private void SetupDragDrop() {
         AddHandler(DragDrop.DragEnterEvent, OnDragOver, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
         AddHandler(DragDrop.DragOverEvent, OnDragOver, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
         AddHandler(DragDrop.DragLeaveEvent, OnDragLeave, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
@@ -275,14 +249,11 @@ public partial class MainWindow : Window
         || data.Contains(DataFormats.Text)
         || data.Contains("text/uri-list");
 
-    private static string[] GetDroppedPaths(IDataObject data)
-    {
+    private static string[] GetDroppedPaths(IDataObject data) {
         // Primary: Avalonia storage items (works on X11 and sometimes Wayland)
-        if (data.Contains(DataFormats.Files))
-        {
+        if (data.Contains(DataFormats.Files)) {
             var files = data.GetFiles();
-            if (files != null)
-            {
+            if (files != null) {
                 var paths = files
                     .Select(f => f.TryGetLocalPath())
                     .Where(p => !string.IsNullOrEmpty(p))
@@ -294,8 +265,7 @@ public partial class MainWindow : Window
         // Fallback: raw text/uri-list MIME type or plain text.
         // On Linux some DEs send "text/uri-list" without Avalonia mapping it to Files.
         // Split on both \r and \n, skip comment lines, handle file:// and file:///.
-        foreach (var fmt in new[] { "text/uri-list", DataFormats.Text })
-        {
+        foreach (var fmt in new[] { "text/uri-list", DataFormats.Text }) {
             if (!data.Contains(fmt)) continue;
             var text = data.Get(fmt) as string ?? data.GetText();
             if (string.IsNullOrEmpty(text)) continue;
@@ -303,8 +273,7 @@ public partial class MainWindow : Window
                 .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(l => l.Trim())
                 .Where(l => l.StartsWith("file://") && !l.StartsWith("#"))
-                .Select(l =>
-                {
+                .Select(l => {
                     try { return new Uri(l).LocalPath; }
                     catch { return null; }
                 })
@@ -316,25 +285,21 @@ public partial class MainWindow : Window
         return Array.Empty<string>();
     }
 
-    private void OnDragOver(object? sender, DragEventArgs e)
-    {
+    private void OnDragOver(object? sender, DragEventArgs e) {
         if (_dropFromIndex >= 0) return;
-        if (HasFiles(e.Data))
-        {
+        if (HasFiles(e.Data)) {
             e.DragEffects = DragDropEffects.Copy;
             DropOverlay.IsVisible = true;
             e.Handled = true;
         }
     }
 
-    private void OnDragLeave(object? sender, DragEventArgs e)
-    {
+    private void OnDragLeave(object? sender, DragEventArgs e) {
         if (_dropFromIndex < 0)
             DropOverlay.IsVisible = false;
     }
 
-    private async void OnDrop(object? sender, DragEventArgs e)
-    {
+    private async void OnDrop(object? sender, DragEventArgs e) {
         if (_dropFromIndex >= 0) return;
         DropOverlay.IsVisible = false;
         e.Handled = true;
@@ -343,43 +308,35 @@ public partial class MainWindow : Window
         if (paths.Length == 0) return;
 
         ViewModel.IsUiEnabled = false;
-        try
-        {
+        try {
             await ViewModel.ExtractPackages(paths);
             ViewModel.UpdateStats();
         }
-        finally
-        {
+        finally {
             ViewModel.IsUiEnabled = true;
         }
     }
 
-    private void PackageGrid_KeyDown(object? sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Space)
-        {
+    private void PackageGrid_KeyDown(object? sender, KeyEventArgs e) {
+        if (e.Key == Key.Space) {
             ViewModel.ToggleSelectedPackageEnabled();
             e.Handled = true;
         }
-        else if (e.Key == Key.Delete)
-        {
+        else if (e.Key == Key.Delete) {
             ViewModel.DeletePackageCommand.Execute(null);
             e.Handled = true;
         }
     }
 
-    private async void AddPackage_Click(object? sender, RoutedEventArgs e)
-    {
+    private async void AddPackage_Click(object? sender, RoutedEventArgs e) {
         await ViewModel.AddPackagesFromPicker(this);
     }
 
-    private async void CreatePackage_Click(object? sender, RoutedEventArgs e)
-    {
+    private async void CreatePackage_Click(object? sender, RoutedEventArgs e) {
         await ViewModel.CreateNewPackage(this);
     }
 
-    private void SetupConsoleRedirect()
-    {
+    private void SetupConsoleRedirect() {
         var logPath = Path.Combine(Utilities.AppPaths.DataDir, "Aemulus.log");
         var sw = new StreamWriter(logPath, false, Encoding.UTF8, 4096);
         _outputter = new TextBoxOutputter(sw);
@@ -388,33 +345,26 @@ public partial class MainWindow : Window
         Console.SetOut(_outputter);
     }
 
-    private void OnConsoleWrite(object? sender, ConsoleWriterEventArgs e)
-    {
+    private void OnConsoleWrite(object? sender, ConsoleWriterEventArgs e) {
         Dispatcher.UIThread.Post(() => ViewModel.AppendConsoleRaw(e.Value));
     }
 
-    private void OnConsoleWriteLine(object? sender, ConsoleWriterEventArgs e)
-    {
+    private void OnConsoleWriteLine(object? sender, ConsoleWriterEventArgs e) {
         Dispatcher.UIThread.Post(() => ViewModel.AppendConsole(e.Value));
     }
 
-    protected override void OnOpened(EventArgs e)
-    {
+    protected override void OnOpened(EventArgs e) {
         base.OnOpened(e);
         _dialogService = new DialogService(this);
         _packageDownloader = new PackageDownloader(_dialogService);
         ViewModel.SetDialogService(_dialogService);
         ViewModel.UpdateStats();
         // Required to ensure colors get set once the dialog service is available.
-        if (!ProtocolRegistration.CheckRegistration())
-        {
-            _dialogService.ShowConfirmation("The Aemulus Protocol is not registered. Would you like to register it now? This is required for some features such as downloading packages directly from GameBanana.").ContinueWith(t =>
-            {
-                if (t.Result)
-                {
+        if (!ProtocolRegistration.CheckRegistration()) {
+            _dialogService.ShowConfirmation("The Aemulus Protocol is not registered. Would you like to register it now? This is required for some features such as downloading packages directly from GameBanana.").ContinueWith(t => {
+                if (t.Result) {
                     ProtocolRegistration.RegisterProtocol();
-                    Dispatcher.UIThread.InvokeAsync(() =>
-                    {
+                    Dispatcher.UIThread.InvokeAsync(() => {
                         ViewModel.UpdateGameAccentColor();
                         _ = _dialogService.ShowNotification("Protocol registered! You may now use 1-Click Install links.");
                     });
@@ -423,34 +373,29 @@ public partial class MainWindow : Window
         }
 
         ViewModel.UpdateGameAccentColor();
-        if(Args != null && Args.Length >= 1){
-            if(Args[0].Contains("://")){
+        if (Args != null && Args.Length >= 1) {
+            if (Args[0].Contains("://")) {
                 _ = _packageDownloader.DownloadTaskIPC(Args[0]);
             }
         }
     }
 
-    private void SetupGuide_Click(object? sender, PointerPressedEventArgs e)
-    {
+    private void SetupGuide_Click(object? sender, PointerPressedEventArgs e) {
         try { Process.Start(new ProcessStartInfo("https://gamebanana.com/tuts/13379") { UseShellExecute = true }); } catch { }
     }
 
-    private void SupportTekka_Click(object? sender, PointerPressedEventArgs e)
-    {
+    private void SupportTekka_Click(object? sender, PointerPressedEventArgs e) {
         try { Process.Start(new ProcessStartInfo("https://ko-fi.com/tekka") { UseShellExecute = true }); } catch { }
     }
 
-    private void SupportMe_Click(object? sender, PointerPressedEventArgs e)
-    {
+    private void SupportMe_Click(object? sender, PointerPressedEventArgs e) {
         try { Process.Start(new ProcessStartInfo("https://ko-fi.com/alexankitty") { UseShellExecute = true }); } catch { }
     }
 
-    private async void ConfigButton_Click(object? sender, RoutedEventArgs e)
-    {
+    private async void ConfigButton_Click(object? sender, RoutedEventArgs e) {
         var configVm = ViewModel.CreateConfigViewModel();
         var configWindow = new ConfigWindow(configVm);
-        configWindow.UnpackRequested += async () =>
-        {
+        configWindow.UnpackRequested += async () => {
             ViewModel.ApplyConfigChanges(configVm);
             await ViewModel.UnpackBaseFiles();
         };
@@ -458,14 +403,12 @@ public partial class MainWindow : Window
         ViewModel.ApplyConfigChanges(configVm);
     }
 
-    private void OnPackageChecked(object? sender, RoutedEventArgs e)
-    {
+    private void OnPackageChecked(object? sender, RoutedEventArgs e) {
         if (sender is CheckBox checkBox && checkBox.DataContext is DisplayedMetadata package)
             ViewModel.TogglePackageEnabled(package, true);
     }
 
-    private void OnPackageUnchecked(object? sender, RoutedEventArgs e)
-    {
+    private void OnPackageUnchecked(object? sender, RoutedEventArgs e) {
         if (sender is CheckBox checkBox && checkBox.DataContext is DisplayedMetadata package)
             ViewModel.TogglePackageEnabled(package, false);
     }
@@ -479,15 +422,13 @@ public partial class MainWindow : Window
     private static readonly string[] GameNames = { "Persona 1 (PSP)", "Persona 3 FES", "Persona 3 Portable", "Persona 4 Golden", "Persona 4 Golden (Vita)", "Persona 5", "Persona 5 Royal (PS4)", "Persona 5 Royal (Switch)", "Persona 5 Strikers", "Persona Q", "Persona Q2" };
     private static readonly string[] TypeNames = { "Mod", "Wip", "Sound", "Tool", "Tutorial" };
 
-    private int GetGameFilterIndex()
-    {
+    private int GetGameFilterIndex() {
         var game = ViewModel.SelectedGame;
         var idx = Array.IndexOf(GameNames, game);
         return idx >= 0 ? idx : 0;
     }
 
-    private async void InitializeBrowser()
-    {
+    private async void InitializeBrowser() {
         if (_browserInitialized && _browserGameName == ViewModel.SelectedGame) return;
         _browserInitialized = true;
         _browserGameName = ViewModel.SelectedGame;
@@ -509,19 +450,15 @@ public partial class MainWindow : Window
         LoadingPanel.IsVisible = true;
         ErrorPanel.IsVisible = false;
 
-        try
-        {
+        try {
             using var httpClient = new HttpClient();
-            for (int g = 0; g < GameIds.Length; g++)
-            {
+            for (int g = 0; g < GameIds.Length; g++) {
                 var gameFilter = (GameFilter)g;
                 _cats[gameFilter] = new Dictionary<TypeFilter, List<GameBananaCategory>>();
-                for (int t = 0; t < TypeNames.Length; t++)
-                {
+                for (int t = 0; t < TypeNames.Length; t++) {
                     var typeFilter = (TypeFilter)t;
                     var allCats = new List<GameBananaCategory>();
-                    try
-                    {
+                    try {
                         var url = $"https://gamebanana.com/apiv4/{TypeNames[t]}Category/ByGame?_aGameRowIds[]={GameIds[g]}" +
                             "&_sRecordSchema=Custom&_csvProperties=_idRow,_sName,_sProfileUrl,_sIconUrl,_idParentCategoryRow&_nPerpage=50&_bReturnMetadata=true";
                         var responseMsg = await httpClient.GetAsync(url);
@@ -531,13 +468,10 @@ public partial class MainWindow : Window
                         if (parsed != null) allCats.AddRange(parsed);
 
                         // Check for pagination
-                        if (responseMsg.Headers.TryGetValues("X-GbApi-Metadata_nRecordCount", out var vals))
-                        {
-                            if (int.TryParse(vals.FirstOrDefault(), out int count))
-                            {
+                        if (responseMsg.Headers.TryGetValues("X-GbApi-Metadata_nRecordCount", out var vals)) {
+                            if (int.TryParse(vals.FirstOrDefault(), out int count)) {
                                 int totalPages = (int)Math.Ceiling(count / 50.0);
-                                for (int p = 2; p <= totalPages; p++)
-                                {
+                                for (int p = 2; p <= totalPages; p++) {
                                     var pageUrl = $"{url}&_nPage={p}";
                                     responseString = await httpClient.GetStringAsync(pageUrl);
                                     responseString = Regex.Replace(responseString, @"""(\d+)""", @"$1");
@@ -547,16 +481,14 @@ public partial class MainWindow : Window
                             }
                         }
                     }
-                    catch (Exception ex)
-                    {
+                    catch (Exception ex) {
                         ParallelLogger.Log($"[WARNING] Failed to fetch {TypeNames[t]} categories for {GameNames[g]}: {ex.Message}");
                     }
                     _cats[gameFilter][typeFilter] = allCats;
                 }
             }
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             ParallelLogger.Log($"[ERROR] Failed to fetch categories: {ex.Message}");
             ErrorPanel.IsVisible = true;
             BrowserMessage.Text = ex.Message;
@@ -570,8 +502,7 @@ public partial class MainWindow : Window
         await RefreshFilter();
     }
 
-    private void UpdateCategoryBoxes()
-    {
+    private void UpdateCategoryBoxes() {
         var gameFilter = (GameFilter)GameFilterBox.SelectedIndex;
         var typeFilter = (TypeFilter)TypeBox.SelectedIndex;
 
@@ -585,17 +516,14 @@ public partial class MainWindow : Window
         SubCatBox.SelectedIndex = 0;
     }
 
-    private void UpdateSubCategoryBox()
-    {
+    private void UpdateSubCategoryBox() {
         var gameFilter = (GameFilter)GameFilterBox.SelectedIndex;
         var typeFilter = (TypeFilter)TypeBox.SelectedIndex;
         var selectedCat = CatBox.SelectedItem as GameBananaCategory;
 
-        if (selectedCat?.ID != null && _cats != null && _cats.TryGetValue(gameFilter, out var types) && types.TryGetValue(typeFilter, out var catList))
-        {
+        if (selectedCat?.ID != null && _cats != null && _cats.TryGetValue(gameFilter, out var types) && types.TryGetValue(typeFilter, out var catList)) {
             var subs = catList.Where(c => c.RootID == selectedCat.ID).OrderBy(c => c.ID).ToList();
-            if (subs.Any())
-            {
+            if (subs.Any()) {
                 var subItems = new List<GameBananaCategory> { AllCategory };
                 subItems.AddRange(subs);
                 SubCatBox.ItemsSource = subItems;
@@ -609,23 +537,19 @@ public partial class MainWindow : Window
         SubCatBox.SelectedIndex = 0;
     }
 
-    private GameFilter GetCurrentGameFilter()
-    {
+    private GameFilter GetCurrentGameFilter() {
         return (GameFilter)Math.Max(0, GameFilterBox.SelectedIndex);
     }
 
-    private TypeFilter GetCurrentTypeFilter()
-    {
+    private TypeFilter GetCurrentTypeFilter() {
         return (TypeFilter)Math.Max(0, TypeBox.SelectedIndex);
     }
 
-    private FeedFilter GetCurrentFeedFilter()
-    {
+    private FeedFilter GetCurrentFeedFilter() {
         return (FeedFilter)Math.Max(0, FilterBox.SelectedIndex);
     }
 
-    private async System.Threading.Tasks.Task RefreshFilter()
-    {
+    private async System.Threading.Tasks.Task RefreshFilter() {
         LoadingPanel.IsVisible = true;
         ErrorPanel.IsVisible = false;
 
@@ -633,19 +557,16 @@ public partial class MainWindow : Window
         var subcategory = SubCatBox.SelectedItem as GameBananaCategory ?? AllCategory;
         string? search = _searched ? SearchBar.Text : null;
 
-        try
-        {
+        try {
             await FeedGenerator.GetFeed(_page, GetCurrentGameFilter(), GetCurrentTypeFilter(),
                 GetCurrentFeedFilter(), category, subcategory, 25, search);
 
-            if (FeedGenerator.error)
-            {
+            if (FeedGenerator.error) {
                 ErrorPanel.IsVisible = true;
                 BrowserMessage.Text = FeedGenerator.exception?.Message ?? "Unknown error";
                 FeedBox.ItemsSource = null;
             }
-            else
-            {
+            else {
                 FeedBox.ItemsSource = FeedGenerator.CurrentFeed.Records;
                 _filterChanging = true;
                 var pages = new List<string>();
@@ -657,8 +578,7 @@ public partial class MainWindow : Window
                 _filterChanging = false;
             }
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             ErrorPanel.IsVisible = true;
             BrowserMessage.Text = ex.Message;
         }
@@ -666,8 +586,7 @@ public partial class MainWindow : Window
         LoadingPanel.IsVisible = false;
     }
 
-    private void GameFilterSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
+    private void GameFilterSelectionChanged(object? sender, SelectionChangedEventArgs e) {
         if (_filterChanging || !_browserInitialized) return;
         _page = 1;
         _filterChanging = true;
@@ -676,8 +595,7 @@ public partial class MainWindow : Window
         _ = RefreshFilter();
     }
 
-    private void TypeFilterSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
+    private void TypeFilterSelectionChanged(object? sender, SelectionChangedEventArgs e) {
         if (_filterChanging || !_browserInitialized) return;
         _page = 1;
         _filterChanging = true;
@@ -686,15 +604,13 @@ public partial class MainWindow : Window
         _ = RefreshFilter();
     }
 
-    private void FilterSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
+    private void FilterSelectionChanged(object? sender, SelectionChangedEventArgs e) {
         if (_filterChanging || !_browserInitialized) return;
         _page = 1;
         _ = RefreshFilter();
     }
 
-    private void MainFilterSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
+    private void MainFilterSelectionChanged(object? sender, SelectionChangedEventArgs e) {
         if (_filterChanging || !_browserInitialized) return;
         _filterChanging = true;
         UpdateSubCategoryBox();
@@ -703,103 +619,83 @@ public partial class MainWindow : Window
         _ = RefreshFilter();
     }
 
-    private void SubFilterSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
+    private void SubFilterSelectionChanged(object? sender, SelectionChangedEventArgs e) {
         if (_filterChanging || !_browserInitialized) return;
         _page = 1;
         _ = RefreshFilter();
     }
 
-    private void PerPageSelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
+    private void PerPageSelectionChanged(object? sender, SelectionChangedEventArgs e) {
         if (_filterChanging || !_browserInitialized) return;
         _page = 1;
         _ = RefreshFilter();
     }
 
-    private void PageBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
+    private void PageBox_SelectionChanged(object? sender, SelectionChangedEventArgs e) {
         if (_filterChanging || !_browserInitialized) return;
-        if (PageBox.SelectedIndex >= 0)
-        {
+        if (PageBox.SelectedIndex >= 0) {
             _page = PageBox.SelectedIndex + 1;
             _ = RefreshFilter();
         }
     }
 
-    private void DecrementPage(object? sender, RoutedEventArgs e)
-    {
-        if (_page > 1)
-        {
+    private void DecrementPage(object? sender, RoutedEventArgs e) {
+        if (_page > 1) {
             _page--;
             _ = RefreshFilter();
         }
     }
 
-    private void IncrementPage(object? sender, RoutedEventArgs e)
-    {
-        if (_page < (FeedGenerator.CurrentFeed?.TotalPages ?? 1))
-        {
+    private void IncrementPage(object? sender, RoutedEventArgs e) {
+        if (_page < (FeedGenerator.CurrentFeed?.TotalPages ?? 1)) {
             _page++;
             _ = RefreshFilter();
         }
     }
 
-    private void SearchButton_Click(object? sender, RoutedEventArgs e)
-    {
+    private void SearchButton_Click(object? sender, RoutedEventArgs e) {
         _searched = !string.IsNullOrWhiteSpace(SearchBar.Text);
         _page = 1;
         _ = RefreshFilter();
     }
 
-    private void SearchBar_KeyDown(object? sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter)
-        {
+    private void SearchBar_KeyDown(object? sender, KeyEventArgs e) {
+        if (e.Key == Key.Enter) {
             _searched = !string.IsNullOrWhiteSpace(SearchBar.Text);
             _page = 1;
             _ = RefreshFilter();
         }
     }
 
-    private async void Download_Click(object? sender, RoutedEventArgs e)
-    {
-        if (sender is Button btn && btn.Tag is GameBananaRecord record && _packageDownloader != null)
-        {
+    private async void Download_Click(object? sender, RoutedEventArgs e) {
+        if (sender is Button btn && btn.Tag is GameBananaRecord record && _packageDownloader != null) {
             var gameName = GameNames[Math.Max(0, GameFilterBox.SelectedIndex)];
             await _packageDownloader.BrowserDownload(record, gameName);
             ViewModel.RefreshPackageList();
         }
     }
 
-    private async void MoreInfo_Click(object? sender, RoutedEventArgs e)
-    {
-        if (sender is Button btn && btn.Tag is GameBananaRecord record)
-        {
+    private async void MoreInfo_Click(object? sender, RoutedEventArgs e) {
+        if (sender is Button btn && btn.Tag is GameBananaRecord record) {
             var desc = record.Text ?? record.Description ?? "No description available.";
-            var box = new NotificationBox(_dialogService.DialogWindow ,$"{record.Title}\n\nby {record.Owner?.Name}\n\n{desc}", true);
+            var box = new NotificationBox(_dialogService.DialogWindow, $"{record.Title}\n\nby {record.Owner?.Name}\n\n{desc}", true);
             await box.ShowDialog(this);
         }
     }
 
-    private void Homepage_Click(object? sender, RoutedEventArgs e)
-    {
-        if (sender is Button btn && btn.Tag is GameBananaRecord record && record.Link != null)
-        {
+    private void Homepage_Click(object? sender, RoutedEventArgs e) {
+        if (sender is Button btn && btn.Tag is GameBananaRecord record && record.Link != null) {
             Process.Start(new ProcessStartInfo(record.Link.ToString()) { UseShellExecute = true });
         }
     }
 
-    private void TabControl_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        if (sender is TabControl tc && tc.SelectedIndex == 1)
-        {
+    private void TabControl_SelectionChanged(object? sender, SelectionChangedEventArgs e) {
+        if (sender is TabControl tc && tc.SelectedIndex == 1) {
             InitializeBrowser();
         }
     }
 
-    private async void BrowserRefresh_Click(object? sender, RoutedEventArgs e)
-    {
+    private async void BrowserRefresh_Click(object? sender, RoutedEventArgs e) {
         await RefreshFilter();
     }
 

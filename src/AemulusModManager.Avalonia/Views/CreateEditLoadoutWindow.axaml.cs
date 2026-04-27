@@ -11,8 +11,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace AemulusModManager.Avalonia.Views;
 
-public partial class CreateEditLoadoutWindow : Window
-{
+public partial class CreateEditLoadoutWindow : Window {
     private readonly string _game;
     private DialogWindowViewModel _dialogVm;
     public string LoadoutName { get; set; } = "";
@@ -22,13 +21,11 @@ public partial class CreateEditLoadoutWindow : Window
     private readonly bool _editing;
     public string? ResultName { get; private set; }
 
-    public CreateEditLoadoutWindow()
-    {
+    public CreateEditLoadoutWindow() {
         InitializeComponent();
     }
 
-    public CreateEditLoadoutWindow(DialogWindowViewModel dialogVm, string game, string? currentName = null, bool editing = false)
-    {
+    public CreateEditLoadoutWindow(DialogWindowViewModel dialogVm, string game, string? currentName = null, bool editing = false) {
         _dialogVm = dialogVm;
         DataContext = dialogVm;
         Console.WriteLine("Opened window");
@@ -37,50 +34,42 @@ public partial class CreateEditLoadoutWindow : Window
         _editing = editing;
         DataContext = dialogVm;
         InitializeComponent();
-        foreach(var prop in dialogVm.AccentProps)
-        {
+        foreach (var prop in dialogVm.AccentProps) {
             this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
         }
-        if (currentName != null && editing)
-        {
+        if (currentName != null && editing) {
             Title = $"Edit {currentName} loadout";
             LoadoutName = currentName;
             NameBox.Text = currentName;
             Height = 120;
         }
-        if (currentName == null || !editing)
-        {
+        if (currentName == null || !editing) {
             DeleteButton.IsVisible = false;
             CopyLoadout.IsVisible = true;
         }
-        else
-        {
+        else {
             DeleteButton.IsVisible = true;
             CopyLoadout.IsVisible = false;
             CreateButton.Content = "Save";
         }
 
-        NameBox.TextChanged += (_, _) =>
-        {
+        NameBox.TextChanged += (_, _) => {
             LoadoutName = NameBox.Text ?? "";
             CreateButton.IsEnabled = !string.IsNullOrWhiteSpace(NameBox.Text);
         };
 
     }
 
-    private void SetAccentButtonBackground(string gameTitle)
-    {
+    private void SetAccentButtonBackground(string gameTitle) {
         var brush = Converters.GameColorConverter.GetBrush(gameTitle);
         CreateButton.Background = brush;
         DeleteButton.Background = brush;
     }
 
-    private async void CreateButton_Click(object? sender, RoutedEventArgs e)
-    {
+    private async void CreateButton_Click(object? sender, RoutedEventArgs e) {
         Console.WriteLine($"Copy current loadout: {CopyCurrentLoadout}");
         if (string.IsNullOrWhiteSpace(NameBox.Text) ||
-           _originalName == NameBox.Text)
-        {
+           _originalName == NameBox.Text) {
             Close();
             return;
         }
@@ -88,27 +77,23 @@ public partial class CreateEditLoadoutWindow : Window
                 Utilities.AppPaths.ConfigDir,
                 _game, $"{NameBox.Text}.xml");
         //validation
-        if (NameBox.Text == "Add new loadout")
-        {
+        if (NameBox.Text == "Add new loadout") {
             ParallelLogger.Log("[ERROR] Invalid loadout name, try another one.");
             var notification = new NotificationBox(_dialogVm, "Invalid loadout name, try another one.");
             await notification.ShowDialog(this);
         }
         //check if name already exists
-        else if (File.Exists(configPath))
-        {
+        else if (File.Exists(configPath)) {
             ParallelLogger.Log($"[ERROR] Loadout name {NameBox.Text} already exists, try another one.");
             var notification = new NotificationBox(_dialogVm, $"Loadout name {NameBox.Text} already exists, try another one.");
             await notification.ShowDialog(this);
         }
         //editing but name is changed, rename file
-        else if (_originalName != NameBox.Text && _editing)
-        {
+        else if (_originalName != NameBox.Text && _editing) {
             configPath = Path.Combine(
                 Utilities.AppPaths.ConfigDir,
                 _game, $"{_originalName}.xml");
-            if (File.Exists(configPath))
-            {
+            if (File.Exists(configPath)) {
                 string newConfigPath = Path.Combine(
                     Utilities.AppPaths.ConfigDir,
                     _game, $"{NameBox.Text}.xml");
@@ -118,15 +103,12 @@ public partial class CreateEditLoadoutWindow : Window
             Close();
         }
         //Create new loadout
-        else
-        {
-            if (CopyCurrentLoadout == true && _originalName != null)
-            {
+        else {
+            if (CopyCurrentLoadout == true && _originalName != null) {
                 string copyPath = Path.Combine(
                 Utilities.AppPaths.ConfigDir,
                 _game, $"{_originalName}.xml");
-                if (File.Exists(copyPath))
-                {
+                if (File.Exists(copyPath)) {
                     File.Copy(copyPath, configPath);
                 }
                 ResultName = NameBox.Text;
@@ -138,37 +120,31 @@ public partial class CreateEditLoadoutWindow : Window
 
     }
 
-    private void CancelButton_Click(object? sender, RoutedEventArgs e)
-    {
+    private void CancelButton_Click(object? sender, RoutedEventArgs e) {
         LoadoutName = "";
         Close();
     }
 
-    private async void DeleteButton_Click(object? sender, RoutedEventArgs e)
-    {
+    private async void DeleteButton_Click(object? sender, RoutedEventArgs e) {
         string configPath = Utilities.AppPaths.ConfigDir;
         string[] loadoutFiles = Directory.GetFiles(Path.Combine(configPath, _game))
             .Where(path => Path.GetExtension(path) == ".xml")
             .ToArray();
 
-        if (loadoutFiles.Length == 1)
-        {
+        if (loadoutFiles.Length == 1) {
             var notification = new NotificationBox(_dialogVm, "You cannot delete the last loadout");
             ParallelLogger.Log("[ERROR] You cannot delete the last loadout");
             await notification.ShowDialog(this);
         }
-        else
-        {
+        else {
             var notification = new NotificationBox(_dialogVm,
                 $"Are you sure you want to delete {_originalName} loadout?\nThis cannot be undone.", false);
             await notification.ShowDialog(this);
-            if (notification.YesNo)
-            {
+            if (notification.YesNo) {
                 configPath = Path.Combine(
                 Utilities.AppPaths.ConfigDir,
                 _game, $"{NameBox.Text}.xml");
-                if (File.Exists(configPath))
-                {
+                if (File.Exists(configPath)) {
                     File.Delete(configPath);
                 }
                 Close();

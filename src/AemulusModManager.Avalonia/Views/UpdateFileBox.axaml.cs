@@ -6,24 +6,20 @@ using AemulusModManager.Avalonia.ViewModels;
 
 namespace AemulusModManager.Avalonia.Views;
 
-public partial class UpdateFileBox : Window
-{
+public partial class UpdateFileBox : Window {
     public string? ChosenFileUrl { get; set; }
     public string? ChosenFileName { get; set; }
     public string Host { get; set; } = "";
 
-    public UpdateFileBox()
-    {
+    public UpdateFileBox() {
         InitializeComponent();
     }
 
     // GameBanana Files
-    public UpdateFileBox(DialogWindowViewModel dialogVm, List<GameBananaItemFile> files, string packageName) : this()
-    {
+    public UpdateFileBox(DialogWindowViewModel dialogVm, List<GameBananaItemFile> files, string packageName) : this() {
         InitializeComponent();
         DataContext = dialogVm;
-        foreach(var prop in dialogVm.AccentProps)
-        {
+        foreach (var prop in dialogVm.AccentProps) {
             this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
         }
         FileList.ItemsSource = files;
@@ -32,20 +28,16 @@ public partial class UpdateFileBox : Window
     }
 
     // GitHub Files
-    public UpdateFileBox(DialogWindowViewModel dialogVm, IReadOnlyList<ReleaseAsset> files, string packageName) : this()
-    {
+    public UpdateFileBox(DialogWindowViewModel dialogVm, IReadOnlyList<ReleaseAsset> files, string packageName) : this() {
         InitializeComponent();
         DataContext = dialogVm;
-        foreach(var prop in dialogVm.AccentProps)
-        {
+        foreach (var prop in dialogVm.AccentProps) {
             this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
         }
         TitleBox.Text = packageName;
         var convList = new List<GithubFile>();
-        foreach (var file in files)
-        {
-            convList.Add(new GithubFile
-            {
+        foreach (var file in files) {
+            convList.Add(new GithubFile {
                 FileName = file.Name,
                 Downloads = file.DownloadCount,
                 Filesize = file.Size,
@@ -58,17 +50,13 @@ public partial class UpdateFileBox : Window
         Host = "github";
     }
 
-    private void SelectButton_Click(object? sender, RoutedEventArgs e)
-    {
-        if (sender is Button button)
-        {
-            if (Host == "gamebanana" && button.DataContext is GameBananaItemFile gbFile)
-            {
+    private void SelectButton_Click(object? sender, RoutedEventArgs e) {
+        if (sender is Button button) {
+            if (Host == "gamebanana" && button.DataContext is GameBananaItemFile gbFile) {
                 ChosenFileUrl = gbFile.DownloadUrl;
                 ChosenFileName = gbFile.FileName;
             }
-            else if (Host == "github" && button.DataContext is GithubFile ghFile)
-            {
+            else if (Host == "github" && button.DataContext is GithubFile ghFile) {
                 ChosenFileUrl = ghFile.DownloadUrl;
                 ChosenFileName = ghFile.FileName;
             }
@@ -76,8 +64,7 @@ public partial class UpdateFileBox : Window
         Close();
     }
 
-    private void CancelButton_Click(object? sender, RoutedEventArgs e)
-    {
+    private void CancelButton_Click(object? sender, RoutedEventArgs e) {
         Close();
     }
 }

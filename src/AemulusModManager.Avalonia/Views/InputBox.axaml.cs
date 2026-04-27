@@ -5,28 +5,23 @@ using Avalonia.Media;
 
 namespace AemulusModManager.Avalonia.Views;
 
-public partial class InputBox : Window
-{
+public partial class InputBox : Window {
     public string? Result { get; private set; }
     public bool CopyLoadout { get; private set; }
 
-    public InputBox()
-    {
+    public InputBox() {
         InitializeComponent();
     }
 
-    public InputBox(DialogWindowViewModel dialogVm, string prompt) : this()
-    {
+    public InputBox(DialogWindowViewModel dialogVm, string prompt) : this() {
         DataContext = dialogVm;
         PromptText.Text = prompt;
-        foreach(var prop in dialogVm.AccentProps)
-        {
+        foreach (var prop in dialogVm.AccentProps) {
             this.Resources[prop] = dialogVm.GetType().GetProperty(prop)?.GetValue(dialogVm);
         }
     }
 
-    private void Confirm_Click(object? sender, RoutedEventArgs e)
-    {
+    private void Confirm_Click(object? sender, RoutedEventArgs e) {
         var name = InputTextBox.Text?.Trim();
         if (string.IsNullOrEmpty(name))
             return;
@@ -34,8 +29,7 @@ public partial class InputBox : Window
         Close();
     }
 
-    private void Cancel_Click(object? sender, RoutedEventArgs e)
-    {
+    private void Cancel_Click(object? sender, RoutedEventArgs e) {
         Result = null;
         Close();
     }

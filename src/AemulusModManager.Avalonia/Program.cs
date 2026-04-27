@@ -10,18 +10,16 @@ using AemulusModManager.Avalonia.Utilities;
 
 namespace AemulusModManager.Avalonia;
 
-public static class Info
-{
+public static class Info {
+    // Todo: Get these from AssemblyInfo
     public const string Name = "Aemulus Mod Manager";
     public const string Author = "Alexankitty";
 }
-class Program
-{
+class Program {
     static Mutex? mutex;
 
     [STAThread]
-    public static void Main(string[] args)
-    {
+    public static void Main(string[] args) {
         // get application GUID as defined in AssemblyInfo.cs
         var appGuid = Assembly.GetExecutingAssembly()
             .GetCustomAttribute<GuidAttribute>()?.Value;
@@ -31,10 +29,9 @@ class Program
         bool createdNew;
         mutex = new Mutex(true, mutexId, out createdNew);
 
-        if (!createdNew)
-        {
-            if(args.Length >= 1){
-                if(args[0].Contains("://")){
+        if (!createdNew) {
+            if (args.Length >= 1) {
+                if (args[0].Contains("://")) {
                     var ipc = new IPCService();
                     ipc.SendMessage(args[0]);
                     return;
@@ -42,8 +39,7 @@ class Program
             }
             BuildAvaloniaApp().Start(Error, [$"Another instance of {Info.Name} is already running."]);
         }
-        else
-        {
+        else {
             BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
         }
@@ -51,16 +47,14 @@ class Program
     }
 
 
-    public static AppBuilder BuildAvaloniaApp()
-    {
+    public static AppBuilder BuildAvaloniaApp() {
         IconProvider.Current.Register<FontAwesomeIconProvider>();
         return AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
     }
-    static void Error(Application app, string[] args)
-    {
+    static void Error(Application app, string[] args) {
         var cts = new CancellationTokenSource();
         var errorDialog = new Views.ErrorDialog(args[0], cts);
         errorDialog.Show();

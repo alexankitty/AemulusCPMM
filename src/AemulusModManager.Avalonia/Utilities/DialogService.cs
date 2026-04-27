@@ -12,22 +12,18 @@ using Octokit;
 
 namespace AemulusModManager.Avalonia.Utilities;
 
-public class DialogService
-{
+public class DialogService {
     public DialogWindowViewModel DialogWindow;
     private readonly Window _owner;
     public Window OwnerWindow => _owner;
 
-    public DialogService(Window owner)
-    {
+    public DialogService(Window owner) {
         _owner = owner;
         DialogWindow = new DialogWindowViewModel("");
     }
 
-    public async Task<bool> ShowNotification(string message, bool isOkOnly = true)
-    {
-        return await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
+    public async Task<bool> ShowNotification(string message, bool isOkOnly = true) {
+        return await Dispatcher.UIThread.InvokeAsync(async () => {
             var box = new NotificationBox(DialogWindow, message, isOkOnly);
             await box.ShowDialog(_owner);
             return box.YesNo;
@@ -36,30 +32,24 @@ public class DialogService
 
     public async Task<(bool yesNo, string? skippedVersion)> ShowChangelog(
         GameBananaItemUpdate update, string packageName, string message,
-        DisplayedMetadata row, string onlineVersion, string packageXmlPath, bool isUpdate)
-    {
-        return await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
+        DisplayedMetadata row, string onlineVersion, string packageXmlPath, bool isUpdate) {
+        return await Dispatcher.UIThread.InvokeAsync(async () => {
             var box = new ChangelogBox(DialogWindow, update, packageName, message, row, onlineVersion, packageXmlPath, isUpdate);
             await box.ShowDialog(_owner);
             return (box.YesNo, null as string);
         });
     }
 
-    public async Task<bool> ShowDownloadConfirm(string name, string? author = null, Uri? imageUri = null)
-    {
-        return await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
+    public async Task<bool> ShowDownloadConfirm(string name, string? author = null, Uri? imageUri = null) {
+        return await Dispatcher.UIThread.InvokeAsync(async () => {
             var box = new DownloadWindow(DialogWindow, name, author ?? "", imageUri);
             await box.ShowDialog(_owner);
             return box.YesNo;
         });
     }
 
-    public async Task<bool> ShowDownloadConfirm(GameBananaRecord record)
-    {
-        return await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
+    public async Task<bool> ShowDownloadConfirm(GameBananaRecord record) {
+        return await Dispatcher.UIThread.InvokeAsync(async () => {
             var box = new DownloadWindow(DialogWindow, record);
             await box.ShowDialog(_owner);
             return box.YesNo;
@@ -67,10 +57,8 @@ public class DialogService
     }
 
     public async Task<(string? url, string? fileName)> ShowFileSelector(
-        List<GameBananaItemFile> files, string packageName)
-    {
-        return await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
+        List<GameBananaItemFile> files, string packageName) {
+        return await Dispatcher.UIThread.InvokeAsync(async () => {
             var box = new UpdateFileBox(DialogWindow, files, packageName);
             await box.ShowDialog(_owner);
             return (box.ChosenFileUrl, box.ChosenFileName);
@@ -78,48 +66,38 @@ public class DialogService
     }
 
     public async Task<(string? url, string? fileName)> ShowFileSelector(
-        IReadOnlyList<ReleaseAsset> files, string packageName)
-    {
-        return await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
+        IReadOnlyList<ReleaseAsset> files, string packageName) {
+        return await Dispatcher.UIThread.InvokeAsync(async () => {
             var box = new UpdateFileBox(DialogWindow, files, packageName);
             await box.ShowDialog(_owner);
             return (box.ChosenFileUrl, box.ChosenFileName);
         });
     }
 
-    public async Task ShowAltLinks(List<GameBananaAlternateFileSource>? sources, string name, string game, bool isUpdate)
-    {
-        await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
+    public async Task ShowAltLinks(List<GameBananaAlternateFileSource>? sources, string name, string game, bool isUpdate) {
+        await Dispatcher.UIThread.InvokeAsync(async () => {
             var box = new AltLinkWindow(DialogWindow, sources ?? new List<GameBananaAlternateFileSource>());
             await box.ShowDialog(_owner);
         });
     }
 
-    public UpdateProgressBox CreateProgressBox(System.Threading.CancellationTokenSource cts)
-    {
+    public UpdateProgressBox CreateProgressBox(System.Threading.CancellationTokenSource cts) {
         return new UpdateProgressBox(DialogWindow, cts);
     }
 
-    public async Task ShowProgressBox(UpdateProgressBox box)
-    {
+    public async Task ShowProgressBox(UpdateProgressBox box) {
         await Dispatcher.UIThread.InvokeAsync(() => box.Show(_owner));
     }
 
-    public async Task CloseProgressBox(UpdateProgressBox box)
-    {
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
+    public async Task CloseProgressBox(UpdateProgressBox box) {
+        await Dispatcher.UIThread.InvokeAsync(() => {
             box.Finished = true;
             box.Close();
         });
     }
 
-    public async Task UpdateProgress(UpdateProgressBox box, double percentage, string title, string text)
-    {
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
+    public async Task UpdateProgress(UpdateProgressBox box, double percentage, string title, string text) {
+        await Dispatcher.UIThread.InvokeAsync(() => {
             var progressBar = box.FindControl<ProgressBar>("ProgressBar");
             var progressTitle = box.FindControl<TextBlock>("ProgressTitle");
             var progressText = box.FindControl<TextBlock>("ProgressText");
@@ -130,33 +108,26 @@ public class DialogService
         });
     }
 
-    public async Task<(string? name, bool copyLoadout)> ShowInputDialog( string prompt)
-    {
-        return await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
+    public async Task<(string? name, bool copyLoadout)> ShowInputDialog(string prompt) {
+        return await Dispatcher.UIThread.InvokeAsync(async () => {
             var box = new InputBox(DialogWindow, prompt);
             await box.ShowDialog(_owner);
             return (box.Result, box.CopyLoadout);
         });
     }
 
-    public async Task<bool> ShowConfirmation(string message)
-    {
-        return await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
+    public async Task<bool> ShowConfirmation(string message) {
+        return await Dispatcher.UIThread.InvokeAsync(async () => {
             var box = new NotificationBox(DialogWindow, message, false);
             await box.ShowDialog(_owner);
             return box.YesNo;
         });
     }
 
-    public async Task<string?> ShowSaveFileDialog(string defaultFileName, string filterName, string filterExtension)
-    {
-        return await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
+    public async Task<string?> ShowSaveFileDialog(string defaultFileName, string filterName, string filterExtension) {
+        return await Dispatcher.UIThread.InvokeAsync(async () => {
             var storageProvider = _owner.StorageProvider;
-            var result = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
-            {
+            var result = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions {
                 Title = "Save File",
                 SuggestedFileName = defaultFileName,
                 FileTypeChoices = new[]

@@ -1,9 +1,7 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
-namespace AemulusModManager
-{
-    public class GameBananaItemUpdateChange
-    {
+namespace AemulusModManager {
+    public class GameBananaItemUpdateChange {
         [JsonProperty("cat")]
         public string Category { get; set; }
 
